@@ -6,6 +6,12 @@ speaker, author, team leader, and process architect / vibecoder.
 
 ## Files
 - `index.html` — the entire site (self-contained: inline CSS, inline SVG icons, vanilla JS). No build step, no dependencies.
+- `assets/portrait.jpg` — hero portrait (Michal speaking at the 2024 World Congress on Electroporation).
+
+## Design
+"Ultra-weak photon emission" theme — luminous photon-cyan on near-black, Instrument Serif display +
+IBM Plex Mono instrument labels. Hero uses the TEDxBratislava talk *"Light of living organisms"*
+(YouTube `gezEio1mdjs`) as a dimmed ambient background, with a "Watch my TEDx talk" sound modal.
 
 ## Editing social links
 All social links live in **one place**: the `SOCIALS` array near the bottom of `index.html`.
