@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Michal Cifra, Ph.D. — Bioelectrodynamics · Scientist · Builder</title>
+<meta name="description" content="Michal Cifra, Ph.D. — senior scientist and team leader in bioelectrodynamics at the Institute of Photonics and Electronics, Czech Academy of Sciences. Expert on the electromagnetic physics of life, speaker, author, and process architect." />
+<meta name="author" content="Michal Cifra" />
+<!-- Open Graph -->
+<meta property="og:type" content="profile" />
+<meta property="og:title" content="Michal Cifra, Ph.D. — Bioelectrodynamics · Scientist · Builder" />
+<meta property="og:description" content="Senior scientist & team leader exploring the electromagnetic physics of life. Speaker, author, team leader — and avid builder of autonomous-agent systems." />
+<meta property="og:url" content="https://michalcifra.com" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --bg-2:#0f1626;
+    --panel:#121b2e;
+    --panel-2:#16213a;
+    --ink:#e8edf7;
+    --ink-dim:#9aa7c2;
+    --ink-faint:#64748b;
+    --line:#23304d;
+    --cyan:#38e1d6;
+    --violet:#8b7bff;
+    --amber:#ffcf6b;
+    --accent-grad:linear-gradient(120deg,#38e1d6 0%,#8b7bff 60%,#c08bff 100%);
+    --maxw:1080px;
+    --r:16px;
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  /* ambient field background */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(900px 500px at 78% -8%, rgba(139,123,255,.16), transparent 60%),
+      radial-gradient(800px 600px at 8% 8%, rgba(56,225,214,.12), transparent 55%),
+      radial-gradient(700px 700px at 50% 120%, rgba(192,139,255,.10), transparent 60%);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-1;opacity:.5;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 0%,transparent 70%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 0%,transparent 70%);
+    opacity:.12;
+  }
+  a{color:var(--cyan);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  section{padding:64px 0;border-top:1px solid var(--line)}
+  h2{font-size:clamp(1.4rem,3vw,2rem);margin:0 0 8px;letter-spacing:-.02em}
+  .eyebrow{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:600;margin:0 0 18px}
+  .lead{color:var(--ink-dim);max-width:62ch}
+
+  /* ---------- NAV ---------- */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);
+      background:rgba(10,14,26,.72);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .brand{font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;color:var(--ink)}
+  .brand .spark{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;
+    background:var(--accent-grad);color:#06121a;font-weight:800}
+  .navlinks{display:flex;gap:24px;font-size:.92rem}
+  .navlinks a{color:var(--ink-dim)}
+  .navlinks a:hover{color:var(--ink);text-decoration:none}
+  @media(max-width:720px){.navlinks{display:none}}
+
+  /* ---------- HERO ---------- */
+  header.hero{padding:84px 0 56px;position:relative}
+  .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+  .badge{font-size:.74rem;letter-spacing:.04em;color:var(--ink-dim);
+    border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:999px}
+  .badge b{color:var(--ink);font-weight:600}
+  h1{font-size:clamp(2.1rem,6vw,3.8rem);line-height:1.04;letter-spacing:-.03em;margin:0 0 18px;font-weight:800}
+  h1 .grad{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .subhead{font-size:clamp(1.05rem,2.4vw,1.35rem);color:var(--ink-dim);max-width:60ch;margin:0 0 30px}
+  .subhead strong{color:var(--ink);font-weight:600}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:12px;font-weight:600;font-size:.95rem;border:1px solid transparent;transition:.15s}
+  .btn-primary{background:var(--accent-grad);color:#06121a}
+  .btn-primary:hover{filter:brightness(1.08);text-decoration:none;transform:translateY(-1px)}
+  .btn-ghost{border-color:var(--line);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);text-decoration:none}
+
+  /* ---------- METRICS ---------- */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:46px}
+  @media(max-width:720px){.metrics{grid-template-columns:repeat(2,1fr)}}
+  .metric{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+  .metric .n{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:800;letter-spacing:-.02em;
+    background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .metric .l{font-size:.8rem;color:var(--ink-dim);margin-top:2px}
+  .metric .src{font-size:.68rem;color:var(--ink-faint);margin-top:8px}
+
+  /* ---------- CARDS ---------- */
+  .grid{display:grid;gap:16px}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:860px){.cols-3{grid-template-columns:1fr}.cols-2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px;transition:.18s}
+  .card:hover{border-color:#33456e;transform:translateY(-2px);box-shadow:var(--shadow)}
+  .card h3{margin:0 0 8px;font-size:1.06rem}
+  .card p{margin:0;color:var(--ink-dim);font-size:.93rem}
+  .card .ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;margin-bottom:14px;
+    background:rgba(56,225,214,.10);border:1px solid rgba(56,225,214,.25);font-size:1.2rem}
+
+  /* ---------- TWO-COL ABOUT ---------- */
+  .about{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;align-items:start}
+  @media(max-width:860px){.about{grid-template-columns:1fr}}
+  .about p{color:var(--ink-dim)}
+  .factsheet{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+  .factsheet dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:10px 16px;font-size:.9rem}
+  .factsheet dt{color:var(--ink-faint)}
+  .factsheet dd{margin:0;color:var(--ink)}
+
+  /* ---------- PUBLICATIONS ---------- */
+  .pub{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid var(--line)}
+  .pub:last-child{border-bottom:0}
+  .pub .cites{flex:0 0 auto;text-align:center;min-width:64px}
+  .pub .cites b{display:block;font-size:1.25rem;color:var(--amber);font-weight:800;line-height:1.1}
+  .pub .cites span{font-size:.66rem;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em}
+  .pub .meta strong{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .pub .meta span{font-size:.85rem;color:var(--ink-dim)}
+
+  /* ---------- BOOKS ---------- */
+  .book{display:flex;gap:16px;align-items:flex-start}
+  .book .spine{flex:0 0 6px;align-self:stretch;border-radius:4px;background:var(--accent-grad)}
+
+  /* ---------- AWARDS chips ---------- */
+  .awards{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .award{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:10px 14px;font-size:.88rem}
+  .award .yr{color:var(--amber);font-weight:700}
+
+  /* ---------- SOCIALS ---------- */
+  .socials{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:26px}
+  @media(max-width:720px){.socials{grid-template-columns:repeat(2,1fr)}}
+  .soc{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:13px 15px;color:var(--ink);transition:.16s;position:relative}
+  .soc:hover{border-color:var(--cyan);transform:translateY(-2px);text-decoration:none}
+  .soc svg{width:22px;height:22px;flex:0 0 auto;fill:currentColor}
+  .soc .nm{font-weight:600;font-size:.9rem;line-height:1.15}
+  .soc .at{font-size:.74rem;color:var(--ink-faint)}
+  .soc[data-status="todo"]{opacity:.5;border-style:dashed;cursor:help}
+  .soc[data-status="todo"]:hover{border-color:var(--amber);transform:none}
+  .soc[data-status="todo"] .at{color:var(--amber)}
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:48px 0 64px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:.85rem}
+  footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;align-items:center}
+  .reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="spark">⚡</span> Michal Cifra</a>
+    <div class="navlinks">
+      <a href="#about">About</a>
+      <a href="#research">Research</a>
+      <a href="#publications">Publications</a>
+      <a href="#books">Books</a>
+      <a href="#building">Building</a>
+      <a href="#connect">Connect</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="badge-row reveal">
+      <span class="badge"><b>Senior Scientist</b> · Team Leader</span>
+      <span class="badge">Institute of Photonics & Electronics · <b>Czech Academy of Sciences</b></span>
+      <span class="badge">IEEE &amp; Optica <b>Senior Member</b></span>
+    </div>
+    <h1 class="reveal">The <span class="grad">electromagnetic physics of life</span> — measured, modelled, and built upon.</h1>
+    <p class="subhead reveal">I'm <strong>Michal Cifra</strong> — a physicist and biomedical engineer leading the <strong>Bioelectrodynamics</strong> team in Prague. I study how living matter generates and responds to electromagnetic fields: from <strong>ultra-weak photon emission</strong> and <strong>microtubule electrodynamics</strong> to <strong>protein electric fields</strong> and <strong>sub-terahertz biosensing</strong>. I also design and build autonomous software systems — an avid <strong>vibecoder and process architect</strong>.</p>
+    <div class="cta reveal">
+      <a class="btn btn-primary" href="#connect">Connect &amp; follow ↓</a>
+      <a class="btn btn-ghost" href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener">Google Scholar</a>
+      <a class="btn btn-ghost" href="https://www.ufe.cz/en/z/michal-cifra/" target="_blank" rel="noopener">Institute profile</a>
+    </div>
+
+    <div class="metrics">
+      <div class="metric reveal"><div class="n">3,600+</div><div class="l">Citations</div><div class="src">Google Scholar · 2026</div></div>
+      <div class="metric reveal"><div class="n">29</div><div class="l">h-index</div><div class="src">Google Scholar · 2026</div></div>
+      <div class="metric reveal"><div class="n">64</div><div class="l">i10-index</div><div class="src">Google Scholar · 2026</div></div>
+      <div class="metric reveal"><div class="n">5</div><div class="l">Continents of research</div><div class="src">EU · US · Asia · S. America</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="wrap">
+    <p class="eyebrow reveal">About</p>
+    <div class="about">
+      <div class="reveal">
+        <h2>Where electromagnetism meets the living cell</h2>
+        <p>For nearly two decades I have worked at the interface of <strong style="color:var(--ink)">biophysics, electromagnetics, and photonics</strong> — asking how biological systems both <em>generate</em> and <em>respond to</em> electromagnetic fields, and how we can measure and harness those processes.</p>
+        <p>My team combines precise <strong style="color:var(--ink)">measurement</strong> (single-photon detection, micro/nanosensors, high-frequency interfaces) with <strong style="color:var(--ink)">computer simulation</strong> (molecular dynamics, electrodynamics of biomolecules) to turn long-debated phenomena into quantitative, testable science.</p>
+        <p>Alongside research I lead people and programs, speak about the field internationally, co-author and co-edit scholarly books — and increasingly architect the <strong style="color:var(--ink)">software and automation</strong> that lets a small group operate like a large one.</p>
+        <div class="awards">
+          <div class="award reveal"><span class="yr">2022</span> Justin Teissié Award</div>
+          <div class="award reveal"><span class="yr">2021</span> IEEE Sensors Best Paper (2nd)</div>
+          <div class="award reveal"><span class="yr">2019</span> Optica Senior Member</div>
+          <div class="award reveal"><span class="yr">2016</span> Otto Wichterle Award (CAS)</div>
+          <div class="award reveal"><span class="yr">2015</span> IEEE Senior Member</div>
+        </div>
+      </div>
+      <aside class="factsheet reveal">
+        <dl>
+          <dt>Role</dt><dd>Senior Scientist &amp; Team Leader, Bioelectrodynamics</dd>
+          <dt>Institute</dt><dd>Photonics &amp; Electronics, Czech Academy of Sciences, Prague</dd>
+          <dt>Ph.D.</dt><dd>Radioelectronics — CTU Prague, 2009</dd>
+          <dt>M.Sc.</dt><dd>Biomedical Engineering — Univ. of Žilina, 2006</dd>
+          <dt>Abroad</dt><dd>U Chicago · NIMS Japan · UNICAMP Brazil · IIB Germany · RWTH Aachen</dd>
+          <dt>ORCID</dt><dd><a href="https://orcid.org/0000-0002-8853-9523" target="_blank" rel="noopener">0000-0002-8853-9523</a></dd>
+        </dl>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section id="research">
+  <div class="wrap">
+    <p class="eyebrow reveal">Research expertise</p>
+    <h2 class="reveal">Six threads, one question: how does life work electromagnetically?</h2>
+    <p class="lead reveal" style="margin-bottom:30px">Spanning endogenous light, cytoskeletal electrodynamics, and the engineered devices that probe them.</p>
+    <div class="grid cols-3">
+      <div class="card reveal"><div class="ico">✨</div><h3>Ultra-weak photon emission</h3><p>Endogenous biophotons &amp; biochemiluminescence from oxidative metabolism — mechanisms, imaging, and statistics of the faintest light life emits.</p></div>
+      <div class="card reveal"><div class="ico">🧬</div><h3>Microtubules &amp; cytoskeleton</h3><p>Electric fields generated by vibrational modes of microtubules; radiofrequency characterization of cytoskeletal structures.</p></div>
+      <div class="card reveal"><div class="ico">⚡</div><h3>Protein electric fields</h3><p>How charged side-chain motions drive long-range electromagnetic effects that steer protein–protein approach — the "egg of Coulomb."</p></div>
+      <div class="card reveal"><div class="ico">📡</div><h3>Sub-THz &amp; microwave bio-interactions</h3><p>Sub-terahertz devices to control proteins; microwave characterization methods for biomolecular systems.</p></div>
+      <div class="card reveal"><div class="ico">🔬</div><h3>Micro- &amp; nano-biosensors</h3><p>High-frequency bioelectronic interfaces and sensors that make weak electromagnetic processes measurable.</p></div>
+      <div class="card reveal"><div class="ico">🌐</div><h3>Non-chemical cell communication</h3><p>Critical, evidence-driven study of field-mediated cell-to-cell signalling — separating real effects from artefact.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PUBLICATIONS -->
+<section id="publications">
+  <div class="wrap">
+    <p class="eyebrow reveal">Selected publications</p>
+    <h2 class="reveal">Widely-cited work</h2>
+    <p class="lead reveal" style="margin-bottom:22px">A few of the most-cited papers — full list on <a href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener">Google Scholar</a>.</p>
+    <div class="reveal">
+      <div class="pub"><div class="cites"><b>510+</b><span>cited by</span></div><div class="meta"><strong>Electromagnetic cellular interactions</strong><span>M. Cifra, J. Z. Fields, A. Farhadi — <i>Progress in Biophysics &amp; Molecular Biology</i>, 2011</span></div></div>
+      <div class="pub"><div class="cites"><b>360+</b><span>cited by</span></div><div class="meta"><strong>Ultra-weak photon emission from biological samples: definition, mechanisms, properties, detection and applications</strong><span>M. Cifra, P. Pospíšil — <i>J. Photochemistry &amp; Photobiology B</i>, 2014</span></div></div>
+      <div class="pub"><div class="cites"><b>190+</b><span>cited by</span></div><div class="meta"><strong>Emission of mitochondrial biophotons and their effect on electrical activity of membrane via microtubules</strong><span>M. Rahnama, J. A. Tuszyński, I. Bókkon, M. Cifra, et al. — <i>J. Integrative Neuroscience</i>, 2011</span></div></div>
+      <div class="pub"><div class="cites"><b>190+</b><span>cited by</span></div><div class="meta"><strong>Electric field generated by axial longitudinal vibration modes of microtubule</strong><span>M. Cifra, J. Pokorný, D. Havelka, O. Kučera — <i>BioSystems</i>, 2010</span></div></div>
+      <div class="pub"><div class="cites"><b>145+</b><span>cited by</span></div><div class="meta"><strong>Non-chemical and non-contact cell-to-cell communication: a short review</strong><span>F. Scholkmann, D. Fels, M. Cifra — <i>American J. Translational Research</i>, 2013</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKS -->
+<section id="books">
+  <div class="wrap">
+    <p class="eyebrow reveal">Author &amp; editor</p>
+    <h2 class="reveal">Books</h2>
+    <div class="grid cols-2" style="margin-top:18px">
+      <div class="card book reveal"><div class="spine"></div><div><h3>Ultra-Weak Photon Emission from Biological Systems</h3><p style="margin:8px 0 0">Endogenous Biophotonics and Intrinsic Bioluminescence. Co-editor (Volodyaev, van Wijk, Cifra, Vladimirov) — <strong style="color:var(--ink)">Springer, 2023</strong>. The reference volume on the field.</p><p style="margin:10px 0 0"><a href="https://link.springer.com/book/10.1007/978-3-031-39078-4" target="_blank" rel="noopener">Springer →</a></p></div></div>
+      <div class="card book reveal"><div class="spine"></div><div><h3>Fields of the Cell</h3><p style="margin:8px 0 0">A multidisciplinary exploration of field-phenomena in living systems and their implications for research and diagnostics. Co-editor — <strong style="color:var(--ink)">2015</strong>.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILDING / vibecoder -->
+<section id="building">
+  <div class="wrap">
+    <p class="eyebrow reveal">Builder &amp; process architect</p>
+    <h2 class="reveal">Research runs on systems — so I build them</h2>
+    <p class="lead reveal" style="margin-bottom:30px">Beyond the lab, I design software and automation that compress repetitive scientific and communication work into reliable, self-running pipelines. I'm an avid <strong style="color:var(--ink)">vibecoder</strong> — building with AI agents as collaborators — and a <strong style="color:var(--ink)">process architect</strong> who turns one-off effort into durable infrastructure.</p>
+    <div class="grid cols-3">
+      <div class="card reveal"><div class="ico">🤖</div><h3>Autonomous-agent ecosystem</h3><p>A monorepo of dozens of cooperating agents handling infrastructure, scientific tooling, science communication, and HPC access.</p></div>
+      <div class="card reveal"><div class="ico">🎬</div><h3>Content automation pipelines</h3><p>End-to-end media pipelines — transcription, captioning, rendering, and multi-platform publishing — running unattended.</p></div>
+      <div class="card reveal"><div class="ico">🧮</div><h3>HPC &amp; simulation orchestration</h3><p>Molecular-dynamics and modelling campaigns orchestrated across academic supercomputing — preflight-gated and reproducible.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONNECT / SOCIALS -->
+<section id="connect">
+  <div class="wrap">
+    <p class="eyebrow reveal">Connect &amp; follow</p>
+    <h2 class="reveal">Find me across the web</h2>
+    <p class="lead reveal">Science updates, talks, and behind-the-scenes of the lab — pick your platform.</p>
+    <!-- Social links render from the SOCIALS config near the bottom of this file.
+         Confirmed links are live; entries marked TODO need the handle pasted in. -->
+    <div class="socials" id="socials"></div>
+
+    <h2 class="reveal" style="margin-top:48px">Academic profiles</h2>
+    <div class="socials">
+      <a class="soc reveal" href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 24a7 7 0 1 1 0-14 7 7 0 0 1 0 14zm0-24L0 9.5l4.838 3.94A8 8 0 0 1 12 9a8 8 0 0 1 7.162 4.44L24 9.5z"/></svg><span><span class="nm">Google Scholar</span><span class="at">3,600+ citations</span></span></a>
+      <a class="soc reveal" href="https://orcid.org/0000-0002-8853-9523" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92zM6.46 7.94h1.823v9.665H6.46zm3.65 0h3.547c3.38 0 4.864 2.416 4.864 4.838 0 2.632-2.057 4.83-4.847 4.83h-3.564zm1.822 1.65v6.38h1.6c2.28 0 3.21-1.737 3.21-3.193 0-1.49-.95-3.187-3.246-3.187z"/></svg><span><span class="nm">ORCID</span><span class="at">0000-0002-8853-9523</span></span></a>
+      <a class="soc reveal" href="https://www.researchgate.net/profile/Michal-Cifra" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M19.586 0H4.414A4.414 4.414 0 0 0 0 4.414v15.172A4.414 4.414 0 0 0 4.414 24h15.172A4.414 4.414 0 0 0 24 19.586V4.414A4.414 4.414 0 0 0 19.586 0zM8.3 14.4c-.6.66-1.5 1-2.62 1-1.27 0-2.27-.42-2.95-1.22-.61-.72-.93-1.74-.93-3.02v-.02c0-1.2.34-2.2 1-2.95.7-.78 1.66-1.18 2.86-1.18 1.02 0 1.84.27 2.45.8.5.44.83 1.03.95 1.7H8.3c-.2-.66-.72-1-1.55-1-.66 0-1.18.25-1.55.74-.36.49-.54 1.18-.54 2.07 0 .9.19 1.6.57 2.08.38.49.92.73 1.6.73.6 0 1.06-.15 1.38-.46.3-.28.46-.68.48-1.18H6.7v-1.35h3.04v.9c0 .99-.3 1.79-.9 2.4zm9.2 1.1l-1.94-3.2c.46-.16.83-.43 1.1-.8.3-.42.46-.94.46-1.55 0-.79-.27-1.42-.8-1.87-.5-.43-1.2-.65-2.07-.65h-3.13v8.72h1.84v-3.1h.92l1.7 3.1h2.05z"/></svg><span><span class="nm">ResearchGate</span><span class="at">Bioelectrodynamics</span></span></a>
+      <a class="soc reveal" href="https://www.ufe.cz/en/z/michal-cifra/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 0L1.5 6v12L12 24l10.5-6V6zm0 2.3l8.5 4.85v9.7L12 21.7l-8.5-4.85v-9.7z"/><circle cx="12" cy="12" r="3.2"/></svg><span><span class="nm">Institute profile</span><span class="at">ÚFE · CAS</span></span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© <span id="yr"></span> Michal Cifra, Ph.D. · Prague, Czech Republic</div>
+    <div>Bioelectrodynamics · Institute of Photonics &amp; Electronics, Czech Academy of Sciences</div>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   SOCIAL LINKS — single source of truth.
+   • status:"ok"   → renders as a live link
+   • status:"todo" → renders greyed/dashed; paste the profile URL + handle,
+                     then change status to "ok". (Get these from the
+                     AutoVideoPosting / OneUp connected accounts.)
+   Order matches the 8 platforms the AVP pipeline publishes to.
+   ===================================================================== */
+const SOCIALS = [
+  { key:"linkedin", name:"LinkedIn", handle:"in/michal-cifra",
+    url:"https://www.linkedin.com/in/michal-cifra-5a5a5437", status:"ok",
+    icon:'<svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.8 0 0 .78 0 1.74v20.52C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.74V1.74C24 .78 23.2 0 22.22 0z"/></svg>' },
+
+  { key:"bluesky", name:"Bluesky", handle:"@mcer33.bsky.social",
+    url:"https://bsky.app/profile/mcer33.bsky.social", status:"ok",
+    icon:'<svg viewBox="0 0 24 24"><path d="M5.1 3.3C7.8 5.3 10.7 9.4 12 11.6c1.3-2.2 4.2-6.3 6.9-8.3 2-1.5 5.1-2.6 5.1.9 0 .7-.4 5.9-.6 6.7-.8 2.9-3.7 3.6-6.3 3.2 4.5.8 5.6 3.3 3.2 5.8-4.7 4.8-6.7-1.2-7.2-2.7-.1-.3-.1-.4-.1-.3 0-.1 0 0-.1.3-.5 1.5-2.5 7.5-7.2 2.7-2.5-2.5-1.3-5 3.2-5.8-2.6.4-5.5-.3-6.3-3.2C2.5 9.1 2 4 2 3.2c0-3.4 3.1-2.3 5.1-.9z"/></svg>' },
+
+  { key:"facebook", name:"Facebook", handle:"Michal Cifra — scientist",
+    url:"https://www.facebook.com/884975894697262", status:"ok",
+    icon:'<svg viewBox="0 0 24 24"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.24 2.69.24v2.97h-1.52c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>' },
+
+  { key:"x", name:"X (Twitter)", handle:"add handle",
+    url:"", status:"todo",
+    icon:'<svg viewBox="0 0 24 24"><path d="M18.9 1.5h3.7l-8 9.2L24 22.5h-7.4l-5.8-7.6-6.6 7.6H.5l8.6-9.8L0 1.5h7.6l5.2 6.9zM17.6 20.3h2.05L6.5 3.6H4.3z"/></svg>' },
+
+  { key:"instagram", name:"Instagram", handle:"add handle",
+    url:"", status:"todo",
+    icon:'<svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 3.68A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 12 8a4 4 0 0 1 0 8zm6.4-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0z"/></svg>' },
+
+  { key:"threads", name:"Threads", handle:"add handle",
+    url:"", status:"todo",
+    icon:'<svg viewBox="0 0 24 24"><path d="M12.2 22h-.05C8.7 22 6.07 20.85 4.34 18.6 2.8 16.6 2 13.85 2 12s.8-4.6 2.34-6.6C6.07 3.15 8.7 2 12.14 2h.05c2.65.02 4.85.86 6.5 2.5 1.46 1.45 2.38 3.5 2.7 6.07l-1.94.24c-.55-4.3-2.92-6.32-7.27-6.35-2.86.02-4.93.9-6.27 2.65C4.86 8.27 4.2 9.96 4.2 12s.66 3.73 1.7 5.04c1.34 1.75 3.4 2.63 6.27 2.65 2.6-.02 4.3-.62 5.5-1.92.86-.93 1.27-2.06 1.27-2.06.02-.9-.2-1.66-.66-2.27-.55-.7-1.43-1.18-2.62-1.42-.1 1.42-.55 3.85-3.45 3.85-1.5 0-2.82-1-2.9-2.55-.1-1.85 1.62-2.7 3.6-2.7.52 0 1 .03 1.45.1 0-.92-.46-1.86-1.9-1.86-.95 0-1.55.4-1.85.96l-1.7-.8c.66-1.3 1.96-1.96 3.55-1.96 2.3 0 3.78 1.45 3.85 3.95.74.26 1.4.66 1.9 1.2.86.92 1.27 2.18 1.2 3.66 0 .04-.5 1.62-1.74 2.94C17.4 21.3 15.2 21.98 12.2 22zm.27-8.4c-1.1 0-1.78.45-1.74 1.16.04.7.86 1.04 1.55 1.04 1.36 0 1.7-1.1 1.78-2.06-.5-.1-1.04-.14-1.6-.14z"/></svg>' },
+
+  { key:"youtube", name:"YouTube", handle:"add handle",
+    url:"", status:"todo",
+    icon:'<svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.12-2.12C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.53A3 3 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3 3 0 0 0 2.12 2.12c1.88.53 9.38.53 9.38.53s7.5 0 9.38-.53a3 3 0 0 0 2.12-2.12C24 15.92 24 12 24 12s0-3.92-.5-5.8zM9.6 15.6V8.4l6.2 3.6z"/></svg>' },
+
+  { key:"tiktok", name:"TikTok", handle:"add handle",
+    url:"", status:"todo",
+    icon:'<svg viewBox="0 0 24 24"><path d="M16.6 5.82a4.28 4.28 0 0 1-1.05-2.82h-3.1v12.6a2.6 2.6 0 0 1-2.6 2.5 2.6 2.6 0 0 1-2.6-2.6 2.6 2.6 0 0 1 3.3-2.5v-3.16a5.7 5.7 0 0 0-.7-.04A5.74 5.74 0 0 0 4.1 15.6a5.74 5.74 0 0 0 11.48.14V9.4a7.3 7.3 0 0 0 4.32 1.4V7.7a4.28 4.28 0 0 1-3.3-1.88z"/></svg>' }
+];
+
+const wrap = document.getElementById("socials");
+wrap.innerHTML = SOCIALS.map(s => {
+  const live = s.status === "ok" && s.url;
+  const tag  = live ? "a" : "div";
+  const href = live ? ` href="${s.url}" target="_blank" rel="noopener"` : "";
+  const st   = live ? "" : ' data-status="todo" title="Add this profile URL in the SOCIALS config"';
+  const at   = live ? s.handle : "⚠ " + s.handle;
+  return `<${tag} class="soc reveal"${href}${st}>${s.icon}<span><span class="nm">${s.name}</span><span class="at">${at}</span></span></${tag}>`;
+}).join("");
+
+document.getElementById("yr").textContent = new Date().getFullYear();
+
+/* reveal on scroll */
+const io = new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

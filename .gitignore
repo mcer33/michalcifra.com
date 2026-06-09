@@ -1,0 +1,12 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+.vscode/
+.idea/
+
+# OneDrive conflict copies
+*-DESKTOP-*
+*-NTB-*
+*([0-9]).html
