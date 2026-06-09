@@ -13,21 +13,20 @@ All social links live in **one place**: the `SOCIALS` array near the bottom of `
 - `status:"ok"` → renders as a live link.
 - `status:"todo"` → renders greyed/dashed as a placeholder.
 
-The 8 platforms match the AutoVideoPosting / OneUp publishing targets. Four are confirmed:
+The 8 platforms match the AutoVideoPosting / OneUp publishing targets. All confirmed:
 
 | Platform  | Status | Link |
 |-----------|--------|------|
 | LinkedIn  | ✅ ok  | linkedin.com/in/michal-cifra-5a5a5437 |
 | Bluesky   | ✅ ok  | bsky.app/profile/mcer33.bsky.social |
-| Facebook  | ✅ ok  | facebook.com/884975894697262 (page "Michal Cifra — scientist") |
-| X         | ⚠ todo | paste handle |
-| Instagram | ⚠ todo | paste handle |
-| Threads   | ⚠ todo | paste handle |
-| YouTube   | ⚠ todo | paste handle |
-| TikTok    | ⚠ todo | paste handle |
+| Facebook  | ✅ ok  | facebook.com/michal.cifra.scientist |
+| X         | ✅ ok  | x.com/mcer33 |
+| Instagram | ✅ ok  | instagram.com/michal.cifra |
+| Threads   | ✅ ok  | threads.com/@michal.cifra |
+| YouTube   | ✅ ok  | youtube.com/@MichalCifra |
+| TikTok    | ✅ ok  | tiktok.com/@michal.cifra |
 
-To finish a TODO: set its `url`, update `handle`, and change `status` to `"ok"`.
-Source of truth for the missing handles = the OneUp connected accounts in the AutoVideoPosting setup.
+To change any link: edit its `url`/`handle` in the `SOCIALS` array. `status:"todo"` greys an entry out.
 
 ## Preview locally
 Just open `index.html` in a browser, or:
