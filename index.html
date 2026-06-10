@@ -326,7 +326,7 @@
       <h1 class="reveal" data-d="1">The <span class="em">electromagnetic<br>physics</span> of life.</h1>
       <p class="subhead reveal" data-d="2">I measure and model how living matter <strong>generates and responds to electromagnetic fields</strong> — from the ultra-weak light cells emit, to the electrodynamics of microtubules and the effects of electric fields on proteins. I also <strong>build the software</strong> that lets a small lab run like a large one.</p>
       <div class="cta reveal" data-d="3">
-        <button class="btn btn-primary" id="watchBtn"><span class="tri"></span> Watch my TEDx talk</button>
+        <a class="btn btn-primary" href="#talks"><span class="tri"></span> Watch my talks</a>
         <a class="btn btn-ghost" href="#connect">Connect &amp; follow</a>
       </div>
     </div>
@@ -585,7 +585,6 @@ function openFrame(src){
   modal.classList.add("open");modal.setAttribute("aria-hidden","false");
 }
 function closeModal(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");slot.innerHTML="";}
-document.getElementById("watchBtn").addEventListener("click",()=>openFrame("https://www.youtube-nocookie.com/embed/gezEio1mdjs?autoplay=1&rel=0&modestbranding=1"));
 document.querySelectorAll(".talk").forEach(b=>b.addEventListener("click",()=>openFrame(b.dataset.frame)));
 document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
