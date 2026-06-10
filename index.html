@@ -559,18 +559,18 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 /* ===== TALKS — selected online talks (id = YouTube video id). Edit freely. ===== */
 const TALKS = [
   { id:"3qJCyGmhQu4", title:"Biophotons: Fundamentals", src:"Quantum Biology Forum · USA · 2026" },
-  { id:"ki5_lrQwNak", title:"Fields &amp; Biological Coherence", src:"Podcast · Ricci Flow Nutrition" },
-  { id:"8I--fsCDlLA", title:"Your Body's Quantum Light Signature", src:"Podcast · Reverse Aging Club" },
-  { id:"y-rj6NjxsfE", title:"Light and life — an overview", src:"The Guy Foundation" },
-  { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"The Guy Foundation" },
-  { id:"ZurukIc097g", title:"Bioelectricity", src:"The Guy Foundation" },
-  { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"The Guy Foundation" },
-  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"IEEE Sensors · Australia · 2021" },
-  { id:"g9XfyAY2IPc", title:"Forces shaping the water: beyond sensing to biomodulation", src:"Aquaphotomics · 2021" },
+  { id:"ki5_lrQwNak", title:"Fields &amp; Biological Coherence", src:"Podcast · 2026" },
+  { id:"8I--fsCDlLA", title:"Your Body Light Signatures", src:"Podcast · 2026" },
+  { id:"y-rj6NjxsfE", title:"Light and life — an overview", src:"The Guy Foundation · 2025" },
+  { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"The Guy Foundation · 2024" },
+  { id:"ZurukIc097g", title:"Bioelectricity", src:"The Guy Foundation · 2023" },
+  { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"The Guy Foundation · 2021" },
+  { id:"5_crBp9W0F4", title:"Molecular understanding of EM-field–biomatter interaction for rational bio/chemical sensing device design", src:"IEEE Sensors · Australia · 2021" },
+  { id:"g9XfyAY2IPc", title:"Microwaves and nanosecond electric pulses for analysis and influencing of microtubule systems", src:"Aquaphotomics · 2021" },
   { id:"VJIVxLx8U9M", title:"Microwave &amp; optical bioelectrodynamics at the nanoscale", src:"Aquaphotomics · Japan · 2018" },
-  { id:"5Tyxd1a-sE4", title:"Physics, Chemistry &amp; Biology of Water", src:"Bulgaria · 2017" },
-  { frame:"https://slideslive.com/embed/presentation/38901000", thumb:"https://ma.slideslive.com/library/presentations/38901000/thumbnail/vlastni-svetlo-organizmu-fyzikalnechemicke-principy-a-vyuziti_UQPBs3_medium.jpg", title:"Vlastní světlo organizmů", src:"Lecture · Czech Republic" },
-  { id:"gezEio1mdjs", title:"Bio Light", src:"TEDxBratislava · Slovakia" }
+  { id:"5Tyxd1a-sE4", title:"Microwave and optical bioelectrodynamics at the nanoscale and molecular level", src:"Bulgaria · 2017" },
+  { frame:"https://slideslive.com/embed/presentation/38901000", thumb:"https://ma.slideslive.com/library/presentations/38901000/thumbnail/vlastni-svetlo-organizmu-fyzikalnechemicke-principy-a-vyuziti_UQPBs3_medium.jpg", title:"Vlastní světlo organizmů", src:"Lecture · Czech Republic · 2017" },
+  { id:"gezEio1mdjs", title:"Bio Light", src:"TEDxBratislava · Slovakia · 2012" }
 ];
 document.getElementById("talks-grid").innerHTML = TALKS.map(t=>{
   const thumb = t.thumb || `https://img.youtube.com/vi/${t.id}/hqdefault.jpg`;
