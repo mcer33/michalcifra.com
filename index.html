@@ -560,11 +560,11 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 const TALKS = [
   { id:"3qJCyGmhQu4", title:"Biophotons: Fundamentals", src:"Quantum Biology Forum · 2026" },
   { id:"gezEio1mdjs", title:"Bio Light", src:"TEDxBratislava" },
-  { id:"y-rj6NjxsfE", title:"Light and life — an overview", src:"Invited talk" },
-  { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"Invited talk" },
-  { id:"ZurukIc097g", title:"Bioelectricity", src:"Invited talk" },
-  { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"Lecture" },
-  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"Lecture" }
+  { id:"y-rj6NjxsfE", title:"Light and life — an overview", src:"The Guy Foundation" },
+  { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"The Guy Foundation" },
+  { id:"ZurukIc097g", title:"Bioelectricity", src:"The Guy Foundation" },
+  { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"The Guy Foundation" },
+  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"Lecture series" }
 ];
 document.getElementById("talks-grid").innerHTML = TALKS.map(t=>
   `<button class="talk" data-vid="${t.id}" aria-label="Play: ${t.title}"><span class="thumb"><img loading="lazy" src="https://img.youtube.com/vi/${t.id}/hqdefault.jpg" alt="${t.title}"/></span><span class="body"><span class="ttl">${t.title}</span><span class="src">${t.src}</span></span></button>`
