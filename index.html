@@ -564,7 +564,10 @@ const TALKS = [
   { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"The Guy Foundation" },
   { id:"ZurukIc097g", title:"Bioelectricity", src:"The Guy Foundation" },
   { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"The Guy Foundation" },
-  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"Lecture series" }
+  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"Lecture series" },
+  { id:"g9XfyAY2IPc", title:"Forces shaping the water: beyond sensing to biomodulation", src:"Aquaphotomics · 2021" },
+  { id:"VJIVxLx8U9M", title:"Microwave &amp; optical bioelectrodynamics at the nanoscale", src:"Aquaphotomics · 2018" },
+  { id:"8I--fsCDlLA", title:"Your Body's Quantum Light Signature", src:"Podcast · Reverse Aging Club" }
 ];
 document.getElementById("talks-grid").innerHTML = TALKS.map(t=>
   `<button class="talk" data-vid="${t.id}" aria-label="Play: ${t.title}"><span class="thumb"><img loading="lazy" src="https://img.youtube.com/vi/${t.id}/hqdefault.jpg" alt="${t.title}"/></span><span class="body"><span class="ttl">${t.title}</span><span class="src">${t.src}</span></span></button>`
