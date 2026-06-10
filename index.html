@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Michal Cifra, Ph.D. — Bioelectrodynamics · Scientist · Builder</title>
-<meta name="description" content="Michal Cifra, Ph.D. — senior scientist and team leader in bioelectrodynamics at the Institute of Photonics and Electronics, Czech Academy of Sciences. Studying the electromagnetic physics of life: ultra-weak photon emission, microtubule electrodynamics, protein electric fields. Speaker, author, team leader, and process architect." />
+<meta name="description" content="Michal Cifra, Ph.D. — senior scientist and team leader in bioelectrodynamics at the Institute of Photonics and Electronics, Czech Academy of Sciences. Studying the electromagnetic physics of life: ultra-weak photon emission, microtubule electrodynamics, electric field effects on proteins. Speaker, author, team leader, and process architect." />
 <meta name="author" content="Michal Cifra" />
 <meta property="og:type" content="profile" />
 <meta property="og:title" content="Michal Cifra, Ph.D. — the electromagnetic physics of life" />
@@ -257,6 +257,29 @@
   .founder .ft span{color:var(--ink-dim);font-size:.92rem}
   .founder .go{font-family:var(--mono);font-size:.78rem;color:var(--photon);white-space:nowrap}
 
+  /* talks gallery */
+  .talks{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+  @media(max-width:860px){.talks{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.talks{grid-template-columns:1fr}}
+  .talk{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);cursor:pointer;transition:.2s;text-align:left;font:inherit;color:inherit;padding:0;display:block;width:100%}
+  .talk:hover{transform:translateY(-4px);border-color:var(--photon);box-shadow:0 26px 50px -32px rgba(0,0,0,.8)}
+  .talk .thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0a0e16;display:block}
+  .talk .thumb img{width:100%;height:100%;object-fit:cover;opacity:.82;transition:.25s}
+  .talk:hover .thumb img{opacity:1;transform:scale(1.04)}
+  .talk .thumb::after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);
+    border-radius:50%;background:rgba(5,7,11,.55);backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,.35)}
+  .talk .thumb::before{content:"";position:absolute;left:50%;top:50%;z-index:2;transform:translate(-35%,-50%);
+    border-left:13px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent}
+  .talk .body{padding:14px 16px;display:block}
+  .talk .ttl{font-family:var(--serif);font-size:1.12rem;line-height:1.12;color:var(--ink);display:block}
+  .talk .src{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--photon);margin-top:9px;display:block}
+  /* research-experience list inside factsheet */
+  .factsheet .exp{margin:0;padding:0;list-style:none}
+  .factsheet .exp li{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .factsheet .exp li:last-child{border-bottom:0}
+  .factsheet .exp li b{color:var(--ink);font-weight:600;font-size:.92rem}
+  .factsheet .exp li span{font-family:var(--mono);font-size:.66rem;color:var(--ink-faint);white-space:nowrap;text-align:right}
+
   /* reveal */
   .reveal{opacity:0;transform:translateY(22px);transition:.8s cubic-bezier(.2,.7,.2,1)}
   .reveal.in{opacity:1;transform:none}
@@ -275,6 +298,7 @@
       <a href="#about">About</a>
       <a href="#research">Research</a>
       <a href="#work">Impact</a>
+      <a href="#talks">Talks</a>
       <a href="#building">Building</a>
       <a href="#connect">Connect</a>
     </div>
@@ -300,7 +324,7 @@
       </div>
       <p class="name reveal" data-d="1">Michal Cifra, Ph.D.</p>
       <h1 class="reveal" data-d="1">The <span class="em">electromagnetic<br>physics</span> of life.</h1>
-      <p class="subhead reveal" data-d="2">I measure and model how living matter <strong>generates and responds to electromagnetic fields</strong> — from the ultra-weak light cells emit, to the electric fields of proteins and microtubules. I also <strong>build the software</strong> that lets a small lab run like a large one.</p>
+      <p class="subhead reveal" data-d="2">I measure and model how living matter <strong>generates and responds to electromagnetic fields</strong> — from the ultra-weak light cells emit, to the electrodynamics of microtubules and the effects of electric fields on proteins. I also <strong>build the software</strong> that lets a small lab run like a large one.</p>
       <div class="cta reveal" data-d="3">
         <button class="btn btn-primary" id="watchBtn"><span class="tri"></span> Watch my TEDx talk</button>
         <a class="btn btn-ghost" href="#connect">Connect &amp; follow</a>
@@ -322,8 +346,8 @@
 <!-- ===================== TICKER ===================== -->
 <div class="ticker" aria-hidden="true">
   <div class="track">
-    <span>Ultra-weak photon emission <b>✦</b></span><span>Microtubule electrodynamics <b>✦</b></span><span>Protein electric fields <b>✦</b></span><span>Sub-THz biosensing <b>✦</b></span><span>Biophotons <b>✦</b></span><span>Cytoskeleton <b>✦</b></span><span>Non-chemical signalling <b>✦</b></span>
-    <span>Ultra-weak photon emission <b>✦</b></span><span>Microtubule electrodynamics <b>✦</b></span><span>Protein electric fields <b>✦</b></span><span>Sub-THz biosensing <b>✦</b></span><span>Biophotons <b>✦</b></span><span>Cytoskeleton <b>✦</b></span><span>Non-chemical signalling <b>✦</b></span>
+    <span>Ultra-weak photon emission <b>✦</b></span><span>Microtubule electrodynamics <b>✦</b></span><span>Electric field effects on proteins <b>✦</b></span><span>Sub-THz biosensing <b>✦</b></span><span>Biophotons <b>✦</b></span><span>Cytoskeleton <b>✦</b></span><span>Non-chemical signalling <b>✦</b></span>
+    <span>Ultra-weak photon emission <b>✦</b></span><span>Microtubule electrodynamics <b>✦</b></span><span>Electric field effects on proteins <b>✦</b></span><span>Sub-THz biosensing <b>✦</b></span><span>Biophotons <b>✦</b></span><span>Cytoskeleton <b>✦</b></span><span>Non-chemical signalling <b>✦</b></span>
   </div>
 </div>
 
@@ -363,7 +387,15 @@
           <div class="frow"><dt>Institute</dt><dd>Photonics &amp; Electronics,<br>Czech Academy of Sciences · Prague</dd></div>
           <div class="frow"><dt>Ph.D.</dt><dd>Radioelectronics — CTU Prague, 2009</dd></div>
           <div class="frow"><dt>M.Sc.</dt><dd>Biomedical Engineering — Žilina, 2006</dd></div>
-          <div class="frow"><dt>Research experience</dt><dd>Visiting professor U Chicago · NIMS Japan · UNICAMP Brazil · IIB Germany · RWTH Aachen</dd></div>
+          <div class="frow"><dt>Research<br>experience</dt><dd>
+            <ul class="exp">
+              <li><b>University of Chicago</b><span>USA · 2014–15</span></li>
+              <li><b>NIMS</b><span>Japan · 2013</span></li>
+              <li><b>UNICAMP</b><span>Brazil · 2010</span></li>
+              <li><b>Int. Inst. of Biophysics</b><span>Germany · 2006–10</span></li>
+              <li><b>RWTH Aachen</b><span>Germany · 2004–05</span></li>
+            </ul>
+          </dd></div>
           <div class="frow"><dt>ORCID</dt><dd><a href="https://orcid.org/0000-0002-8853-9523" target="_blank" rel="noopener">0000-0002-8853-9523</a></dd></div>
         </dl>
       </aside>
@@ -379,7 +411,7 @@
     <div class="rgrid" style="margin-top:40px">
       <div class="rcard reveal"><div class="idx">01</div><h3>Ultra-weak photon emission</h3><p>Endogenous biophotons &amp; biochemiluminescence from oxidative metabolism — mechanisms, imaging, and statistics of the faintest light life emits.</p></div>
       <div class="rcard reveal" data-d="1"><div class="idx">02</div><h3>Microtubules &amp; cytoskeleton</h3><p>Electric fields from vibrational modes of microtubules; radiofrequency characterization of cytoskeletal structures.</p></div>
-      <div class="rcard reveal" data-d="2"><div class="idx">03</div><h3>Protein electric fields</h3><p>How charged side-chain motions drive long-range electromagnetic effects that steer protein–protein approach — the "egg of Coulomb."</p></div>
+      <div class="rcard reveal" data-d="2"><div class="idx">03</div><h3>Electric field effects on proteins</h3><p>How applied fields — pulsed electric fields and sub-THz — and intrinsic charged side-chain motions reshape protein behaviour and steer long-range protein–protein effects (the "egg of Coulomb").</p></div>
       <div class="rcard reveal"><div class="idx">04</div><h3>Sub-THz &amp; microwave interactions</h3><p>Sub-terahertz devices to control proteins; microwave characterization methods for biomolecular systems.</p></div>
       <div class="rcard reveal" data-d="1"><div class="idx">05</div><h3>Micro- &amp; nano-biosensors</h3><p>High-frequency bioelectronic interfaces and sensors that make weak electromagnetic processes measurable.</p></div>
       <div class="rcard reveal" data-d="2"><div class="idx">06</div><h3>Non-chemical cell signalling</h3><p>Critical, evidence-driven study of field-mediated cell-to-cell communication — separating real effects from artefact.</p></div>
@@ -394,7 +426,7 @@
     <h2 class="reveal">Beyond the <em>papers</em>.</h2>
     <p class="lead reveal" data-d="1" style="margin:8px 0 32px">I've authored <strong style="color:var(--ink)">120+ publications</strong> — 80+ journal papers and <strong style="color:var(--ink)">3 edited books</strong> (plus 2 guest-edited special issues) — cited <strong style="color:var(--ink)">3,600+ times</strong> on Google Scholar (1,700+ on Web of Science; h-index 29). Full list on <a href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener">Google Scholar</a> · <a href="https://orcid.org/0000-0002-8853-9523" target="_blank" rel="noopener">ORCID</a>. Below: the leadership and service behind them.</p>
     <div class="statgrid reveal" data-d="1">
-      <div class="stat"><div class="n">~€3<span class="u">M</span></div><div class="l">Research funding</div><div class="s">won as principal investigator</div></div>
+      <div class="stat"><div class="n">~€3<span class="u">M</span></div><div class="l">Research funding</div><div class="s">incl. €1.9M ERC-equivalent EXPRO</div></div>
       <div class="stat"><div class="n">30<span class="u">+</span></div><div class="l">Events organized</div><div class="s">10,000+ attendees</div></div>
       <div class="stat"><div class="n">27</div><div class="l">Researchers mentored</div><div class="s">12 MSc · 7 PhD · 8 postdoc</div></div>
       <div class="stat"><div class="n">8</div><div class="l">Awards &amp; honors</div><div class="s">Wichterle · Teissié · IEEE</div></div>
@@ -409,12 +441,16 @@
           <li><b>URSI</b> — Commission K (TAC); national-committee secretary</li>
           <li><b>Optica</b> Senior Member · <b>SPIE</b> Life Member</li>
           <li>Associate Editor, <b>Scientific Reports</b> (2019–); former IEEE&nbsp;JERM</li>
+          <li>Elected member, <b>CAS Assembly</b> (2018–28)</li>
+          <li>Grant-panel &amp; PhD-thesis reviewer — EC&nbsp;Horizon, DFG, FWO…; 16 theses</li>
         </ul>
       </div>
       <div class="col reveal" data-d="1"><h3>Teaching, mentoring &amp; ventures</h3>
         <ul>
           <li>Founder — <b>Molecular Bioelectromagnetism</b> course, Charles University</li>
-          <li>Founder — <b>Bioelectrodynamics webinar series</b> (2021–)</li>
+          <li>Founder — <b>Bioelectrodynamics webinar series</b> (2021–, ~1,600 members)</li>
+          <li>Founder — <b>Biophotoniq</b>, science-outreach venture (2026–)</li>
+          <li>Alumni now at <b>NIST · Kanazawa U · SETU · KU&nbsp;Ružomberok</b></li>
           <li>On the boards of 3 PhD + 1 MSc study programs (CZ &amp; SK)</li>
           <li><b>Patent</b> — method of determining complex permittivity (CZ, 2024)</li>
           <li>Co-founder &amp; CTO, <b>MetaVia s.r.o.</b> (2007–12)</li>
@@ -424,10 +460,20 @@
   </div>
 </section>
 
+<!-- ===================== TALKS ===================== -->
+<section id="talks" class="divider">
+  <div class="wrap">
+    <p class="label reveal">04 — Talks &amp; media</p>
+    <h2 class="reveal">On stage &amp; on screen.</h2>
+    <p class="lead reveal" data-d="1" style="margin:8px 0 30px">From TEDx to the Quantum Biology Forum, I give public lectures and scientific talks on the electromagnetic side of life — a selection below. More on my <a href="https://www.youtube.com/@MichalCifra" target="_blank" rel="noopener">YouTube channel</a>.</p>
+    <div class="talks reveal" data-d="1" id="talks-grid"></div>
+  </div>
+</section>
+
 <!-- ===================== BUILDING ===================== -->
 <section id="building" class="divider">
   <div class="wrap">
-    <p class="label reveal">04 — Builder &amp; process architect</p>
+    <p class="label reveal">05 — Builder &amp; process architect</p>
     <h2 class="reveal">Research runs on systems —<br>so I <em>build</em> them.</h2>
     <p class="lead reveal" data-d="1" style="margin:8px 0 26px">Beyond the lab I design software and automation that compress repetitive scientific and communication work into reliable, self-running pipelines. An avid <strong style="color:var(--ink)">vibecoder</strong> — building with AI agents as collaborators — and a <strong style="color:var(--ink)">process architect</strong> turning one-off effort into durable infrastructure.</p>
     <a class="founder reveal" data-d="1" href="https://www.biophotoniq.net" target="_blank" rel="noopener">
@@ -446,13 +492,14 @@
 <!-- ===================== CONNECT ===================== -->
 <section id="connect" class="divider">
   <div class="wrap">
-    <p class="label reveal">05 — Connect &amp; follow</p>
+    <p class="label reveal">06 — Connect &amp; follow</p>
     <h2 class="reveal">Find me across the web.</h2>
     <p class="lead reveal" data-d="1" style="margin:8px 0 26px">Science updates, talks, and behind-the-scenes of the lab — pick your platform.</p>
     <div class="socials reveal" data-d="1" id="socials"></div>
 
-    <p class="label reveal" style="margin-top:54px">Academic profiles</p>
+    <p class="label reveal" style="margin-top:54px">Profiles &amp; writing</p>
     <div class="socials reveal" data-d="1">
+      <a class="soc" href="https://michalcifra.substack.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg><span class="tx"><span class="nm">Substack</span><span class="at">michalcifra.substack.com</span></span></a>
       <a class="soc" href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 24a7 7 0 1 1 0-14 7 7 0 0 1 0 14zm0-24L0 9.5l4.838 3.94A8 8 0 0 1 12 9a8 8 0 0 1 7.162 4.44L24 9.5z"/></svg><span class="tx"><span class="nm">Google Scholar</span><span class="at">3,600+ citations</span></span></a>
       <a class="soc" href="https://orcid.org/0000-0002-8853-9523" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92zM6.46 7.94h1.823v9.665H6.46zm3.65 0h3.547c3.38 0 4.864 2.416 4.864 4.838 0 2.632-2.057 4.83-4.847 4.83h-3.564zm1.822 1.65v6.38h1.6c2.28 0 3.21-1.737 3.21-3.193 0-1.49-.95-3.187-3.246-3.187z"/></svg><span class="tx"><span class="nm">ORCID</span><span class="at">0000-0002-8853-9523</span></span></a>
       <a class="soc" href="https://www.researchgate.net/profile/Michal-Cifra" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M19.586 0H4.414A4.414 4.414 0 0 0 0 4.414v15.172A4.414 4.414 0 0 0 4.414 24h15.172A4.414 4.414 0 0 0 24 19.586V4.414A4.414 4.414 0 0 0 19.586 0zM8.3 14.4c-.6.66-1.5 1-2.62 1-1.27 0-2.27-.42-2.95-1.22-.61-.72-.93-1.74-.93-3.02v-.02c0-1.2.34-2.2 1-2.95.7-.78 1.66-1.18 2.86-1.18 1.02 0 1.84.27 2.45.8.5.44.83 1.03.95 1.7H8.3c-.2-.66-.72-1-1.55-1-.66 0-1.18.25-1.55.74-.36.49-.54 1.18-.54 2.07 0 .9.19 1.6.57 2.08.38.49.92.73 1.6.73.6 0 1.06-.15 1.38-.46.3-.28.46-.68.48-1.18H6.7v-1.35h3.04v.9c0 .99-.3 1.79-.9 2.4zm9.2 1.1l-1.94-3.2c.46-.16.83-.43 1.1-.8.3-.42.46-.94.46-1.55 0-.79-.27-1.42-.8-1.87-.5-.43-1.2-.65-2.07-.65h-3.13v8.72h1.84v-3.1h.92l1.7 3.1h2.05z"/></svg><span class="tx"><span class="nm">ResearchGate</span><span class="at">Bioelectrodynamics</span></span></a>
@@ -509,14 +556,29 @@ document.getElementById("socials").innerHTML = SOCIALS.map(s=>{
 
 document.getElementById("yr").textContent=new Date().getFullYear();
 
-/* video modal — load the talk with sound on demand, unload on close (stops playback) */
+/* ===== TALKS — selected online talks (id = YouTube video id). Edit freely. ===== */
+const TALKS = [
+  { id:"3qJCyGmhQu4", title:"Biophotons: Fundamentals", src:"Quantum Biology Forum · 2026" },
+  { id:"gezEio1mdjs", title:"Bio Light", src:"TEDxBratislava" },
+  { id:"y-rj6NjxsfE", title:"Light and life — an overview", src:"Invited talk" },
+  { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"Invited talk" },
+  { id:"ZurukIc097g", title:"Bioelectricity", src:"Invited talk" },
+  { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"Lecture" },
+  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"Lecture" }
+];
+document.getElementById("talks-grid").innerHTML = TALKS.map(t=>
+  `<button class="talk" data-vid="${t.id}" aria-label="Play: ${t.title}"><span class="thumb"><img loading="lazy" src="https://img.youtube.com/vi/${t.id}/hqdefault.jpg" alt="${t.title}"/></span><span class="body"><span class="ttl">${t.title}</span><span class="src">${t.src}</span></span></button>`
+).join("");
+
+/* video modal — load on demand, unload on close (stops playback) */
 const modal=document.getElementById("modal"), slot=document.getElementById("modalSlot");
-function openModal(){
-  slot.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/gezEio1mdjs?autoplay=1&rel=0&modestbranding=1" title="Michal Cifra — talk" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+function openVideo(id){
+  slot.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" title="Michal Cifra — talk" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
   modal.classList.add("open");modal.setAttribute("aria-hidden","false");
 }
 function closeModal(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");slot.innerHTML="";}
-document.getElementById("watchBtn").addEventListener("click",openModal);
+document.getElementById("watchBtn").addEventListener("click",()=>openVideo("gezEio1mdjs"));
+document.querySelectorAll(".talk").forEach(b=>b.addEventListener("click",()=>openVideo(b.dataset.vid)));
 document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
