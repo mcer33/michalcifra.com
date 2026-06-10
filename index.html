@@ -558,31 +558,34 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 
 /* ===== TALKS — selected online talks (id = YouTube video id). Edit freely. ===== */
 const TALKS = [
-  { id:"3qJCyGmhQu4", title:"Biophotons: Fundamentals", src:"Quantum Biology Forum · 2026" },
-  { id:"gezEio1mdjs", title:"Bio Light", src:"TEDxBratislava" },
+  { id:"3qJCyGmhQu4", title:"Biophotons: Fundamentals", src:"Quantum Biology Forum · USA · 2026" },
+  { id:"8I--fsCDlLA", title:"Your Body's Quantum Light Signature", src:"Podcast · Reverse Aging Club" },
   { id:"y-rj6NjxsfE", title:"Light and life — an overview", src:"The Guy Foundation" },
   { id:"JXuD4SxUnsE", title:"The life electric: the evidence", src:"The Guy Foundation" },
   { id:"ZurukIc097g", title:"Bioelectricity", src:"The Guy Foundation" },
   { id:"UakBE6pQRxc", title:"Cellular Bioelectromagnetics", src:"The Guy Foundation" },
-  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"Lecture series" },
+  { id:"5_crBp9W0F4", title:"Molecular Bioelectromagnetics", src:"IEEE Sensors · Australia · 2021" },
   { id:"g9XfyAY2IPc", title:"Forces shaping the water: beyond sensing to biomodulation", src:"Aquaphotomics · 2021" },
-  { id:"VJIVxLx8U9M", title:"Microwave &amp; optical bioelectrodynamics at the nanoscale", src:"Aquaphotomics · 2018" },
-  { id:"8I--fsCDlLA", title:"Your Body's Quantum Light Signature", src:"Podcast · Reverse Aging Club" },
-  { id:"5Tyxd1a-sE4", title:"Physics, Chemistry &amp; Biology of Water", src:"Invited talk · 2017" }
+  { id:"VJIVxLx8U9M", title:"Microwave &amp; optical bioelectrodynamics at the nanoscale", src:"Aquaphotomics · Japan · 2018" },
+  { id:"5Tyxd1a-sE4", title:"Physics, Chemistry &amp; Biology of Water", src:"Bulgaria · 2017" },
+  { frame:"https://slideslive.com/embed/presentation/38901000", thumb:"https://ma.slideslive.com/library/presentations/38901000/thumbnail/vlastni-svetlo-organizmu-fyzikalnechemicke-principy-a-vyuziti_UQPBs3_medium.jpg", title:"Vlastní světlo organizmů", src:"Lecture · Czech Republic" },
+  { id:"gezEio1mdjs", title:"Bio Light", src:"TEDxBratislava · Slovakia" }
 ];
-document.getElementById("talks-grid").innerHTML = TALKS.map(t=>
-  `<button class="talk" data-vid="${t.id}" aria-label="Play: ${t.title}"><span class="thumb"><img loading="lazy" src="https://img.youtube.com/vi/${t.id}/hqdefault.jpg" alt="${t.title}"/></span><span class="body"><span class="ttl">${t.title}</span><span class="src">${t.src}</span></span></button>`
-).join("");
+document.getElementById("talks-grid").innerHTML = TALKS.map(t=>{
+  const thumb = t.thumb || `https://img.youtube.com/vi/${t.id}/hqdefault.jpg`;
+  const frame = t.frame || `https://www.youtube-nocookie.com/embed/${t.id}?autoplay=1&rel=0&modestbranding=1`;
+  return `<button class="talk" data-frame="${frame}" aria-label="Play: ${t.title}"><span class="thumb"><img loading="lazy" src="${thumb}" alt="${t.title}"/></span><span class="body"><span class="ttl">${t.title}</span><span class="src">${t.src}</span></span></button>`;
+}).join("");
 
 /* video modal — load on demand, unload on close (stops playback) */
 const modal=document.getElementById("modal"), slot=document.getElementById("modalSlot");
-function openVideo(id){
-  slot.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" title="Michal Cifra — talk" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+function openFrame(src){
+  slot.innerHTML=`<iframe src="${src}" title="Michal Cifra — talk" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
   modal.classList.add("open");modal.setAttribute("aria-hidden","false");
 }
 function closeModal(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");slot.innerHTML="";}
-document.getElementById("watchBtn").addEventListener("click",()=>openVideo("gezEio1mdjs"));
-document.querySelectorAll(".talk").forEach(b=>b.addEventListener("click",()=>openVideo(b.dataset.vid)));
+document.getElementById("watchBtn").addEventListener("click",()=>openFrame("https://www.youtube-nocookie.com/embed/gezEio1mdjs?autoplay=1&rel=0&modestbranding=1"));
+document.querySelectorAll(".talk").forEach(b=>b.addEventListener("click",()=>openFrame(b.dataset.frame)));
 document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
