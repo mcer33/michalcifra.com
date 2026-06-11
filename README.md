@@ -36,6 +36,16 @@ Pages sends `Cache-Control: max-age=600`, so a browser may show the old copy for
 **Constraints:** static only (no PHP/DB/server code — that's why the Biophotoniq site stays on Websupport).
 Any machine pushing needs git creds / `gh` auth for the `mcer33` GitHub account.
 
+**Relaying a page built by an ecosystem agent** (one command, any authed machine):
+```bash
+ecosystem/infra/deploy-to-web.sh <src-rel-to-ecosystem-root> <dest-rel-to-site-root> [commit msg]
+# e.g.  …/deploy-to-web.sh agents/social-analysis/debiasify-agent/site/avcrdebiasify-tests/index.html \
+#                          avcrdebiasify-tests/index.html "Add report (noindex)"
+```
+It pulls ecosystem, copies the file into a michalcifra.com checkout, commits+pushes to `master`, waits for the
+Pages build, and curls the live URL. Set `MICHALCIFRA_WEB` to reuse an existing site checkout, else it clones to
+`~/.cache/michalcifra.com`. (Exists because ufeclaude's deploy key is ecosystem-only and can't push here.)
+
 ## Editing content (all data-driven, one place each)
 - **Social links** — the `SOCIALS` array near the bottom of `index.html` (8 platforms; `status:"ok"`/`"todo"`).
   Also a "Profiles & writing" row: Substack, Google Scholar, ORCID, ResearchGate, Institute page.
