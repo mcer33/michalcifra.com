@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Test analýzy zaujatosti — Akademie věd ČR (Debiasify)</title>
+<style>
+  :root { --bg:#0f1216; --card:#171c23; --mut:#8b95a3; --fg:#e8edf2;
+           --rhet:#e0a458; --fact:#5fa8d3; --none:#3a6b4a; --line:#232a33; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+          font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:860px; margin:0 auto; padding:32px 20px 80px; }
+  h1 { font-size:26px; margin:0 0 6px; }
+  .lead { color:var(--mut); margin:0 0 24px; }
+  .note { background:#1c2530; border:1px solid var(--line); border-left:3px solid var(--fact);
+           border-radius:8px; padding:14px 16px; margin:0 0 28px; font-size:14.5px; color:#cdd6e0; }
+  .kpis { display:flex; flex-wrap:wrap; gap:14px; margin:0 0 28px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:10px;
+          padding:14px 18px; flex:1; min-width:150px; }
+  .kpi b { display:block; font-size:24px; }
+  .kpi span { color:var(--mut); font-size:13px; }
+  h2 { font-size:16px; color:var(--mut); text-transform:uppercase; letter-spacing:.06em;
+        margin:32px 0 12px; }
+  ul.top { margin:0 0 8px; padding-left:18px; } ul.top .ct { color:var(--mut); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+           padding:16px 18px; margin:0 0 16px; }
+  .card .meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
+                 font-size:13px; color:var(--mut); margin-bottom:8px; }
+  .card .date { font-weight:600; color:var(--fg); }
+  .excerpt { margin:6px 0 12px; }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px; }
+  .chip { font-size:12.5px; padding:3px 9px; border-radius:20px; background:#202833;
+           border:1px solid var(--line); }
+  .chip.rhetorical { border-color:var(--rhet); } .chip.factual { border-color:var(--fact); }
+  .chip.none { border-color:var(--none); color:#9fd4af; }
+  .summary { font-size:14.5px; color:#cdd6e0; margin:4px 0 12px; }
+  .src { font-size:13px; color:var(--fact); text-decoration:none; }
+  footer { color:var(--mut); font-size:13px; margin-top:36px; border-top:1px solid var(--line);
+            padding-top:16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test analýzy zaujatosti příspěvků: Akademie věd ČR</h1>
+  <p class="lead">Pilotní strojový test nástroje <b>Debiasify</b> · vygenerováno 11. 6. 2026</p>
+
+  <div class="note">
+    <b>K čemu to je.</b> Toto je <b>technický test</b> propojení s nástrojem Debiasify,
+    který v textu hledá <b>rétorické</b> (jak je něco napsáno) a <b>faktické</b>
+    (co a jak je doloženo) znaky ovlivňování. Příspěvky <b>Akademie věd ČR</b> jsme
+    automaticky načetli z účtu na síti Bluesky a poslali k rozboru. <b>Nejde o hodnocení
+    Akademie věd</b> — jde o ukázku, jak se nástroj chová na reálných, převážně
+    popularizačních a PR textech. Vysoké „PR“ nálezy jsou u oficiální komunikace běžné a
+    neznamenají dezinformaci.
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><b>6</b><span>analyzovaných příspěvků</span></div>
+    <div class="kpi"><b>15%</b>
+      <span>průměrná míra ovlivňování (nízká)</span></div>
+    <div class="kpi"><b>27</b><span>jednotlivých nálezů celkem</span></div>
+  </div>
+
+  <h2>Nejčastější nálezy</h2>
+  <ul class="top"><li>Efekt rámování (způsob podání) <span class='ct'>(5×)</span></li><li>Znaky PR / propagace <span class='ct'>(5×)</span></li><li>Odvolávání se na autoritu <span class='ct'>(4×)</span></li><li>Skrytá reklama (advertorial) <span class='ct'>(4×)</span></li><li>Apel na emoce <span class='ct'>(3×)</span></li><li>Senzacechtivost <span class='ct'>(3×)</span></li></ul>
+
+  <h2>Jednotlivé příspěvky</h2>
+  
+        <article class="card">
+          <div class="meta">
+            <span class="date">9. 6. 2026</span>
+            <span class="scores">rétorika <b>25%</b>
+              · fakta <b>75%</b>
+              · míra ovlivňování <b>15%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🔴 LIVE: Byl jsem dinosauří dítě, ale získaly si mě želvy, ohlíží se paleontolog Milan Chroust
+
+🎧 Poslechněte si #podcast_avcr 
+open.spotify.com/episode/6VeR...
+
+📱 Všechny díly Podcastu Akademie věd si poslechněte na Spotify, Apple Podcasts,…</p>
+          <div class="chips"><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip factual">Skrytá reklama (advertorial) <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
+          <p class="summary">Text je primárně charakterizován institucionální public relations a inzerentními strukturami, využívá značky autority a mírnou senzacechtivost k podpoře zapojení publika. Rétoricky využívá emocionální háčky prostřednictvím osobního vyprávění a retrospektivního rámování k humanizaci vědeckého diskurzu a budování vztahu. Faktuální objektivita je druhořadá oproti propagačnímu cíli, protože příspěvek funguje jako výzva k akci pro proprietární mediální výstupy organizace, spíše než jako neutrální shrnutí vědeckých zjištění.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnu3kdq76s2c" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="date">9. 6. 2026</span>
+            <span class="scores">rétorika <b>25%</b>
+              · fakta <b>50%</b>
+              · míra ovlivňování <b>15%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🖼️Výstava &quot;Mezi traumatem a nostalgií&quot;
+
+📅Od 15. června do 15. září 2026 bude v chodbách Klementina možné shlédnout výstavu „Mezi traumatem a nostalgií. Příběhy bulharského literárního exilu (1944–1989)“, jejímž autorem je Jakub Mikulecký ze…</p>
+          <div class="chips"><span class="chip factual">Skrytá reklama (advertorial) <b>50%</b></span><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span></div>
+          <p class="summary">Text vykazuje mírné rétorické rámování použitím emocionálně evokujících termínů v názvu výstavy, které předem kategorizuje historické zkušenosti. Z věcného hlediska slouží příspěvek jako propagační nástroj pro Akademii věd ČR, využívající institucionální autoritu k ověření významu akce. Tyto prvky společně slouží k řízení reputace instituce a k nasměrování interpretačního pohledu publika k určitému narativu traumatu a nostalgie.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntq2dubzk23" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="date">9. 6. 2026</span>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · míra ovlivňování <b>25%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🌺 Místopředsedkyně vlády České republiky Alena Schillerová minulý pátek navštívila Průhonický park.
+
+🌸 Park je národní kulturní památkou a je spravován Botanickým ústavem Akademie věd ČR. Návštěvou ji provedl předseda Akademie věd ČR Radomí…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální informativní příspěvek</span></div>
+          <p class="summary">The analysis reveals a primary reliance on PR characteristics and authority-based framing, which serve to enhance the institutional prestige of the Academy of Sciences. Rhetorically, the text uses decorative elements and formal honorifics to create a positive narrative frame (Rhetorical Bucket). Factually, the text contains a significant discrepancy by using an outdated executive title for the visitor, which degrades the accuracy of the report in a contemporary context (Factual Bucket).</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="date">8. 6. 2026</span>
+            <span class="scores">rétorika <b>25%</b>
+              · fakta <b>50%</b>
+              · míra ovlivňování <b>5%</b> (zanedbatelná)</span>
+          </div>
+          <p class="excerpt">🖐️Už popáté se veřejnost po celé České republice zapojí do víkendového mapování nepůvodních druhů rostlin a živočichů známého jako Biosmršť.
+
+📅Akce proběhne od 12. do 14. června 2026.
+
+Více @ibotcz.bsky.social: www.avcr.cz/cs/pro-media...…</p>
+          <div class="chips"><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip rhetorical">Sociální důkaz („všichni to vědí“) <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span></div>
+          <p class="summary">Text je primárně informativní, ale využívá rétorické strategie, jako je sociální důkaz a senzace, k maximalizaci zapojení veřejnosti, zejména prostřednictvím energického brandingu akce &#x27;Biosmršť&#x27;. Z faktického hlediska obsah vykazuje charakteristiky PR typické pro institucionální komunikaci, spoléhající na autoritu Akademie věd ČR k zajištění legitimity. Ačkoli rámování &#x27;nepůvodních druhů&#x27; směřuje čtenáře ke specifickému ekologickému narativu, celková manipulace zůstává nízká a konzistentní se standardní veřejnou komunikací ve vědě.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnrcgli7rk2d" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="date">8. 6. 2026</span>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · míra ovlivňování <b>20%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🔗 Propojovat vědu, veřejnou správu i podnikatelskou sféru a přinášet regionům nové poznatky i praktická řešení.
+
+www.avcr.cz/cs/udalosti/Akademie-ved-prinasi-krajum-a-regionum-nove-poznatky-i-prakticka-reseni-00001/…</p>
+          <div class="chips"><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip factual">Skrytá reklama (advertorial) <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span></div>
+          <p class="summary">Text primárně vykazuje charakteristiky institucionální PR a tzv. &quot;advertorial&quot; (reklamní sdělení v novinovém formátu), navržené k posílení reputace Akademie věd. Retoricky využívá pozitivní rámování k zdůraznění užitečnosti a „praktičnosti“ své práce, což čtenáře směřuje k příznivému pohledu na společenskou roli instituce. Z hlediska faktů obsah funguje jako sebepropagační materiál, kterému v samotném příspěvku chybí nezávislé ověření nebo konkrétní datové body.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr6svoo6c2t" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+        </article>
+        <article class="card">
+          <div class="meta">
+            <span class="date">8. 6. 2026</span>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · míra ovlivňování <b>10%</b> (zanedbatelná)</span>
+          </div>
+          <p class="excerpt">🔬 Z Veletrhu vědy rovnou na Colours of Ostrava! 
+
+Veletrh vědy sice právě skončil, ale naše vědecká jízda pokračuje. Už v červenci se na vás těšíme v Ostravě na Meltingpotu!…</p>
+          <div class="chips"><span class="chip factual">Skrytá reklama (advertorial) <b>75%</b></span><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip rhetorical">Nadržování „naší“ skupině <b>25%</b></span><span class="chip factual">Vynechání klíčových informací <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
+          <p class="summary">Komunikace je charakterizována strategiemi institucionálního PR a propagačním rámováním navrženým pro maximalizaci veřejného zapojení. Použitím metafory &#x27;vědecká jízda&#x27; text využívá efekt rámování (Rhetorical Bucket) k prezentaci akademického dosahu jako dynamické volnočasové aktivity. Dále příspěvek vykazuje charakteristiky inzerce a PR (Factual Bucket) tím, že upřednostňuje viditelnost značky a propagaci akcí před šířením konkrétních vědeckých dat.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr2j7s2gk2c" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+        </article>
+
+  <footer>
+    Stránka je záměrně <b>neindexovaná</b> (neobjeví se ve vyhledávačích).
+    Nástroj: Debiasify (debiasify.com). Pilotní spolupráce v rámci programu
+    AV ČR „Umělá inteligence pro vědu a společnost“. Data: veřejné příspěvky
+    z Bluesky. Generováno automaticky agentem <code>debiasify-agent</code>.
+  </footer>
+</div>
+</body>
+</html>
