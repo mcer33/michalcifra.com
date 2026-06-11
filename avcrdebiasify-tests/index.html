@@ -65,29 +65,38 @@
   <div class="note">
     <b>K čemu to je.</b> Toto je <b>technický test</b> propojení s nástrojem Debiasify,
     který v textu hledá <b>rétorické</b> (jak je něco napsáno) a <b>faktické</b>
-    (co a jak je doloženo) znaky ovlivňování. Příspěvky <b>Akademie věd ČR</b> jsme
-    automaticky načetli z účtu na síti Bluesky a poslali k rozboru. U vybraných příspěvků
-    jsme analyzovali i <b>diskuzi pod nimi</b> (reakce čtenářů) — ta je vnořená pod daným
-    příspěvkem. <b>Nejde o hodnocení Akademie věd</b> — jde o ukázku, jak se nástroj chová
-    na reálných, převážně popularizačních a PR textech. Vysoké „PR“ nálezy jsou u oficiální
-    komunikace běžné a neznamenají dezinformaci.
+    (co a jak je doloženo) znaky ovlivňování. Příspěvky jsme automaticky načetli
+    z <b>oficiálního účtu Akademie věd ČR na síti Bluesky</b>
+    (<code>akademievedcr.bsky.social</code>) a poslali k rozboru. Tuto síť používáme proto,
+    že je její obsah <b>přímo strojově přístupný přes veřejné API</b> — na rozdíl od
+    Facebooku, který automatické čtení cizích stránek a komentářů zvenčí neumožňuje.
+    U vybraných příspěvků jsme analyzovali i <b>diskuzi pod nimi</b> (reakce čtenářů) —
+    ta je vnořená pod daným příspěvkem. <b>Nejde o hodnocení Akademie věd</b> — jde o
+    ukázku, jak se nástroj chová na reálných, převážně popularizačních a PR textech.
+    Vysoké „PR“ nálezy jsou u oficiální komunikace běžné a neznamenají dezinformaci.
   </div>
 
   <div class="legend">
-    <b>Jak číst procenta u příspěvků.</b>
+    <b>Jak číst procenta — a co je dobré a co špatné.</b>
+    <p style="margin:8px 0 4px">U všech tří metrik platí stejný směr:
+      <b>0&nbsp;% = nejlepší</b> (věcný, neutrální text bez manipulace),
+      <b>100&nbsp;% = nejproblematičtější</b> (silné ovlivňování).
+      Čím <b>vyšší</b> číslo, tím hůř.</p>
     <ul>
       <li><b>Rétorika</b> (0–100&nbsp;%) — <i>jak</i> je text napsán: emoce, naléhavost,
-        útoky na osobu, efektní rámování. Číslo je <b>míra jistoty</b>, že je přítomen
-        nejsilnější rétorický znak — ne podíl „zaujatého“ textu.</li>
+        útoky na osobu, efektní rámování. <b>0&nbsp;%</b> = žádný rétorický trik (dobré),
+        <b>100&nbsp;%</b> = jednoznačný silný rétorický nátlak (špatné). Číslo je
+        <b>míra jistoty</b> u nejsilnějšího nálezu, ne podíl „zaujatého“ textu.</li>
       <li><b>Fakta</b> (0–100&nbsp;%) — <i>co a jak</i> je doloženo: chybějící informace,
-        vágní nebo chybějící zdroje, nepodložená tvrzení, skrytá reklama. Opět jistota
-        u nejsilnějšího faktického znaku.</li>
+        vágní nebo chybějící zdroje, nepodložená tvrzení, skrytá reklama. <b>0&nbsp;%</b> =
+        nic podstatného nechybí (dobré), <b>100&nbsp;%</b> = vážné faktické vady či
+        zamlčování (špatné).</li>
       <li>Obě hodnoty jsou <b>stupňované</b>: 0&nbsp;% nic · 25&nbsp;% slabý náznak ·
         50&nbsp;% střední · 75&nbsp;% silný · 100&nbsp;% jednoznačný nález.</li>
       <li><b>Míra ovlivňování</b> (0–100&nbsp;%) — souhrnně, nakolik použité techniky
-        <b>snižují informační hodnotu</b> textu (0&nbsp;= věcné a informativní,
-        100&nbsp;= převažuje manipulace). Slovní stupně: zanedbatelná → nízká → střední →
-        vyšší → vysoká.</li>
+        <b>snižují informační hodnotu</b> textu. <b>0&nbsp;%</b> = čistě věcné a informativní
+        (nejlepší), <b>100&nbsp;%</b> = převažuje manipulace nad obsahem (nejhorší).
+        Slovní stupně: zanedbatelná → nízká → střední → vyšší → vysoká.</li>
     </ul>
   </div>
 
@@ -150,7 +159,7 @@ open.spotify.com/episode/6VeR...
 
 🌸 Park je národní kulturní památkou a je spravován Botanickým ústavem Akademie věd ČR. Návštěvou ji provedl předseda Akademie věd ČR Radomír Pánek.…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The analysis reveals a primary reliance on PR characteristics and authority-based framing, which serve to enhance the institutional prestige of the Academy of Sciences. Rhetorically, the text uses decorative elements and formal honorifics to create a positive narrative frame (Rhetorical Bucket). Factually, the text contains a significant discrepancy by using an outdated executive title for the visitor, which degrades the accuracy of the report in a contemporary context (Factual Bucket).</p>
+          <p class="summary">Analýza odhaluje primární spoléhání se na PR prvky a rámování založené na autoritě, které slouží k posílení institucionální prestiže Akademie věd. Rétoricky text využívá dekorativní prvky a formální honorifika k vytvoření pozitivního narativního rámce (Rétorický kbelík). Fakticky text obsahuje významný nesoulad, protože používá zastaralý výkonný titul pro návštěvníka, což v současném kontextu snižuje přesnost zprávy (Faktický kbelík).</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
           <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26</a></div>
         </article></div><div class="group">
@@ -227,7 +236,7 @@ Více: www.avcr.cz/cs/pro-media...…</p>
 
 No uvidíme.  @vitex.f.…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The text exhibits a strong Framing Effect and Sensationalism in the Rhetorical bucket, characterizing a complex engineering project as a continuous scientific spectacle through hyperbolic language. In the Factual bucket, it suffers from the Omission of Key Information regarding the logistical and safety constraints of active construction sites, alongside Unsupported Claims about the frequency of potential fossil finds. These elements combine to create a highly optimistic, speculative narrative that prioritizes scientific enthusiasm over technical and operational reality.</p>
+          <p class="summary">Text vykazuje silný rámovací efekt a senzacechtivost v rétorické rovině, když charakterizuje složitý inženýrský projekt jako nepřetržitou vědeckou podívanou pomocí hyperbolického jazyka. Ve faktické rovině trpí opomenutím klíčových informací ohledně logistických a bezpečnostních omezení aktivních stavenišť, spolu s nepodloženými tvrzeními o četnosti potenciálních nálezů fosilií. Tyto prvky se kombinují a vytvářejí vysoce optimistický, spekulativní narativ, který upřednostňuje vědecké nadšení před technickou a provozní realitou.</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
           
         </article>
@@ -275,7 +284,7 @@ No uvidíme.…</p>
 🆓 Snímky můžete zdarma využít pro výuku, popularizaci i komunikaci o vědě.
 🔗 fotobanka.avcr.cz…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The analysis reveals that the text primarily functions as a promotional tool (Advertorial/PR) for the Czech Academy of Sciences, utilizing its institutional authority to drive engagement with its resources. Rhetorically, it employs a framing effect by suggesting that a curated collection of professional photos is synonymous with the reality of &#x27;Czech science.&#x27; While the information provided is factually grounded in the institution&#x27;s offerings, the presentation is designed to enhance organizational prestige rather than provide a neutral analysis of the scientific field.</p>
+          <p class="summary">Analýza odhaluje, že text primárně funguje jako propagační nástroj (advertorial/PR) pro Akademii věd České republiky, přičemž využívá svou institucionální autoritu k podpoře zájmu o své zdroje. Rétoricky využívá efekt rámování tím, že naznačuje, že kurátorský výběr profesionálních fotografií je synonymem pro realitu „české vědy“. Ačkoli jsou poskytnuté informace fakticky založeny na nabídce instituce, prezentace je navržena tak, aby posílila prestiž organizace, spíše než aby poskytla neutrální analýzu vědeckého oboru.</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
           <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w</a></div>
         </article><div class="thread">
@@ -346,7 +355,7 @@ S pozdravem,
 Štěpán Sekanina, home researcher, Omice
 P.S. Přiložena tabulka srovnání GEP s konkurenčními teori…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The text primarily relies on rhetorical framing and factual vagueness to elevate a fringe perspective to the level of institutional science. In the Rhetorical bucket, the author uses formal academic language and false equivalence to suggest that their &#x27;home research&#x27; is a peer-level competitor to established scientific paradigms. In the Factual bucket, the systematic omission of context regarding the &#x27;GEP&#x27; theory and the use of vague, unverifiable sourcing prevent any objective assessment of the claims being made.</p>
+          <p class="summary">Text se primárně opírá o rétorické rámování a faktickou vágnost, aby povýšil okrajovou perspektivu na úroveň institucionální vědy. V rétorické rovině autor používá formální akademický jazyk a falešnou ekvivalenci, aby naznačil, že jeho „domácí výzkum“ je rovnocenným konkurentem zavedených vědeckých paradigmat. Ve faktické rovině systematické opomíjení kontextu ohledně teorie „GEP“ a používání vágních, neověřitelných zdrojů znemožňují jakékoli objektivní posouzení předkládaných tvrzení.</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
           
         </article>
@@ -379,7 +388,7 @@ P.S. Přiložena tabulka srovnání GEP s konkurenčními teoriemi.&quot;…</p>
 
 Více: www.avcr.cz/cs/pro-media...…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The text exhibits minimal rhetorical manipulation, maintaining a dry and objective tone; however, it utilizes a naturalistic Framing Effect through the use of emojis and neutral terminology. From a factual perspective, the post is characterized by the Omission of Key Information and PR Characteristics, as it functions primarily to drive traffic to an institutional portal rather than providing a standalone scientific analysis. These elements reflect a communication strategy focused on institutional authority and engagement rather than comprehensive evidence delivery.</p>
+          <p class="summary">Text vykazuje minimální rétorickou manipulaci, zachovává suchý a objektivní tón; využívá však naturalistický rámovací efekt prostřednictvím emotikonů a neutrální terminologie. Z faktického hlediska se příspěvek vyznačuje opomenutím klíčových informací a PR charakteristikami, neboť slouží především k přesměrování návštěvnosti na institucionální portál, nikoli k poskytnutí samostatné vědecké analýzy. Tyto prvky odrážejí komunikační strategii zaměřenou spíše na institucionální autoritu a zapojení publika než na komplexní předkládání důkazů.</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
           <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22</a></div>
         </article><div class="thread">
@@ -405,7 +414,7 @@ Více: www.avcr.cz/cs/pro-media...…</p>
           </div>
           <p class="excerpt">Autor odkazovaného článku v Nature Radim Hédl přispívá - spolu s dalšími autory -  popularizačními texty k tématu do časopisu Jeseníky - Rychlebské hory vydávaného 2x ročně z.s. Erebia z Lipové Lázní ve spolupráci AOPK a CHKO Jeseníky. Viz čísla 4/2019, 9/2022, 13/2025.⬇️…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The text primarily relies on rhetorical framing and factual appeals to authority to establish the credibility of the author and his associated publications. By emphasizing high-prestige affiliations such as the journal Nature and state conservation agencies, it creates a halo effect that discourages critical scrutiny of the actual content. The structure is characteristic of PR messaging, focusing on institutional legitimacy rather than substantive evidence or balanced discussion.</p>
+          <p class="summary">Text se primárně opírá o rétorické rámování a faktické odkazy na autority, aby ustanovil důvěryhodnost autora a jeho přidružených publikací. Zdůrazňováním vysoce prestižních afilací, jako je časopis Nature a státní ochranářské agentury, vytváří efekt svatozáře, který odrazuje od kritického zkoumání samotného obsahu. Struktura je charakteristická pro PR sdělení, zaměřuje se na institucionální legitimitu spíše než na věcné důkazy nebo vyváženou diskusi.</p>
           <a class="src" href="https://bsky.app/profile/canis55lupus.bsky.social/post/3mhqghrjgok2j" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
           
         </article>
@@ -448,7 +457,7 @@ Více: www.avcr.cz/cs/pro-media...…</p>
           </div>
           <p class="excerpt">@mkyral.mastodonczech.cz.ap.brid.gy: @akademievedcr.bsky.social Je to sice umělé, ale pořád to není inteligentní. Jen to vykrádá práci jiných a k tomu si přidává vlastní halucinace 🤷‍♂️  @klosko.net: A ty halucinace pak někdo publikuje,  AI to vykrade a následně se z toho učí ...…</p>
           <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">The discourse is heavily dominated by the Rhetorical Bucket, utilizing sensationalist metaphors and slippery slope arguments to frame AI as an existential threat. From a Factual Bucket perspective, the claims suffer from significant omissions of technical context regarding model training and the legal nuances of data ingestion. This combination shifts the focus from a technical or legal critique to an emotional appeal based on fear and moral outrage, characterizing the technology as inherently parasitic.</p>
+          <p class="summary">Diskurz je silně ovládán rétorickou složkou, která využívá senzačních metafor a argumentů kluzkého svahu, aby umělou inteligenci vykreslila jako existenční hrozbu. Z hlediska faktické složky trpí tvrzení značnými opomenutími technického kontextu týkajícího se trénování modelů a právních nuancí zpracování dat. Tato kombinace odvádí pozornost od technické či právní kritiky k emocionálnímu apelu založenému na strachu a morálním rozhořčení, čímž technologii charakterizuje jako inherentně parazitickou.</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
           
         </article>
