@@ -70,8 +70,10 @@
     (<code>akademievedcr.bsky.social</code>) a poslali k rozboru. Tuto síť používáme proto,
     že je její obsah <b>přímo strojově přístupný přes veřejné API</b> — na rozdíl od
     Facebooku, který automatické čtení cizích stránek a komentářů zvenčí neumožňuje.
-    U vybraných příspěvků jsme analyzovali i <b>diskuzi pod nimi</b> (reakce čtenářů) —
-    ta je vnořená pod daným příspěvkem. <b>Nejde o hodnocení Akademie věd</b> — jde o
+    U příspěvků jsme analyzovali i <b>reakce čtenářů</b> pod nimi — pouze ty <b>delší
+    než 100&nbsp;znaků</b>, které nástroj dokáže vyhodnotit (kratší komentáře Debiasify
+    analyzovat neumí). Reakce jsou vnořené pod daným příspěvkem. <b>Nejde o hodnocení
+    Akademie věd</b> — jde o
     ukázku, jak se nástroj chová na reálných, převážně popularizačních a PR textech.
     Vysoké „PR“ nálezy jsou u oficiální komunikace běžné a neznamenají dezinformaci.
   </div>
@@ -104,12 +106,12 @@
     <div class="kpi"><b>12</b><span>analyzovaných příspěvků</span></div>
     <div class="kpi"><b>17%</b>
       <span>průměrná míra ovlivňování (nízká)</span></div>
-    <div class="kpi"><b>15</b><span>analyzovaných reakcí / diskuzí</span></div>
-    <div class="kpi"><b>102</b><span>jednotlivých nálezů celkem</span></div>
+    <div class="kpi"><b>9</b><span>analyzovaných reakcí (komentářů)</span></div>
+    <div class="kpi"><b>87</b><span>jednotlivých nálezů celkem</span></div>
   </div>
 
   <h2>Nejčastější nálezy</h2>
-  <ul class="top"><li>Efekt rámování (způsob podání) <span class='ct'>(15×)</span></li><li>Apel na emoce <span class='ct'>(11×)</span></li><li>Senzacechtivost <span class='ct'>(10×)</span></li><li>Vynechání klíčových informací <span class='ct'>(9×)</span></li><li>Odvolávání se na autoritu <span class='ct'>(9×)</span></li><li>Znaky PR / propagace <span class='ct'>(9×)</span></li></ul>
+  <ul class="top"><li>Efekt rámování (způsob podání) <span class='ct'>(13×)</span></li><li>Senzacechtivost <span class='ct'>(10×)</span></li><li>Apel na emoce <span class='ct'>(9×)</span></li><li>Znaky PR / propagace <span class='ct'>(9×)</span></li><li>Odvolávání se na autoritu <span class='ct'>(8×)</span></li><li>Vynechání klíčových informací <span class='ct'>(7×)</span></li></ul>
 
   <h2>Jednotlivé příspěvky</h2>
   <div class="group">
@@ -227,21 +229,6 @@ Více: www.avcr.cz/cs/pro-media...…</p>
         </article><div class="thread">
         <article class="card child">
           <div class="meta">
-            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 2 reakcí</span>
-            <span class="scores">rétorika <b>0%</b>
-              · fakta <b>0%</b>
-              · ovlivňování <b>45%</b> (střední)</span>
-          </div>
-          <p class="excerpt">@vitex.f.cz.ap.brid.gy: @akademievedcr.bsky.social A to počkejte až se bude razit tunel do Berouna, tam by mohli stát kolem pásu všichni paleontologové, nadšenci i profesionálové a po dobu několika let pozorně tahat z tun horniny jeden objev za druhym ....
-
-No uvidíme.  @vitex.f.…</p>
-          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">Text vykazuje silný rámovací efekt a senzacechtivost v rétorické rovině, když charakterizuje složitý inženýrský projekt jako nepřetržitou vědeckou podívanou pomocí hyperbolického jazyka. Ve faktické rovině trpí opomenutím klíčových informací ohledně logistických a bezpečnostních omezení aktivních stavenišť, spolu s nepodloženými tvrzeními o četnosti potenciálních nálezů fosilií. Tyto prvky se kombinují a vytvářejí vysoce optimistický, spekulativní narativ, který upřednostňuje vědecké nadšení před technickou a provozní realitou.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
-          
-        </article>
-        <article class="card child">
-          <div class="meta">
             <span class="kindtag kind-reply">↳ Reakce · @vitex.f.cz.ap.brid.gy</span>
             <span class="scores">rétorika <b>25%</b>
               · fakta <b>25%</b>
@@ -290,24 +277,6 @@ No uvidíme.…</p>
         </article><div class="thread">
         <article class="card child">
           <div class="meta">
-            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 1 reakcí</span>
-            <span class="scores">rétorika <b>75%</b>
-              · fakta <b>75%</b>
-              · ovlivňování <b>65%</b> (vyšší)</span>
-          </div>
-          <p class="excerpt">@chyrencz.bsky.social: &quot;Vážená Akademie věd České republiky,
-dovoluji si navrhnout nápis nad hlavní vchod vaší instituce:
-&#x27;Pravda vítězí, ale běda pokud sama nad sebou.&#x27;
-S pozdravem,
-Štěpán Sekanina, home researcher, Omice
-P.S. Přiložena tabulka srovnání GEP s konkurenčními teori…</p>
-          <div class="chips"><span class="chip rhetorical">Efekt rámování (způsob podání) <b>75%</b></span><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip factual">Nepodložená tvrzení <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip factual">Odvolávání se na autoritu <b>50%</b></span></div>
-          <p class="summary">Text primárně využívá &#x27;Rhetorical Bucket&#x27; prostřednictvím sofistikovaného framingového efektu, který podvrací kulturně významné motto k zpochybnění objektivity Akademie. V rámci &#x27;Factual Bucket&#x27; autor uplatňuje autoritářskou předpojatost tím, že přijímá pseudo-akademický titul &#x27;domácí badatel&#x27; a prezentuje nepodložené nároky tím, že okrajovou teorii &#x27;GEP&#x27; staví jako legitimního vědeckého konkurenta. Tyto taktiky společně směřují k degradaci vnímané epistemické vzdálenosti mezi rigorózní institucionální vědou a neověřenými osobními spekulacemi.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
-          
-        </article>
-        <article class="card child">
-          <div class="meta">
             <span class="kindtag kind-reply">↳ Reakce · @chyrencz.bsky.social</span>
             <span class="scores">rétorika <b>75%</b>
               · fakta <b>75%</b>
@@ -343,24 +312,6 @@ P.S. Přiložena tabulka srovnání GEP s konkurenčními teoriemi.&quot;…</p>
         </article><div class="thread">
         <article class="card child">
           <div class="meta">
-            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 1 reakcí</span>
-            <span class="scores">rétorika <b>0%</b>
-              · fakta <b>0%</b>
-              · ovlivňování <b>65%</b> (vyšší)</span>
-          </div>
-          <p class="excerpt">@chyrencz.bsky.social: &quot;Vážená Akademie věd České republiky,
-dovoluji si navrhnout nápis nad hlavní vchod vaší instituce:
-&#x27;Pravda vítězí, ale běda pokud sama nad sebou.&#x27;
-S pozdravem,
-Štěpán Sekanina, home researcher, Omice
-P.S. Přiložena tabulka srovnání GEP s konkurenčními teori…</p>
-          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">Text se primárně opírá o rétorické rámování a faktickou vágnost, aby povýšil okrajovou perspektivu na úroveň institucionální vědy. V rétorické rovině autor používá formální akademický jazyk a falešnou ekvivalenci, aby naznačil, že jeho „domácí výzkum“ je rovnocenným konkurentem zavedených vědeckých paradigmat. Ve faktické rovině systematické opomíjení kontextu ohledně teorie „GEP“ a používání vágních, neověřitelných zdrojů znemožňují jakékoli objektivní posouzení předkládaných tvrzení.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
-          
-        </article>
-        <article class="card child">
-          <div class="meta">
             <span class="kindtag kind-reply">↳ Reakce · @chyrencz.bsky.social</span>
             <span class="scores">rétorika <b>75%</b>
               · fakta <b>0%</b>
@@ -392,19 +343,6 @@ Více: www.avcr.cz/cs/pro-media...…</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
           <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22</a></div>
         </article><div class="thread">
-        <article class="card child">
-          <div class="meta">
-            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 2 reakcí</span>
-            <span class="scores">rétorika <b>75%</b>
-              · fakta <b>0%</b>
-              · ovlivňování <b>35%</b> (střední)</span>
-          </div>
-          <p class="excerpt">@canis55lupus.bsky.social: Autor odkazovaného článku v Nature Radim Hédl přispívá - spolu s dalšími autory -  popularizačními texty k tématu do časopisu Jeseníky - Rychlebské hory vydávaného 2x ročně z.s. Erebia z Lipové Lázní ve spolupráci AOPK a CHKO Jeseníky. Viz čísla 4/2019,…</p>
-          <div class="chips"><span class="chip rhetorical">Útok na osobu (ad hominem) <b>75%</b></span><span class="chip rhetorical">Tu Quoque (Appeal to Hypocrisy) <b>75%</b></span><span class="chip rhetorical">Straw Man <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span></div>
-          <p class="summary">Text primárně využívá autoritu (Authority Bias) tím, že zneužívá prestiže časopisu Nature k ověření lokální publikace, spolu s reklamními prvky (Advertorial), které upřednostňují konverzi prodeje prostřednictvím přímého stanovení cen a odkazů. V rétorické rovině obsah využívá efekt rámování (Framing Effect) popisem ceny jako &#x27;směšné&#x27; k zdůraznění výhodné koupě a vytváří jemný pocit uměle vytvořené naléhavosti (Manufactured Urgency) ohledně dostupnosti zásob. Tyto techniky společně posouvají příspěvek od neutrální informační aktualizace k přesvědčivé marketingové komunikaci.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
-          
-        </article>
         <article class="card child">
           <div class="meta">
             <span class="kindtag kind-reply">↳ Reakce · @canis55lupus.bsky.social</span>
@@ -450,19 +388,6 @@ Více: www.avcr.cz/cs/pro-media...…</p>
         </article><div class="thread">
         <article class="card child">
           <div class="meta">
-            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 2 reakcí</span>
-            <span class="scores">rétorika <b>0%</b>
-              · fakta <b>0%</b>
-              · ovlivňování <b>85%</b> (vysoká)</span>
-          </div>
-          <p class="excerpt">@mkyral.mastodonczech.cz.ap.brid.gy: @akademievedcr.bsky.social Je to sice umělé, ale pořád to není inteligentní. Jen to vykrádá práci jiných a k tomu si přidává vlastní halucinace 🤷‍♂️  @klosko.net: A ty halucinace pak někdo publikuje,  AI to vykrade a následně se z toho učí ...…</p>
-          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
-          <p class="summary">Diskurz je silně ovládán rétorickou složkou, která využívá senzačních metafor a argumentů kluzkého svahu, aby umělou inteligenci vykreslila jako existenční hrozbu. Z hlediska faktické složky trpí tvrzení značnými opomenutími technického kontextu týkajícího se trénování modelů a právních nuancí zpracování dat. Tato kombinace odvádí pozornost od technické či právní kritiky k emocionálnímu apelu založenému na strachu a morálním rozhořčení, čímž technologii charakterizuje jako inherentně parazitickou.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
-          
-        </article>
-        <article class="card child">
-          <div class="meta">
             <span class="kindtag kind-reply">↳ Reakce · @mkyral.mastodonczech.cz.ap.brid.gy</span>
             <span class="scores">rétorika <b>75%</b>
               · fakta <b>0%</b>
@@ -502,19 +427,6 @@ www.avcr.cz/cs/pro-media...…</p>
           <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
           <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l</a></div>
         </article><div class="thread">
-        <article class="card child">
-          <div class="meta">
-            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 1 reakcí</span>
-            <span class="scores">rétorika <b>50%</b>
-              · fakta <b>75%</b>
-              · ovlivňování <b>35%</b> (střední)</span>
-          </div>
-          <p class="excerpt">@lingvojazyce.bsky.social: Hltám tu zprávu, a byť naší dceři už to nepomůže, hned mě napadá, jestli by v takovém případě nebylo možné provádět nějaký specificky zaměřený screening. Nedá se třeba míň aktivní imunitní odpovědi zjišťovat snáz než příliš aktivní imunitní systém? Dal …</p>
-          <div class="chips"><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip rhetorical">Apel na emoce <b>50%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip rhetorical">Availability &amp; Salience <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Nepodložená tvrzení <b>25%</b></span></div>
-          <p class="summary">Analýza odhaluje významné spoléhání na rétorické prvky, jako je emocionální rámování a zřetelnost osobní zkušenosti, které ukotvují vědecký dotaz v subjektivním kontextu. Z faktického hlediska je text ztížen vágním uváděním zdrojů a opomenutím podrobností původní zprávy, což vede ke spekulativním otázkám, které mohou nesprávně interpretovat autoimunitní patologii. Tyto prvky kolektivně posouvají zaměření z objektivní vědecké analýzy na vyprávění řízené osobní relevancí a zjednodušenými lékařskými metaforami.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
-          
-        </article>
         <article class="card child">
           <div class="meta">
             <span class="kindtag kind-reply">↳ Reakce · @lingvojazyce.bsky.social</span>
