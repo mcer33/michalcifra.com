@@ -17,7 +17,11 @@
   h1 { font-size:26px; margin:0 0 6px; }
   .lead { color:var(--mut); margin:0 0 24px; }
   .note { background:#1c2530; border:1px solid var(--line); border-left:3px solid var(--fact);
-           border-radius:8px; padding:14px 16px; margin:0 0 28px; font-size:14.5px; color:#cdd6e0; }
+           border-radius:8px; padding:14px 16px; margin:0 0 16px; font-size:14.5px; color:#cdd6e0; }
+  .legend { background:#141a21; border:1px solid var(--line); border-left:3px solid var(--rhet);
+             border-radius:8px; padding:12px 16px 12px; margin:0 0 28px; font-size:14px; color:#cdd6e0; }
+  .legend ul { margin:8px 0 0; padding-left:18px; }
+  .legend li { margin:4px 0; }
   .kpis { display:flex; flex-wrap:wrap; gap:14px; margin:0 0 28px; }
   .kpi { background:var(--card); border:1px solid var(--line); border-radius:10px;
           padding:14px 18px; flex:1; min-width:150px; }
@@ -30,7 +34,11 @@
            padding:16px 18px; margin:0 0 16px; }
   .card .meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
                  font-size:13px; color:var(--mut); margin-bottom:8px; }
-  .card .date { font-weight:600; color:var(--fg); }
+  .card .date { font-weight:600; color:var(--fact); text-decoration:none; }
+  .card .date:hover { text-decoration:underline; }
+  .rawlink { margin-top:6px; font-size:12px; word-break:break-all; }
+  .rawlink a { color:var(--mut); text-decoration:none; }
+  .rawlink a:hover { color:var(--fact); }
   .excerpt { margin:6px 0 12px; }
   .chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px; }
   .chip { font-size:12.5px; padding:3px 9px; border-radius:20px; background:#202833;
@@ -39,6 +47,12 @@
   .chip.none { border-color:var(--none); color:#9fd4af; }
   .summary { font-size:14.5px; color:#cdd6e0; margin:4px 0 12px; }
   .src { font-size:13px; color:var(--fact); text-decoration:none; }
+  .group { margin:0 0 18px; }
+  .thread { margin:2px 0 0 18px; padding-left:16px; border-left:2px solid var(--line); }
+  .card.child { background:#141a21; margin-top:10px; }
+  .kindtag { font-weight:600; }
+  .kindtag.kind-disc { color:#c79be0; }
+  .kindtag.kind-reply { color:#7fb6a0; }
   footer { color:var(--mut); font-size:13px; margin-top:36px; border-top:1px solid var(--line);
             padding-top:16px; }
 </style>
@@ -52,75 +66,100 @@
     <b>K čemu to je.</b> Toto je <b>technický test</b> propojení s nástrojem Debiasify,
     který v textu hledá <b>rétorické</b> (jak je něco napsáno) a <b>faktické</b>
     (co a jak je doloženo) znaky ovlivňování. Příspěvky <b>Akademie věd ČR</b> jsme
-    automaticky načetli z účtu na síti Bluesky a poslali k rozboru. <b>Nejde o hodnocení
-    Akademie věd</b> — jde o ukázku, jak se nástroj chová na reálných, převážně
-    popularizačních a PR textech. Vysoké „PR“ nálezy jsou u oficiální komunikace běžné a
-    neznamenají dezinformaci.
+    automaticky načetli z účtu na síti Bluesky a poslali k rozboru. U vybraných příspěvků
+    jsme analyzovali i <b>diskuzi pod nimi</b> (reakce čtenářů) — ta je vnořená pod daným
+    příspěvkem. <b>Nejde o hodnocení Akademie věd</b> — jde o ukázku, jak se nástroj chová
+    na reálných, převážně popularizačních a PR textech. Vysoké „PR“ nálezy jsou u oficiální
+    komunikace běžné a neznamenají dezinformaci.
+  </div>
+
+  <div class="legend">
+    <b>Jak číst procenta u příspěvků.</b>
+    <ul>
+      <li><b>Rétorika</b> (0–100&nbsp;%) — <i>jak</i> je text napsán: emoce, naléhavost,
+        útoky na osobu, efektní rámování. Číslo je <b>míra jistoty</b>, že je přítomen
+        nejsilnější rétorický znak — ne podíl „zaujatého“ textu.</li>
+      <li><b>Fakta</b> (0–100&nbsp;%) — <i>co a jak</i> je doloženo: chybějící informace,
+        vágní nebo chybějící zdroje, nepodložená tvrzení, skrytá reklama. Opět jistota
+        u nejsilnějšího faktického znaku.</li>
+      <li>Obě hodnoty jsou <b>stupňované</b>: 0&nbsp;% nic · 25&nbsp;% slabý náznak ·
+        50&nbsp;% střední · 75&nbsp;% silný · 100&nbsp;% jednoznačný nález.</li>
+      <li><b>Míra ovlivňování</b> (0–100&nbsp;%) — souhrnně, nakolik použité techniky
+        <b>snižují informační hodnotu</b> textu (0&nbsp;= věcné a informativní,
+        100&nbsp;= převažuje manipulace). Slovní stupně: zanedbatelná → nízká → střední →
+        vyšší → vysoká.</li>
+    </ul>
   </div>
 
   <div class="kpis">
-    <div class="kpi"><b>6</b><span>analyzovaných příspěvků</span></div>
-    <div class="kpi"><b>15%</b>
+    <div class="kpi"><b>12</b><span>analyzovaných příspěvků</span></div>
+    <div class="kpi"><b>17%</b>
       <span>průměrná míra ovlivňování (nízká)</span></div>
-    <div class="kpi"><b>27</b><span>jednotlivých nálezů celkem</span></div>
+    <div class="kpi"><b>15</b><span>analyzovaných reakcí / diskuzí</span></div>
+    <div class="kpi"><b>102</b><span>jednotlivých nálezů celkem</span></div>
   </div>
 
   <h2>Nejčastější nálezy</h2>
-  <ul class="top"><li>Efekt rámování (způsob podání) <span class='ct'>(5×)</span></li><li>Znaky PR / propagace <span class='ct'>(5×)</span></li><li>Odvolávání se na autoritu <span class='ct'>(4×)</span></li><li>Skrytá reklama (advertorial) <span class='ct'>(4×)</span></li><li>Apel na emoce <span class='ct'>(3×)</span></li><li>Senzacechtivost <span class='ct'>(3×)</span></li></ul>
+  <ul class="top"><li>Efekt rámování (způsob podání) <span class='ct'>(15×)</span></li><li>Apel na emoce <span class='ct'>(11×)</span></li><li>Senzacechtivost <span class='ct'>(10×)</span></li><li>Vynechání klíčových informací <span class='ct'>(9×)</span></li><li>Odvolávání se na autoritu <span class='ct'>(9×)</span></li><li>Znaky PR / propagace <span class='ct'>(9×)</span></li></ul>
 
   <h2>Jednotlivé příspěvky</h2>
-  
+  <div class="group">
         <article class="card">
           <div class="meta">
-            <span class="date">9. 6. 2026</span>
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnu3kdq76s2c" rel="nofollow noopener" target="_blank">9. 6. 2026</a>
             <span class="scores">rétorika <b>25%</b>
               · fakta <b>75%</b>
-              · míra ovlivňování <b>15%</b> (nízká)</span>
+              · ovlivňování <b>15%</b> (nízká)</span>
           </div>
           <p class="excerpt">🔴 LIVE: Byl jsem dinosauří dítě, ale získaly si mě želvy, ohlíží se paleontolog Milan Chroust
 
 🎧 Poslechněte si #podcast_avcr 
 open.spotify.com/episode/6VeR...
 
-📱 Všechny díly Podcastu Akademie věd si poslechněte na Spotify, Apple Podcasts,…</p>
+📱 Všechny díly Podcastu Akademie věd si poslechněte na Spotify, Apple Podcasts, YouTube Music a na dalších podcastových…</p>
           <div class="chips"><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip factual">Skrytá reklama (advertorial) <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
           <p class="summary">Text je primárně charakterizován institucionální public relations a inzerentními strukturami, využívá značky autority a mírnou senzacechtivost k podpoře zapojení publika. Rétoricky využívá emocionální háčky prostřednictvím osobního vyprávění a retrospektivního rámování k humanizaci vědeckého diskurzu a budování vztahu. Faktuální objektivita je druhořadá oproti propagačnímu cíli, protože příspěvek funguje jako výzva k akci pro proprietární mediální výstupy organizace, spíše než jako neutrální shrnutí vědeckých zjištění.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnu3kdq76s2c" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
-        </article>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnu3kdq76s2c" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnu3kdq76s2c" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mnu3kdq76s2c</a></div>
+        </article></div><div class="group">
         <article class="card">
           <div class="meta">
-            <span class="date">9. 6. 2026</span>
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntq2dubzk23" rel="nofollow noopener" target="_blank">9. 6. 2026</a>
             <span class="scores">rétorika <b>25%</b>
               · fakta <b>50%</b>
-              · míra ovlivňování <b>15%</b> (nízká)</span>
+              · ovlivňování <b>15%</b> (nízká)</span>
           </div>
           <p class="excerpt">🖼️Výstava &quot;Mezi traumatem a nostalgií&quot;
 
-📅Od 15. června do 15. září 2026 bude v chodbách Klementina možné shlédnout výstavu „Mezi traumatem a nostalgií. Příběhy bulharského literárního exilu (1944–1989)“, jejímž autorem je Jakub Mikulecký ze…</p>
+📅Od 15. června do 15. září 2026 bude v chodbách Klementina možné shlédnout výstavu „Mezi traumatem a nostalgií. Příběhy bulharského literárního exilu (1944–1989)“, jejímž autorem je Jakub Mikulecký ze Slovanského ústavu AV ČR.
+
+#Strategie_A…</p>
           <div class="chips"><span class="chip factual">Skrytá reklama (advertorial) <b>50%</b></span><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span></div>
           <p class="summary">Text vykazuje mírné rétorické rámování použitím emocionálně evokujících termínů v názvu výstavy, které předem kategorizuje historické zkušenosti. Z věcného hlediska slouží příspěvek jako propagační nástroj pro Akademii věd ČR, využívající institucionální autoritu k ověření významu akce. Tyto prvky společně slouží k řízení reputace instituce a k nasměrování interpretačního pohledu publika k určitému narativu traumatu a nostalgie.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntq2dubzk23" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
-        </article>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntq2dubzk23" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntq2dubzk23" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mntq2dubzk23</a></div>
+        </article></div><div class="group">
         <article class="card">
           <div class="meta">
-            <span class="date">9. 6. 2026</span>
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">9. 6. 2026</a>
             <span class="scores">rétorika <b>0%</b>
               · fakta <b>0%</b>
-              · míra ovlivňování <b>25%</b> (nízká)</span>
+              · ovlivňování <b>25%</b> (nízká)</span>
           </div>
           <p class="excerpt">🌺 Místopředsedkyně vlády České republiky Alena Schillerová minulý pátek navštívila Průhonický park.
 
-🌸 Park je národní kulturní památkou a je spravován Botanickým ústavem Akademie věd ČR. Návštěvou ji provedl předseda Akademie věd ČR Radomí…</p>
-          <div class="chips"><span class="chip none">Bez nálezů — neutrální informativní příspěvek</span></div>
+🌸 Park je národní kulturní památkou a je spravován Botanickým ústavem Akademie věd ČR. Návštěvou ji provedl předseda Akademie věd ČR Radomír Pánek.…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
           <p class="summary">The analysis reveals a primary reliance on PR characteristics and authority-based framing, which serve to enhance the institutional prestige of the Academy of Sciences. Rhetorically, the text uses decorative elements and formal honorifics to create a positive narrative frame (Rhetorical Bucket). Factually, the text contains a significant discrepancy by using an outdated executive title for the visitor, which degrades the accuracy of the report in a contemporary context (Factual Bucket).</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
-        </article>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mntlw2olmc26</a></div>
+        </article></div><div class="group">
         <article class="card">
           <div class="meta">
-            <span class="date">8. 6. 2026</span>
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnrcgli7rk2d" rel="nofollow noopener" target="_blank">8. 6. 2026</a>
             <span class="scores">rétorika <b>25%</b>
               · fakta <b>50%</b>
-              · míra ovlivňování <b>5%</b> (zanedbatelná)</span>
+              · ovlivňování <b>5%</b> (zanedbatelná)</span>
           </div>
           <p class="excerpt">🖐️Už popáté se veřejnost po celé České republice zapojí do víkendového mapování nepůvodních druhů rostlin a živočichů známého jako Biosmršť.
 
@@ -129,36 +168,357 @@ open.spotify.com/episode/6VeR...
 Více @ibotcz.bsky.social: www.avcr.cz/cs/pro-media...…</p>
           <div class="chips"><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip rhetorical">Sociální důkaz („všichni to vědí“) <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span></div>
           <p class="summary">Text je primárně informativní, ale využívá rétorické strategie, jako je sociální důkaz a senzace, k maximalizaci zapojení veřejnosti, zejména prostřednictvím energického brandingu akce &#x27;Biosmršť&#x27;. Z faktického hlediska obsah vykazuje charakteristiky PR typické pro institucionální komunikaci, spoléhající na autoritu Akademie věd ČR k zajištění legitimity. Ačkoli rámování &#x27;nepůvodních druhů&#x27; směřuje čtenáře ke specifickému ekologickému narativu, celková manipulace zůstává nízká a konzistentní se standardní veřejnou komunikací ve vědě.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnrcgli7rk2d" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
-        </article>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnrcgli7rk2d" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnrcgli7rk2d" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mnrcgli7rk2d</a></div>
+        </article></div><div class="group">
         <article class="card">
           <div class="meta">
-            <span class="date">8. 6. 2026</span>
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr6svoo6c2t" rel="nofollow noopener" target="_blank">8. 6. 2026</a>
             <span class="scores">rétorika <b>50%</b>
               · fakta <b>75%</b>
-              · míra ovlivňování <b>20%</b> (nízká)</span>
+              · ovlivňování <b>20%</b> (nízká)</span>
           </div>
           <p class="excerpt">🔗 Propojovat vědu, veřejnou správu i podnikatelskou sféru a přinášet regionům nové poznatky i praktická řešení.
 
 www.avcr.cz/cs/udalosti/Akademie-ved-prinasi-krajum-a-regionum-nove-poznatky-i-prakticka-reseni-00001/…</p>
           <div class="chips"><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip factual">Skrytá reklama (advertorial) <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span></div>
           <p class="summary">Text primárně vykazuje charakteristiky institucionální PR a tzv. &quot;advertorial&quot; (reklamní sdělení v novinovém formátu), navržené k posílení reputace Akademie věd. Retoricky využívá pozitivní rámování k zdůraznění užitečnosti a „praktičnosti“ své práce, což čtenáře směřuje k příznivému pohledu na společenskou roli instituce. Z hlediska faktů obsah funguje jako sebepropagační materiál, kterému v samotném příspěvku chybí nezávislé ověření nebo konkrétní datové body.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr6svoo6c2t" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
-        </article>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr6svoo6c2t" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr6svoo6c2t" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr6svoo6c2t</a></div>
+        </article></div><div class="group">
         <article class="card">
           <div class="meta">
-            <span class="date">8. 6. 2026</span>
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr2j7s2gk2c" rel="nofollow noopener" target="_blank">8. 6. 2026</a>
             <span class="scores">rétorika <b>50%</b>
               · fakta <b>75%</b>
-              · míra ovlivňování <b>10%</b> (zanedbatelná)</span>
+              · ovlivňování <b>10%</b> (zanedbatelná)</span>
           </div>
           <p class="excerpt">🔬 Z Veletrhu vědy rovnou na Colours of Ostrava! 
 
 Veletrh vědy sice právě skončil, ale naše vědecká jízda pokračuje. Už v červenci se na vás těšíme v Ostravě na Meltingpotu!…</p>
           <div class="chips"><span class="chip factual">Skrytá reklama (advertorial) <b>75%</b></span><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip rhetorical">Nadržování „naší“ skupině <b>25%</b></span><span class="chip factual">Vynechání klíčových informací <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
           <p class="summary">Komunikace je charakterizována strategiemi institucionálního PR a propagačním rámováním navrženým pro maximalizaci veřejného zapojení. Použitím metafory &#x27;vědecká jízda&#x27; text využívá efekt rámování (Rhetorical Bucket) k prezentaci akademického dosahu jako dynamické volnočasové aktivity. Dále příspěvek vykazuje charakteristiky inzerce a PR (Factual Bucket) tím, že upřednostňuje viditelnost značky a propagaci akcí před šířením konkrétních vědeckých dat.</p>
-          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr2j7s2gk2c" rel="nofollow noopener" target="_blank">otevřít původní příspěvek ↗</a>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr2j7s2gk2c" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr2j7s2gk2c" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mnr2j7s2gk2c</a></div>
+        </article></div><div class="group">
+        <article class="card">
+          <div class="meta">
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n" rel="nofollow noopener" target="_blank">5. 5. 2026</a>
+            <span class="scores">rétorika <b>25%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>15%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🚇 Při ražbě pražského metra byl objeven nový druh prvohorního členovce
+
+Více: www.avcr.cz/cs/pro-media...…</p>
+          <div class="chips"><span class="chip factual">Znaky PR / propagace <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Odvolávání se na autoritu <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
+          <p class="summary">Text primárně využívá charakteristiky institucionální PR a rámování k zdůraznění vědeckého úspěchu v kontextu veřejné infrastruktury. Retoricky využívá mírný efekt rámování k propojení stavby s objevem, zatímco fakticky vynechává specifické technické detaily, aby podnítil zapojení směrem k oficiálnímu zdroji. Celkový tón je propagační a autoritativní, typický pro státní vědeckou komunikaci zaměřenou na širokou veřejnost.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n</a></div>
+        </article><div class="thread">
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 2 reakcí</span>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>45%</b> (střední)</span>
+          </div>
+          <p class="excerpt">@vitex.f.cz.ap.brid.gy: @akademievedcr.bsky.social A to počkejte až se bude razit tunel do Berouna, tam by mohli stát kolem pásu všichni paleontologové, nadšenci i profesionálové a po dobu několika let pozorně tahat z tun horniny jeden objev za druhym ....
+
+No uvidíme.  @vitex.f.…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
+          <p class="summary">The text exhibits a strong Framing Effect and Sensationalism in the Rhetorical bucket, characterizing a complex engineering project as a continuous scientific spectacle through hyperbolic language. In the Factual bucket, it suffers from the Omission of Key Information regarding the logistical and safety constraints of active construction sites, alongside Unsupported Claims about the frequency of potential fossil finds. These elements combine to create a highly optimistic, speculative narrative that prioritizes scientific enthusiasm over technical and operational reality.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3ml3lum5cr22n" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
         </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @vitex.f.cz.ap.brid.gy</span>
+            <span class="scores">rétorika <b>25%</b>
+              · fakta <b>25%</b>
+              · ovlivňování <b>10%</b> (zanedbatelná)</span>
+          </div>
+          <p class="excerpt">@akademievedcr.bsky.social No já jsem si řikal, že bych chěl bejt u tý hromady co vyvrtali z tunelu a prohledávat to ...
+
+Sem rád že tim jenom někde nezavezli díry, ale někdo se tím vytěženým materiálem seriózně zabývá.…</p>
+          <div class="chips"><span class="chip rhetorical">False Dilemma (Either/Or) <b>25%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Vágní zdrojování <b>25%</b></span></div>
+          <p class="summary">Text primárně využívá rétorické rámování a falešnou dilemu k pozitivnímu kontrastu vědeckého výzkumu oproti standardním metodám likvidace stavebního odpadu, čímž formuje hodnocení vědecké instituce čtenářem. Ačkoli je sentiment pozitivní, použití vágního zdroje ohledně konkrétních zúčastněných aktérů omezuje faktickou ověřitelnost tvrzení. Tyto taktiky společně slouží k posílení prestiže zmíněné vědecké entity bez poskytnutí podrobných důkazů nebo uznání alternativních strategií nakládání s materiálem.</p>
+          <a class="src" href="https://bsky.app/profile/vitex.f.cz.ap.brid.gy/post/3ml3qxyvuwha2" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @vitex.f.cz.ap.brid.gy</span>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>45%</b> (střední)</span>
+          </div>
+          <p class="excerpt">@akademievedcr.bsky.social A to počkejte až se bude razit tunel do Berouna, tam by mohli stát kolem pásu všichni paleontologové, nadšenci i profesionálové a po dobu několika let pozorně tahat z tun horniny jeden objev za druhym ....
+
+No uvidíme.…</p>
+          <div class="chips"><span class="chip factual">Nepodložená tvrzení <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip rhetorical">Senzacechtivost <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip factual">Hasty Generalization <b>25%</b></span></div>
+          <p class="summary">Analýza odhaluje významné spoléhání na rétorické rámování a senzacechtivost, aby byl tunelový projekt prezentován jako zaručený vědecký přínos, čímž se efektivně obcházejí technické složitosti moderní těžby. Z faktického hlediska text trpí opomenutím klíčových logistických omezení a prezentací nepodložených tvrzení ohledně proveditelnosti manuálního sběru zkamenělin v průmyslovém prostředí. Tyto taktiky kolektivně posouvají diskurz od realistického hodnocení paleontologických záchranných prací k romantizovanému, spekulativnímu vyprávění, které upřednostňuje emocionální zapojení před inženýrskou přesností.</p>
+          <a class="src" href="https://bsky.app/profile/vitex.f.cz.ap.brid.gy/post/3ml44twoyowx2" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article></div></div><div class="group">
+        <article class="card">
+          <div class="meta">
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">7. 4. 2026</a>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>12%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">📸 Chcete vědět, jak vypadá česká věda?
+
+🔍 Prozkoumejte fotobanku Akademie věd České republiky – najdete v ní více než 30 000 profesionálních fotografií volně ke stažení.
+
+🆓 Snímky můžete zdarma využít pro výuku, popularizaci i komunikaci o vědě.
+🔗 fotobanka.avcr.cz…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
+          <p class="summary">The analysis reveals that the text primarily functions as a promotional tool (Advertorial/PR) for the Czech Academy of Sciences, utilizing its institutional authority to drive engagement with its resources. Rhetorically, it employs a framing effect by suggesting that a curated collection of professional photos is synonymous with the reality of &#x27;Czech science.&#x27; While the information provided is factually grounded in the institution&#x27;s offerings, the presentation is designed to enhance organizational prestige rather than provide a neutral analysis of the scientific field.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w</a></div>
+        </article><div class="thread">
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 1 reakcí</span>
+            <span class="scores">rétorika <b>75%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>65%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">@chyrencz.bsky.social: &quot;Vážená Akademie věd České republiky,
+dovoluji si navrhnout nápis nad hlavní vchod vaší instituce:
+&#x27;Pravda vítězí, ale běda pokud sama nad sebou.&#x27;
+S pozdravem,
+Štěpán Sekanina, home researcher, Omice
+P.S. Přiložena tabulka srovnání GEP s konkurenčními teori…</p>
+          <div class="chips"><span class="chip rhetorical">Efekt rámování (způsob podání) <b>75%</b></span><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip factual">Nepodložená tvrzení <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip factual">Odvolávání se na autoritu <b>50%</b></span></div>
+          <p class="summary">Text primárně využívá &#x27;Rhetorical Bucket&#x27; prostřednictvím sofistikovaného framingového efektu, který podvrací kulturně významné motto k zpochybnění objektivity Akademie. V rámci &#x27;Factual Bucket&#x27; autor uplatňuje autoritářskou předpojatost tím, že přijímá pseudo-akademický titul &#x27;domácí badatel&#x27; a prezentuje nepodložené nároky tím, že okrajovou teorii &#x27;GEP&#x27; staví jako legitimního vědeckého konkurenta. Tyto taktiky společně směřují k degradaci vnímané epistemické vzdálenosti mezi rigorózní institucionální vědou a neověřenými osobními spekulacemi.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3miv5ojna5k2w" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @chyrencz.bsky.social</span>
+            <span class="scores">rétorika <b>75%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>70%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">&quot;Vážená Akademie věd České republiky,
+dovoluji si navrhnout nápis nad hlavní vchod vaší instituce:
+&#x27;Pravda vítězí, ale běda pokud sama nad sebou.&#x27;
+S pozdravem,
+Štěpán Sekanina, home researcher, Omice
+P.S. Přiložena tabulka srovnání GEP s konkurenčními teoriemi.&quot;…</p>
+          <div class="chips"><span class="chip rhetorical">Efekt rámování (způsob podání) <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>75%</b></span><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip factual">Odvolávání se na autoritu <b>50%</b></span><span class="chip factual">Nepodložená tvrzení <b>50%</b></span></div>
+          <p class="summary">Text primárně využívá rétorické rámování (framing) zneuctěním české národní motto, aby naznačil, že Akademie věd může být zaslepena svou vlastní institucionální &#x27;pravdou.&#x27; Věcně je komunikace charakterizována významnými informačními mezerami a vágním uváděním zdrojů, konkrétně ohledně nedefinované teorie &#x27;GEP&#x27; a absence zmíněné datové tabulky. Autor navíc používá pseudo-autoritativní titul (&#x27;domácí badatel&#x27;), aby vytvořil falešnou ekvivalenci mezi amatérskými spekulacemi a profesionálním vědeckým bádáním.</p>
+          <a class="src" href="https://bsky.app/profile/chyrencz.bsky.social/post/3miwxugpomc2e" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article></div></div><div class="group">
+        <article class="card">
+          <div class="meta">
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z" rel="nofollow noopener" target="_blank">3. 4. 2026</a>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>50%</b>
+              · ovlivňování <b>25%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🎂 Dnes by Tomáš Baťa oslavil 150. narozeniny.
+
+👞 Geniální podnikatel ale zdaleka nebyl vždy 100% úspěšný. 📈 Jak vyhrával nad konkurencí? ❓ A jaký je největší baťovský mýtus?
+
+🗣️ Odpovídá Martin Jemelka z Masarykova ústavu a Archivu AV ČR.…</p>
+          <div class="chips"><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip factual">Odvolávání se na autoritu <b>50%</b></span><span class="chip rhetorical">Senzacechtivost <b>50%</b></span><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span><span class="chip factual">Skrytá reklama (advertorial) <b>25%</b></span></div>
+          <p class="summary">Text využívá rétorické rámování tím, že označuje subjekt za „brilantního“ a používá senzační mezery zvědavosti, jako je „největší mýtus“, k podnícení zapojení. Z faktického hlediska se silně spoléhá na institucionální autoritu a sdělení řízená PR k ověření nadcházejících informací, což je běžná charakteristika akademického propagačního obsahu. Tyto taktiky společně usilují o vytvoření pozitivního, autoritativního kontextu pro výzkum instituce a zároveň využívají standardní strategie zapojení na sociálních sítích.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z</a></div>
+        </article><div class="thread">
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 1 reakcí</span>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>65%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">@chyrencz.bsky.social: &quot;Vážená Akademie věd České republiky,
+dovoluji si navrhnout nápis nad hlavní vchod vaší instituce:
+&#x27;Pravda vítězí, ale běda pokud sama nad sebou.&#x27;
+S pozdravem,
+Štěpán Sekanina, home researcher, Omice
+P.S. Přiložena tabulka srovnání GEP s konkurenčními teori…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
+          <p class="summary">The text primarily relies on rhetorical framing and factual vagueness to elevate a fringe perspective to the level of institutional science. In the Rhetorical bucket, the author uses formal academic language and false equivalence to suggest that their &#x27;home research&#x27; is a peer-level competitor to established scientific paradigms. In the Factual bucket, the systematic omission of context regarding the &#x27;GEP&#x27; theory and the use of vague, unverifiable sourcing prevent any objective assessment of the claims being made.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mimcmb7y322z" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @chyrencz.bsky.social</span>
+            <span class="scores">rétorika <b>75%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>70%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">&quot;Vážená Akademie věd České republiky,
+dovoluji si navrhnout nápis nad hlavní vchod vaší instituce:
+&#x27;Pravda vítězí, ale běda pokud sama nad sebou.&#x27;
+S pozdravem,
+Štěpán Sekanina, home researcher, Omice
+P.S. Přiložena tabulka srovnání GEP s konkurenčními teoriemi.&quot;…</p>
+          <div class="chips"><span class="chip rhetorical">Útok na osobu (ad hominem) <b>75%</b></span><span class="chip rhetorical">Tu Quoque (Appeal to Hypocrisy) <b>75%</b></span><span class="chip rhetorical">Straw Man <b>75%</b></span><span class="chip rhetorical">Apel na emoce <b>50%</b></span></div>
+          <p class="summary">Text primárně využívá rétorické rámování a emocionální apely k zpochybnění integrity Akademie věd, přičemž zneužívá národní symboly k naznačení institucionální korupce. Z faktického hlediska komunikace trpí zneužitím autority prostřednictvím sebeurčeného titulu &#x27;domácí badatel&#x27; a spoléhá na vágní, neověřené odkazy na nedefinovanou teorii &#x27;GEP&#x27;. Tyto taktiky společně slouží k vytvoření zdání vědeckého disentu, zatímco se vyhýbají transparentnosti a standardům recenzního řízení nezbytným pro legitimní akademickou angažovanost.</p>
+          <a class="src" href="https://bsky.app/profile/chyrencz.bsky.social/post/3min7tfj3rc2v" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article></div></div><div class="group">
+        <article class="card">
+          <div class="meta">
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">23. 3. 2026</a>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>10%</b> (zanedbatelná)</span>
+          </div>
+          <p class="excerpt">🌿 Rostlinná společenstva v Evropě procházejí dlouhodobými proměnami.
+
+Více: www.avcr.cz/cs/pro-media...…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
+          <p class="summary">The text exhibits minimal rhetorical manipulation, maintaining a dry and objective tone; however, it utilizes a naturalistic Framing Effect through the use of emojis and neutral terminology. From a factual perspective, the post is characterized by the Omission of Key Information and PR Characteristics, as it functions primarily to drive traffic to an institutional portal rather than providing a standalone scientific analysis. These elements reflect a communication strategy focused on institutional authority and engagement rather than comprehensive evidence delivery.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22</a></div>
+        </article><div class="thread">
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 2 reakcí</span>
+            <span class="scores">rétorika <b>75%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>35%</b> (střední)</span>
+          </div>
+          <p class="excerpt">@canis55lupus.bsky.social: Autor odkazovaného článku v Nature Radim Hédl přispívá - spolu s dalšími autory -  popularizačními texty k tématu do časopisu Jeseníky - Rychlebské hory vydávaného 2x ročně z.s. Erebia z Lipové Lázní ve spolupráci AOPK a CHKO Jeseníky. Viz čísla 4/2019,…</p>
+          <div class="chips"><span class="chip rhetorical">Útok na osobu (ad hominem) <b>75%</b></span><span class="chip rhetorical">Tu Quoque (Appeal to Hypocrisy) <b>75%</b></span><span class="chip rhetorical">Straw Man <b>50%</b></span><span class="chip rhetorical">Apel na emoce <b>25%</b></span></div>
+          <p class="summary">Text primárně využívá autoritu (Authority Bias) tím, že zneužívá prestiže časopisu Nature k ověření lokální publikace, spolu s reklamními prvky (Advertorial), které upřednostňují konverzi prodeje prostřednictvím přímého stanovení cen a odkazů. V rétorické rovině obsah využívá efekt rámování (Framing Effect) popisem ceny jako &#x27;směšné&#x27; k zdůraznění výhodné koupě a vytváří jemný pocit uměle vytvořené naléhavosti (Manufactured Urgency) ohledně dostupnosti zásob. Tyto techniky společně posouvají příspěvek od neutrální informační aktualizace k přesvědčivé marketingové komunikaci.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mhqafvsrys22" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @canis55lupus.bsky.social</span>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>15%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">Autor odkazovaného článku v Nature Radim Hédl přispívá - spolu s dalšími autory -  popularizačními texty k tématu do časopisu Jeseníky - Rychlebské hory vydávaného 2x ročně z.s. Erebia z Lipové Lázní ve spolupráci AOPK a CHKO Jeseníky. Viz čísla 4/2019, 9/2022, 13/2025.⬇️…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
+          <p class="summary">The text primarily relies on rhetorical framing and factual appeals to authority to establish the credibility of the author and his associated publications. By emphasizing high-prestige affiliations such as the journal Nature and state conservation agencies, it creates a halo effect that discourages critical scrutiny of the actual content. The structure is characteristic of PR messaging, focusing on institutional legitimacy rather than substantive evidence or balanced discussion.</p>
+          <a class="src" href="https://bsky.app/profile/canis55lupus.bsky.social/post/3mhqghrjgok2j" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @canis55lupus.bsky.social</span>
+            <span class="scores">rétorika <b>75%</b>
+              · fakta <b>100%</b>
+              · ovlivňování <b>70%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">Časopis lze za směšnou částku 39 Kč/výtisk - zatím jsou k dispozici všechna dosud vydaná čísla - objednat zde:
+215829.myshoptet.com
+🔚…</p>
+          <div class="chips"><span class="chip factual">Skrytá reklama (advertorial) <b>100%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip rhetorical">Senzacechtivost <b>50%</b></span><span class="chip rhetorical">Uměle vytvořená naléhavost <b>25%</b></span></div>
+          <p class="summary">Text je silně nakloněn komerční propagaci, využívá rétorické rámování k označení ceny jako „ směšné “ a vytváří pocit uměle vyvolané naléhavosti ohledně stavu zásob. Z faktického hlediska funguje jako inzerce, která vynechává klíčový kontext, jako je název nebo obsah časopisu, aby se zcela zaměřila na vnímanou nízkou cenu. Tyto taktiky jsou navrženy tak, aby minimalizovaly tření u spotřebitele a podpořily okamžité, impulzivní nákupní chování.</p>
+          <a class="src" href="https://bsky.app/profile/canis55lupus.bsky.social/post/3mhqgl7fnac2j" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article></div></div><div class="group">
+        <article class="card">
+          <div class="meta">
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p" rel="nofollow noopener" target="_blank">20. 1. 2026</a>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>30%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🧠 Revoluce, kterou přinesla umělá inteligence, se netýká jen technologie, ale i změn v komunikaci, říká Vít Gvoždiak z Filosofického ústavu AV ČR.
+
+💬 Na AI odkazujeme v běžných konverzacích a postupně tak mění i naši slovní zásobu.…</p>
+          <div class="chips"><span class="chip factual">Odvolávání se na autoritu <b>75%</b></span><span class="chip rhetorical">Senzacechtivost <b>50%</b></span><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip factual">Hasty Generalization <b>50%</b></span></div>
+          <p class="summary">Text vykazuje směs rétorického senzacechtivosti a faktického rámování založeného na autoritě. Objektivně používá hyperbolický jazyk jako „revoluce“ k dramatizaci jazykových posunů, zatímco fakticky se spoléhá na prestiž Akademie věd ČR, aby dodala váhu zobecněným tvrzením. Tyto prvky spolupracují na prezentaci specifické akademické perspektivy jako naléhavé, nezvratné společenské transformace a zároveň slouží institucionálním PR cílům.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p</a></div>
+        </article><div class="thread">
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 2 reakcí</span>
+            <span class="scores">rétorika <b>0%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>85%</b> (vysoká)</span>
+          </div>
+          <p class="excerpt">@mkyral.mastodonczech.cz.ap.brid.gy: @akademievedcr.bsky.social Je to sice umělé, ale pořád to není inteligentní. Jen to vykrádá práci jiných a k tomu si přidává vlastní halucinace 🤷‍♂️  @klosko.net: A ty halucinace pak někdo publikuje,  AI to vykrade a následně se z toho učí ...…</p>
+          <div class="chips"><span class="chip none">Bez nálezů — neutrální text</span></div>
+          <p class="summary">The discourse is heavily dominated by the Rhetorical Bucket, utilizing sensationalist metaphors and slippery slope arguments to frame AI as an existential threat. From a Factual Bucket perspective, the claims suffer from significant omissions of technical context regarding model training and the legal nuances of data ingestion. This combination shifts the focus from a technical or legal critique to an emotional appeal based on fear and moral outrage, characterizing the technology as inherently parasitic.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mctvlfynls2p" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @mkyral.mastodonczech.cz.ap.brid.gy</span>
+            <span class="scores">rétorika <b>75%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>70%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">@akademievedcr.bsky.social Je to sice umělé, ale pořád to není inteligentní. Jen to vykrádá práci jiných a k tomu si přidává vlastní halucinace 🤷‍♂️…</p>
+          <div class="chips"><span class="chip rhetorical">Útok na osobu (ad hominem) <b>75%</b></span><span class="chip rhetorical">Tu Quoque (Appeal to Hypocrisy) <b>75%</b></span><span class="chip rhetorical">Straw Man <b>75%</b></span><span class="chip rhetorical">Apel na emoce <b>50%</b></span></div>
+          <p class="summary">Text primárně využívá rétorické manipulace prostřednictvím efektu rámování a apelu na emoce, přičemž používá nabitá slova jako &#x27;kradení&#x27; k vyvolání negativního morálního soudu. Z faktického hlediska trpí ukvapeným zobecněním a opomenutím klíčových informací tím, že složité pole AI redukuje na své nejkontroverznější nedostatky, aniž by uznal technické nuance nebo transformační povahu strojového učení. Tato kombinace vytváří vysoce reduktivní a zkreslený narativ, který upřednostňuje emocionální dopad před vyváženým zkoumáním.</p>
+          <a class="src" href="https://bsky.app/profile/mkyral.mastodonczech.cz.ap.brid.gy/post/3mctvt44ujyb2" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @klosko.net</span>
+            <span class="scores">rétorika <b>100%</b>
+              · fakta <b>0%</b>
+              · ovlivňování <b>70%</b> (vyšší)</span>
+          </div>
+          <p class="excerpt">A ty halucinace pak někdo publikuje,  AI to vykrade a následně se z toho učí ... =&gt; spirála vedoucí do pekla…</p>
+          <div class="chips"><span class="chip rhetorical">Útok na osobu (ad hominem) <b>100%</b></span><span class="chip rhetorical">Tu Quoque (Appeal to Hypocrisy) <b>100%</b></span><span class="chip rhetorical">Straw Man <b>100%</b></span><span class="chip rhetorical">Apel na emoce <b>75%</b></span><span class="chip rhetorical">Slippery Slope <b>75%</b></span></div>
+          <p class="summary">Objektivita textu je významně narušena použitím vysoce emotivního a senzačního rámování, konkrétně argumentem kluzkého svahu, který předpovídá &#x27;spirálu do pekla&#x27;. Z faktického hlediska argument trpí opomenutím klíčového technického kontextu, jako je filtrování dat a kurátorství prováděné lidmi, což jsou standardní průmyslové postupy k prevenci takových smyček. Spoléhání na nabité výrazy jako &#x27;krade&#x27; dále posouvá narativ od technické kritiky k morálnímu odsouzení.</p>
+          <a class="src" href="https://bsky.app/profile/klosko.net/post/3mctwc3gbjs2o" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article></div></div><div class="group">
+        <article class="card">
+          <div class="meta">
+            <a class="date" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">9. 1. 2026</a>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>25%</b> (nízká)</span>
+          </div>
+          <p class="excerpt">🧬 Imunitní systém dětí s nově diagnostikovaným diabetem 1. typu není přehnaně aktivní, ale naopak překvapivě nezralý a utlumený.
+
+www.avcr.cz/cs/pro-media...…</p>
+          <div class="chips"><span class="chip factual">Vynechání klíčových informací <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip factual">Vágní zdrojování <b>50%</b></span><span class="chip factual">Znaky PR / propagace <b>50%</b></span><span class="chip rhetorical">False Dilemma (Either/Or) <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
+          <p class="summary">Text primárně využívá rétorické rámování a senzacechtivé háčky, jako je slovo „překvapivě“, k zdůraznění novosti výzkumu a podpoře zapojení. Z faktického hlediska obsah trpí významným opomenutím vědeckého kontextu – včetně metodologie a velikosti vzorku – a spoléhá na vágní zdroje v těle příspěvku. Tyto taktiky jsou v souladu s firemními PR strategiemi, které upřednostňují vysoce účinné souhrny před nuancovanou transparentností vyžadovanou pro vědecké reportování.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+          <div class="rawlink"><a href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l</a></div>
+        </article><div class="thread">
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-disc">💬 Diskuze pod příspěvkem · 1 reakcí</span>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>35%</b> (střední)</span>
+          </div>
+          <p class="excerpt">@lingvojazyce.bsky.social: Hltám tu zprávu, a byť naší dceři už to nepomůže, hned mě napadá, jestli by v takovém případě nebylo možné provádět nějaký specificky zaměřený screening. Nedá se třeba míň aktivní imunitní odpovědi zjišťovat snáz než příliš aktivní imunitní systém? Dal …</p>
+          <div class="chips"><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip rhetorical">Apel na emoce <b>50%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip rhetorical">Availability &amp; Salience <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Nepodložená tvrzení <b>25%</b></span></div>
+          <p class="summary">Analýza odhaluje významné spoléhání na rétorické prvky, jako je emocionální rámování a zřetelnost osobní zkušenosti, které ukotvují vědecký dotaz v subjektivním kontextu. Z faktického hlediska je text ztížen vágním uváděním zdrojů a opomenutím podrobností původní zprávy, což vede ke spekulativním otázkám, které mohou nesprávně interpretovat autoimunitní patologii. Tyto prvky kolektivně posouvají zaměření z objektivní vědecké analýzy na vyprávění řízené osobní relevancí a zjednodušenými lékařskými metaforami.</p>
+          <a class="src" href="https://bsky.app/profile/akademievedcr.bsky.social/post/3mby6wzzy6s2l" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article>
+        <article class="card child">
+          <div class="meta">
+            <span class="kindtag kind-reply">↳ Reakce · @lingvojazyce.bsky.social</span>
+            <span class="scores">rétorika <b>50%</b>
+              · fakta <b>75%</b>
+              · ovlivňování <b>40%</b> (střední)</span>
+          </div>
+          <p class="excerpt">Hltám tu zprávu, a byť naší dceři už to nepomůže, hned mě napadá, jestli by v takovém případě nebylo možné provádět nějaký specificky zaměřený screening. Nedá se třeba míň aktivní imunitní odpovědi zjišťovat snáz než příliš aktivní imunitní systém? Dal by se posílit, aby se cukro…</p>
+          <div class="chips"><span class="chip factual">Vynechání klíčových informací <b>75%</b></span><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip rhetorical">Apel na emoce <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>25%</b></span><span class="chip factual">Nepodložená tvrzení <b>25%</b></span><span class="chip rhetorical">Availability &amp; Salience <b>25%</b></span><span class="chip rhetorical">Senzacechtivost <b>25%</b></span></div>
+          <p class="summary">Text vykazuje značnou epistemickou neprůhlednost kvůli opomenutí primárního zdrojového materiálu a použití vágních odkazů, což čtenáři brání ve ověření základních lékařských tvrzení. Retoricky autor využívá afektivní heuristiku tím, že technické spekulace rámcuje do narativu osobní tragédie, což potenciálně vychyluje čtenáře k nekritickému přijetí navrhovaných lékařských teorií. Dále použití senzačního jazyka a efekt rámování osobní ztráty upřednostňuje emocionální rezonanci před klinickými důkazy, což ovlivňuje celkovou objektivitu diskurzu.</p>
+          <a class="src" href="https://bsky.app/profile/lingvojazyce.bsky.social/post/3mbzfxhpjz22s" rel="nofollow noopener" target="_blank">🦋 Otevřít vlákno ↗</a>
+          
+        </article></div></div>
 
   <footer>
     Stránka je záměrně <b>neindexovaná</b> (neobjeví se ve vyhledávačích).
