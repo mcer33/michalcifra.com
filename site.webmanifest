@@ -1,0 +1,14 @@
+{
+  "name": "Michal Cifra, Ph.D.",
+  "short_name": "M. Cifra",
+  "description": "Senior scientist & team leader in bioelectrodynamics — the electromagnetic physics of life.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05070b",
+  "theme_color": "#05070b",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}
