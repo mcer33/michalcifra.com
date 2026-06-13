@@ -9,14 +9,14 @@
 <meta property="og:type" content="profile" />
 <meta property="og:title" content="Michal Cifra, Ph.D. — the electromagnetic physics of life" />
 <meta property="og:description" content="Senior scientist & team leader in bioelectrodynamics (IPE, Czech Academy of Sciences). Speaker, author, team leader — and avid builder of autonomous-agent systems." />
-<meta property="og:image" content="https://michalcifra.com/assets/portrait.jpg" />
+<meta property="og:image" content="https://michalcifra.com/assets/headshot.jpg" />
 <meta property="og:url" content="https://michalcifra.com/" />
 <meta property="og:site_name" content="Michal Cifra" />
-<meta property="og:image:alt" content="Michal Cifra speaking on electric fields and proteins" />
+<meta property="og:image:alt" content="Michal Cifra, Ph.D." />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Michal Cifra, Ph.D. — the electromagnetic physics of life" />
 <meta name="twitter:description" content="Senior scientist & team leader in bioelectrodynamics (IPE, Czech Academy of Sciences). Speaker, author, team leader — and avid builder of autonomous-agent systems." />
-<meta name="twitter:image" content="https://michalcifra.com/assets/portrait.jpg" />
+<meta name="twitter:image" content="https://michalcifra.com/assets/headshot.jpg" />
 <link rel="canonical" href="https://michalcifra.com/" />
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -38,7 +38,7 @@
       "familyName": "Cifra",
       "honorificSuffix": "Ph.D.",
       "url": "https://michalcifra.com/",
-      "image": "https://michalcifra.com/assets/portrait.jpg",
+      "image": "https://michalcifra.com/assets/headshot.jpg",
       "jobTitle": "Senior Scientist & Team Leader, Bioelectrodynamics",
       "description": "Senior scientist and team leader in bioelectrodynamics at the Institute of Photonics and Electronics, Czech Academy of Sciences; studies the electromagnetic physics of life — ultra-weak photon emission, microtubule electrodynamics, and electric field effects on proteins. Speaker, author, team leader, and process architect.",
       "worksFor": {
@@ -347,6 +347,10 @@
   .copybtn{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--photon);background:none;border:1px solid var(--line-strong);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.15s;white-space:nowrap}
   .copybtn:hover{border-color:var(--photon)}
   .presskit{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;align-items:center}
+  .presshero{display:flex;gap:20px;align-items:center;margin:0 0 24px}
+  .presshero img{width:110px;height:138px;object-fit:cover;object-position:center 22%;border-radius:12px;border:1px solid var(--line-strong);flex:0 0 auto}
+  .presshero p{margin:0;color:var(--ink-dim);font-size:.96rem;max-width:48ch}
+  @media(max-width:560px){.presshero{flex-direction:column;align-items:flex-start}}
 
   /* reveal */
   .reveal{opacity:0;transform:translateY(22px);transition:.8s cubic-bezier(.2,.7,.2,1)}
@@ -553,20 +557,24 @@
       <div class="rcard reveal"><div class="idx">◆</div><h3>Running a small lab like a big one</h3><p>AI, "vibecoding," and process architecture for science — autonomous agent systems that multiply a research team. For tech &amp; innovation audiences.</p></div>
     </div>
 
-    <p class="label reveal" style="margin-top:54px">Press kit — copy-ready bios</p>
+    <p class="label reveal" style="margin-top:54px">Press kit</p>
+    <div class="presshero reveal">
+      <img src="/assets/headshot.jpg" alt="Michal Cifra — headshot" />
+      <p>Hi-res headshot, copy-ready bios, and a printable one-sheet — everything an organizer needs to introduce me. Grab the headshot and one-sheet below.</p>
+    </div>
     <div class="kitgrid">
       <div class="kit reveal">
         <div class="kithead"><h3>Short bio</h3><button class="copybtn" data-copy="#bio-short">Copy</button></div>
-        <p id="bio-short">Michal Cifra, Ph.D., is a senior scientist and team leader in bioelectrodynamics at the Institute of Photonics and Electronics, Czech Academy of Sciences. He studies the electromagnetic physics of life — from ultra-weak photon emission to the effects of electric fields on proteins — and is a speaker, author, and founder of the Biophotoniq science-outreach venture.</p>
+        <p id="bio-short">Michal Cifra is Head of the Bioelectrodynamics Research Team and Senior Scientist at the Institute of Photonics and Electronics, Czech Academy of Sciences. He holds an MSc in Biomedical Engineering and a PhD in Radioelectronics, with research experience in biophotonics (RWTH Aachen / IIB, Germany) and high-frequency bioelectronic interfaces (University of Chicago, USA). His work focuses on electromagnetic properties of biosystems and engineering nanoscale electromagnetic field–biomatter interactions, particularly in proteins. He is passionate about creating global impact in healthcare through leadership, translational research, and the development of the Biophotoniq innovation ecosystem.</p>
       </div>
       <div class="kit reveal" data-d="1">
         <div class="kithead"><h3>Long bio</h3><button class="copybtn" data-copy="#bio-long">Copy</button></div>
-        <p id="bio-long">Michal Cifra (Ph.D., Czech Technical University in Prague) leads the Bioelectrodynamics team at the Institute of Photonics and Electronics of the Czech Academy of Sciences, where he measures and models how living systems generate and respond to electromagnetic fields — ultra-weak photon emission, microtubule electrodynamics, and electric-field effects on proteins. He has authored 120+ publications and two edited books (3,600+ citations), won the Otto Wichterle and Justin Teissié awards, and is a Senior Member of IEEE and Optica. An international speaker (TEDx, Quantum Biology Forum) and founder of the Biophotoniq outreach venture, he also builds autonomous-agent software systems as an avid vibecoder and process architect.</p>
+        <p id="bio-long">Michal Cifra heads the Bioelectrodynamics Research Team at the Institute of Photonics and Electronics of the Czech Academy of Sciences, where he works at the interface of physics, engineering, and biology. He holds an MSc in Biomedical Engineering from the University of Žilina and a PhD in Radioelectronics from the Czech Technical University in Prague. His international research experience includes work at RWTH Aachen, the International Institute of Biophysics in Germany, the University of Chicago, and research stays in Japan and Brazil. Cifra's research focuses on the electromagnetic properties of living systems and on engineering electromagnetic field–biomatter interactions at the molecular and nanoscale levels, with particular interest in proteins, microtubules, cytoskeletal dynamics, chemiexcitation, biochemiluminescence, and ultraweak photon emission. Under his leadership, the Bioelectrodynamics team combines advanced electromagnetic concepts, micro- and nanotechnology-enabled tools, computational modelling, and experiment to probe and influence biosystems at the biomolecular level. He is driven by the vision of translating fundamental discoveries into practical biomedical and biotechnological applications, while building the Biophotoniq innovation ecosystem to create global impact in healthcare through research leadership, collaboration, and innovation.</p>
       </div>
     </div>
 
     <div class="presskit reveal" data-d="1">
-      <a class="btn btn-ghost" href="/assets/portrait.jpg" download>↓ Headshot (JPG)</a>
+      <a class="btn btn-ghost" href="/assets/headshot.jpg" download>↓ Headshot (JPG)</a>
       <a class="btn btn-ghost" href="/speaker/">Speaker one-sheet</a>
       <a class="btn btn-ghost" href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener">Publications →</a>
       <a class="btn btn-primary" href="mailto:cifra@ufe.cz?subject=Speaking%20invitation%20%E2%80%94%20Michal%20Cifra">✉ Invite me to speak</a>
