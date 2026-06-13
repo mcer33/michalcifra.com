@@ -63,7 +63,7 @@
       <div>
         <h1>Michal Cifra, Ph.D.</h1>
         <p class="role">Senior Scientist &amp; Team Leader, Bioelectrodynamics · Institute of Photonics and Electronics, Czech Academy of Sciences · Prague</p>
-        <p class="contact"><b>michalcifra.com</b> · <a href="mailto:cifra@ufe.cz">cifra@ufe.cz</a> · ORCID 0000-0002-8853-9523 · IEEE &amp; Optica Senior Member</p>
+        <p class="contact"><b>michalcifra.com</b> · <a data-em="Y2lmcmFAdWZlLmN6" data-show="1" href="#"></a> · ORCID 0000-0002-8853-9523 · IEEE &amp; Optica Senior Member</p>
       </div>
     </div>
 
@@ -109,9 +109,16 @@
     </div>
 
     <footer>
-      <span><b>Invite me to speak</b> · <a href="mailto:cifra@ufe.cz">cifra@ufe.cz</a></span>
+      <span><b>Invite me to speak</b> · <a data-em="Y2lmcmFAdWZlLmN6" data-show="1" href="#"></a></span>
       <span>michalcifra.com</span>
     </footer>
   </div>
+<script>
+document.querySelectorAll('[data-em]').forEach(function(a){
+  var e=atob(a.dataset.em);
+  a.href='mailto:'+e+(a.dataset.sub?'?subject='+a.dataset.sub:'');
+  if(a.dataset.show)a.textContent=e;
+});
+</script>
 </body>
 </html>

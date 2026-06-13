@@ -631,7 +631,7 @@
       <a class="btn btn-ghost" href="/assets/headshot.jpg" download>↓ Headshot (JPG)</a>
       <a class="btn btn-ghost" href="/speaker/">Speaker one-sheet</a>
       <a class="btn btn-ghost" href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener">Publications →</a>
-      <a class="btn btn-primary" href="mailto:cifra@ufe.cz?subject=Speaking%20invitation%20%E2%80%94%20Michal%20Cifra">✉ Invite me to speak</a>
+      <a class="btn btn-primary" data-em="Y2lmcmFAdWZlLmN6" data-sub="Speaking%20invitation%20%E2%80%94%20Michal%20Cifra" href="#">✉ Invite me to speak</a>
     </div>
   </div>
 </section>
@@ -766,6 +766,13 @@ document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
 window.addEventListener("load",()=>document.querySelectorAll(".hero .reveal,.chiprow.reveal").forEach(el=>el.classList.add("in")));
 </script>
 
+<script>
+document.querySelectorAll('[data-em]').forEach(function(a){
+  var e=atob(a.dataset.em);
+  a.href='mailto:'+e+(a.dataset.sub?'?subject='+a.dataset.sub:'');
+  if(a.dataset.show)a.textContent=e;
+});
+</script>
 <script data-goatcounter="https://michalcifra.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
