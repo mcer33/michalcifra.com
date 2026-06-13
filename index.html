@@ -358,7 +358,7 @@
   .reveal[data-d="1"]{transition-delay:.08s}.reveal[data-d="2"]{transition-delay:.16s}
   .reveal[data-d="3"]{transition-delay:.24s}.reveal[data-d="4"]{transition-delay:.32s}
   @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}
-    .hero-bg iframe{display:none}.label::before,.brand .dot{animation:none}}
+    .label::before,.brand .dot{animation:none}}
 </style>
 </head>
 <body>
@@ -382,9 +382,6 @@
 <header class="hero" id="top">
   <div class="hero-bg">
     <img class="poster" src="https://img.youtube.com/vi/gezEio1mdjs/maxresdefault.jpg" alt="" aria-hidden="true" />
-    <iframe
-      src="https://www.youtube-nocookie.com/embed/gezEio1mdjs?autoplay=1&mute=1&loop=1&playlist=gezEio1mdjs&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&cc_load_policy=0"
-      title="Ambient background — Michal Cifra talk" allow="autoplay; encrypted-media" tabindex="-1" aria-hidden="true"></iframe>
   </div>
 
   <div class="wrap">
@@ -709,11 +706,28 @@ document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 
+/* ambient hero video — deferred 3 s after load; skipped on prefers-reduced-motion */
+window.addEventListener('load',()=>{
+  if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  setTimeout(()=>{
+    const bg=document.querySelector('.hero-bg'); if(!bg) return;
+    const f=document.createElement('iframe');
+    f.src='https://www.youtube-nocookie.com/embed/gezEio1mdjs?autoplay=1&mute=1&loop=1&playlist=gezEio1mdjs&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&cc_load_policy=0';
+    f.title='Ambient background — Michal Cifra talk';
+    f.allow='autoplay; encrypted-media';
+    f.setAttribute('tabindex','-1');
+    f.setAttribute('aria-hidden','true');
+    bg.appendChild(f);
+  },3000);
+});
+
 /* reveal on scroll */
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});
 document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
 /* fire hero reveals immediately */
 window.addEventListener("load",()=>document.querySelectorAll(".hero .reveal,.chiprow.reveal").forEach(el=>el.classList.add("in")));
 </script>
+
+<script data-goatcounter="https://michalcifra.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
