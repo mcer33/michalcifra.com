@@ -337,6 +337,17 @@
   .factsheet .exp li b{color:var(--ink);font-weight:600;font-size:.92rem}
   .factsheet .exp li span{font-family:var(--mono);font-size:.66rem;color:var(--ink-faint);white-space:nowrap;text-align:right}
 
+  /* speaking & press kit */
+  .kitgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:760px){.kitgrid{grid-template-columns:1fr}}
+  .kit{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:22px 24px}
+  .kit .kithead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .kit h3{font-family:var(--serif);font-weight:400;font-size:1.25rem;margin:0}
+  .kit p{margin:0;color:var(--ink-dim);font-size:.92rem;line-height:1.62}
+  .copybtn{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--photon);background:none;border:1px solid var(--line-strong);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .copybtn:hover{border-color:var(--photon)}
+  .presskit{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;align-items:center}
+
   /* reveal */
   .reveal{opacity:0;transform:translateY(22px);transition:.8s cubic-bezier(.2,.7,.2,1)}
   .reveal.in{opacity:1;transform:none}
@@ -356,6 +367,7 @@
       <a href="#research">Research</a>
       <a href="#work">Impact</a>
       <a href="#talks">Talks</a>
+      <a href="#speaking">Speaking</a>
       <a href="#building">Building</a>
       <a href="#connect">Connect</a>
     </div>
@@ -527,10 +539,45 @@
   </div>
 </section>
 
+<!-- ===================== SPEAKING & PRESS ===================== -->
+<section id="speaking" class="divider">
+  <div class="wrap">
+    <p class="label reveal">05 — Speaking &amp; press</p>
+    <h2 class="reveal">Invite me to <em>speak</em>.</h2>
+    <p class="lead reveal" data-d="1" style="margin:8px 0 32px">I speak to scientific, technical, and general audiences on the electromagnetic side of life — keynotes, conference talks, podcasts, and public outreach. Everything an organizer needs is here, plus a <a href="/speaker/">one-page speaker sheet&nbsp;→</a></p>
+
+    <div class="rgrid">
+      <div class="rcard reveal"><div class="idx">◆</div><h3>The electromagnetic physics of life</h3><p>A grand-tour keynote — how living matter generates and responds to electromagnetic fields, from the light cells emit to the fields of proteins. TEDx-style, for general audiences.</p></div>
+      <div class="rcard reveal" data-d="1"><div class="idx">◆</div><h3>The light living things emit</h3><p>Ultra-weak photon emission &amp; biophotons — what the faintest light of life reveals about oxidative stress, health, and non-invasive diagnostics.</p></div>
+      <div class="rcard reveal" data-d="2"><div class="idx">◆</div><h3>Electric fields &amp; proteins</h3><p>How pulsed and sub-terahertz electric fields reshape biomolecules — mechanisms and applications in bio- and nanotechnology.</p></div>
+      <div class="rcard reveal"><div class="idx">◆</div><h3>Running a small lab like a big one</h3><p>AI, "vibecoding," and process architecture for science — autonomous agent systems that multiply a research team. For tech &amp; innovation audiences.</p></div>
+    </div>
+
+    <p class="label reveal" style="margin-top:54px">Press kit — copy-ready bios</p>
+    <div class="kitgrid">
+      <div class="kit reveal">
+        <div class="kithead"><h3>Short bio</h3><button class="copybtn" data-copy="#bio-short">Copy</button></div>
+        <p id="bio-short">Michal Cifra, Ph.D., is a senior scientist and team leader in bioelectrodynamics at the Institute of Photonics and Electronics, Czech Academy of Sciences. He studies the electromagnetic physics of life — from ultra-weak photon emission to the effects of electric fields on proteins — and is a speaker, author, and founder of the Biophotoniq science-outreach venture.</p>
+      </div>
+      <div class="kit reveal" data-d="1">
+        <div class="kithead"><h3>Long bio</h3><button class="copybtn" data-copy="#bio-long">Copy</button></div>
+        <p id="bio-long">Michal Cifra (Ph.D., Czech Technical University in Prague) leads the Bioelectrodynamics team at the Institute of Photonics and Electronics of the Czech Academy of Sciences, where he measures and models how living systems generate and respond to electromagnetic fields — ultra-weak photon emission, microtubule electrodynamics, and electric-field effects on proteins. He has authored 120+ publications and two edited books (3,600+ citations), won the Otto Wichterle and Justin Teissié awards, and is a Senior Member of IEEE and Optica. An international speaker (TEDx, Quantum Biology Forum) and founder of the Biophotoniq outreach venture, he also builds autonomous-agent software systems as an avid vibecoder and process architect.</p>
+      </div>
+    </div>
+
+    <div class="presskit reveal" data-d="1">
+      <a class="btn btn-ghost" href="/assets/portrait.jpg" download>↓ Headshot (JPG)</a>
+      <a class="btn btn-ghost" href="/speaker/">Speaker one-sheet</a>
+      <a class="btn btn-ghost" href="https://scholar.google.com/citations?user=rg7MoCEAAAAJ" target="_blank" rel="noopener">Publications →</a>
+      <a class="btn btn-primary" href="mailto:cifra@ufe.cz?subject=Speaking%20invitation%20%E2%80%94%20Michal%20Cifra">✉ Invite me to speak</a>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== BUILDING ===================== -->
 <section id="building" class="divider">
   <div class="wrap">
-    <p class="label reveal">05 — Builder &amp; process architect</p>
+    <p class="label reveal">06 — Builder &amp; process architect</p>
     <h2 class="reveal">Research runs on systems —<br>so I <em>build</em> them.</h2>
     <p class="lead reveal" data-d="1" style="margin:8px 0 26px">Beyond the lab I design software and automation that compress repetitive scientific and communication work into reliable, self-running pipelines. An avid <strong style="color:var(--ink)">vibecoder</strong> — building with AI agents as collaborators — and a <strong style="color:var(--ink)">process architect</strong> turning one-off effort into durable infrastructure.</p>
     <a class="founder reveal" data-d="1" href="https://www.biophotoniq.net" target="_blank" rel="noopener">
@@ -549,7 +596,7 @@
 <!-- ===================== CONNECT ===================== -->
 <section id="connect" class="divider">
   <div class="wrap">
-    <p class="label reveal">06 — Connect &amp; follow</p>
+    <p class="label reveal">07 — Connect &amp; follow</p>
     <h2 class="reveal">Find me across the web.</h2>
     <p class="lead reveal" data-d="1" style="margin:8px 0 26px">Science updates, talks, and behind-the-scenes of the lab — pick your platform.</p>
     <div class="socials reveal" data-d="1" id="socials"></div>
@@ -643,6 +690,12 @@ function openFrame(src){
 }
 function closeModal(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");slot.innerHTML="";}
 document.querySelectorAll(".talk").forEach(b=>b.addEventListener("click",()=>openFrame(b.dataset.frame)));
+
+/* copy-to-clipboard for press-kit bios */
+document.querySelectorAll(".copybtn").forEach(b=>b.addEventListener("click",async()=>{
+  const el=document.querySelector(b.dataset.copy); if(!el) return;
+  try{ await navigator.clipboard.writeText(el.textContent.trim()); const t=b.textContent; b.textContent="Copied ✓"; setTimeout(()=>{b.textContent=t;},1500);}catch(e){}
+}));
 document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
