@@ -1055,8 +1055,14 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
     var idx=0, ticker=null, player=null;
     function jumpTo(i){
       idx=i%SEGS.length;
+      var w=document.getElementById('hero-yt');
+      /* quick fade-out hides the YT seek/pause icon, then fade back in */
+      if(w){w.style.transition='opacity .15s ease';w.style.opacity='0';}
       player.seekTo(SEGS[idx].s,true);
       player.playVideo();
+      setTimeout(function(){
+        if(w){w.style.transition='opacity .8s ease';w.style.opacity='1';}
+      },450);
     }
     player=new YT.Player('hero-yt-player',{
       videoId:'gezEio1mdjs',
