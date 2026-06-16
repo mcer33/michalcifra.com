@@ -127,6 +127,67 @@
       "name": "Michal Cifra, Ph.D.",
       "inLanguage": "en",
       "about": { "@id": "https://michalcifra.com/#person" }
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://doi.org/10.1016/j.pbiomolbio.2010.07.003",
+      "headline": "Electromagnetic cellular interactions",
+      "author": [
+        {"@type": "Person", "@id": "https://michalcifra.com/#person", "name": "Michal Cifra"},
+        {"@type": "Person", "name": "James Z. Fields"},
+        {"@type": "Person", "name": "Ashkan Farhadi"}
+      ],
+      "datePublished": "2011",
+      "isPartOf": {"@type": "Periodical", "name": "Progress in Biophysics and Molecular Biology"},
+      "url": "https://doi.org/10.1016/j.pbiomolbio.2010.07.003"
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://doi.org/10.1016/j.jphotobiol.2014.02.009",
+      "headline": "Ultra-weak photon emission from biological samples: definition, mechanisms, properties",
+      "author": [
+        {"@type": "Person", "@id": "https://michalcifra.com/#person", "name": "Michal Cifra"},
+        {"@type": "Person", "name": "Pavel Pospíšil"}
+      ],
+      "datePublished": "2014",
+      "isPartOf": {"@type": "Periodical", "name": "Journal of Photochemistry and Photobiology B: Biology"},
+      "url": "https://doi.org/10.1016/j.jphotobiol.2014.02.009"
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://doi.org/10.1002/adma.201903636",
+      "headline": "Reversible and irreversible modulation of tubulin self-assembly by intense nanosecond pulsed electric fields",
+      "author": [
+        {"@type": "Person", "name": "Djamel Eddine Chafai"},
+        {"@type": "Person", "@id": "https://michalcifra.com/#person", "name": "Michal Cifra"}
+      ],
+      "datePublished": "2019",
+      "isPartOf": {"@type": "Periodical", "name": "Advanced Materials"},
+      "url": "https://doi.org/10.1002/adma.201903636"
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://doi.org/10.1109/JETCAS.2018.2829205",
+      "headline": "Bioelectric field enhancement with microfluidic chip for cell stimulation",
+      "author": [
+        {"@type": "Person", "name": "Ankur Jha"},
+        {"@type": "Person", "@id": "https://michalcifra.com/#person", "name": "Michal Cifra"}
+      ],
+      "datePublished": "2018",
+      "isPartOf": {"@type": "Periodical", "name": "IEEE Journal on Emerging and Selected Topics in Circuits and Systems"},
+      "url": "https://doi.org/10.1109/JETCAS.2018.2829205"
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "@id": "https://doi.org/10.1021/acs.analchem.3c01566",
+      "headline": "Biological Auto(chemi)luminescence Imaging of Oxidative Processes in Human Skin",
+      "author": [
+        {"@type": "Person", "name": "Michaela Poplová"},
+        {"@type": "Person", "@id": "https://michalcifra.com/#person", "name": "Michal Cifra"}
+      ],
+      "datePublished": "2023",
+      "isPartOf": {"@type": "Periodical", "name": "Analytical Chemistry"},
+      "url": "https://doi.org/10.1021/acs.analchem.3c01566"
     }
   ]
 }
@@ -194,7 +255,8 @@
   .hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:60px 0 40px;overflow:hidden}
   .hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#04060a}
   .hero-bg img.poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6;filter:grayscale(.25) brightness(.6) contrast(1.05)}
-  .hero-bg iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  #hero-yt{position:absolute;inset:0;pointer-events:none}
+  #hero-yt iframe{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
     width:100vw;height:56.25vw;min-height:100%;min-width:177.78vh;border:0;pointer-events:none;opacity:.72;
     filter:grayscale(.28) contrast(1.06) brightness(.86) saturate(1.2)}
   /* scrims: tint the video toward photon-cyan + keep text legible */
@@ -397,6 +459,39 @@
   .reveal[data-d="3"]{transition-delay:.24s}.reveal[data-d="4"]{transition-delay:.32s}
   @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}
     .label::before,.brand .dot{animation:none}}
+
+  /* ---- Publication timeline ---- */
+  .timeline{position:relative;padding-left:26px;margin:4px 0 0}
+  .timeline::before{content:"";position:absolute;left:5px;top:4px;bottom:20px;width:1px;
+    background:linear-gradient(to bottom,transparent,var(--photon) 6%,rgba(94,242,230,.22) 92%,transparent)}
+  .tmil{position:relative;padding:0 0 18px 26px;opacity:0;transform:translateY(14px);transition:.5s cubic-bezier(.2,.7,.2,1)}
+  .tmil.in{opacity:1;transform:none}
+  .tmil:last-child{padding-bottom:0}
+  .tmil::before{content:"";position:absolute;left:-6px;top:7px;width:11px;height:11px;border-radius:50%;
+    background:var(--bg);border:1.5px solid rgba(94,242,230,.45);box-shadow:0 0 7px rgba(94,242,230,.2);transition:.25s}
+  .tmil:hover::before{border-color:var(--photon);background:rgba(94,242,230,.1);box-shadow:0 0 14px rgba(94,242,230,.5)}
+  .tmil-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;
+    transition:transform .22s,border-color .22s,box-shadow .22s}
+  .tmil:hover .tmil-card{border-color:var(--line-strong);transform:translateX(5px);
+    box-shadow:0 10px 36px -16px rgba(0,0,0,.75),0 0 0 1px rgba(94,242,230,.07)}
+  .tmil-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .tmil-yr{font-family:var(--mono);font-size:.72rem;color:var(--photon);font-weight:600;letter-spacing:.07em}
+  .tmil-badge{font-size:.61rem;font-weight:700;padding:2px 7px;border-radius:999px;border:1px solid;letter-spacing:.05em;text-transform:uppercase}
+  .tbp{color:#f3c97c;border-color:rgba(243,201,124,.28);background:rgba(243,201,124,.07)}
+  .tef{color:var(--photon-2);border-color:rgba(123,208,255,.26);background:rgba(123,208,255,.07)}
+  .tem{color:#c084fc;border-color:rgba(192,132,252,.26);background:rgba(192,132,252,.07)}
+  .ttc{color:#4ade80;border-color:rgba(74,222,128,.24);background:rgba(74,222,128,.07)}
+  .tmil-jrnl{margin-left:auto;font-size:.67rem;color:var(--ink-faint);font-style:italic}
+  .tmil-title{font-family:var(--serif);font-size:.97rem;line-height:1.38;margin:0 0 6px;font-style:italic}
+  .tmil-title a{color:var(--ink);text-decoration:none;border-bottom:1px solid rgba(140,170,210,.2);transition:color .2s,border-color .2s}
+  .tmil-title a:hover{color:var(--photon);border-color:rgba(94,242,230,.4)}
+  .tmil-desc{font-size:.8rem;color:var(--ink-dim);line-height:1.52;margin:0 0 9px}
+  .tmil-foot{display:flex;align-items:center;gap:12px}
+  .tmil-cit{font-family:var(--mono);font-size:.69rem;color:var(--photon);opacity:.82;display:flex;align-items:center;gap:4px}
+  .tmil-cit::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--photon);box-shadow:0 0 5px var(--photon);flex:0 0 auto}
+  .tmil-new{font-family:var(--mono);font-size:.69rem;color:var(--amber);opacity:.85}
+  @media(max-width:600px){.tmil-jrnl{display:none}}
+  @media(prefers-reduced-motion:reduce){.tmil{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
@@ -420,6 +515,7 @@
 <header class="hero" id="top">
   <div class="hero-bg">
     <img class="poster" src="https://img.youtube.com/vi/gezEio1mdjs/maxresdefault.jpg" alt="" aria-hidden="true" />
+    <div id="hero-yt" aria-hidden="true" tabindex="-1"></div>
   </div>
 
   <div class="wrap">
@@ -538,6 +634,87 @@
       <div class="stat"><div class="n">30<span class="u">+</span></div><div class="l">Events organized</div><div class="s">10,000+ attendees</div></div>
       <div class="stat"><div class="n">27</div><div class="l">Researchers mentored</div><div class="s">12 MSc · 7 PhD · 8 postdoc</div></div>
       <div class="stat"><div class="n">8</div><div class="l">Awards &amp; honors</div><div class="s">Wichterle · Teissié · IEEE</div></div>
+    </div>
+
+    <!-- milestone papers timeline -->
+    <div style="margin-top:64px">
+      <p class="label reveal">Milestone papers</p>
+      <p class="lead reveal" data-d="1" style="margin:0 0 36px;font-size:.93rem">Eight papers across six research threads — each a DOI link to the full reference.</p>
+      <div class="timeline">
+
+        <div class="tmil" style="transition-delay:.0s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2007</span><span class="tmil-badge tbp">Biophotons</span><span class="tmil-jrnl">Radioengineering</span></div>
+            <p class="tmil-title"><a href="https://www.radioeng.cz/fulltexts/2007/07_02_15_19.pdf" target="_blank" rel="noopener">Spontaneous ultra-weak photon emission from human hands is time dependent</a></p>
+            <p class="tmil-desc">Career debut — first systematic evidence that biophoton emission from human tissue varies with circadian rhythm, establishing a measurable baseline for diagnostic applications.</p>
+            <div class="tmil-foot"><span class="tmil-cit">47 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.07s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2011</span><span class="tmil-badge tem">EM &amp; Cells</span><span class="tmil-jrnl">Prog Biophys Mol Biol</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1016/j.pbiomolbio.2010.07.003" target="_blank" rel="noopener">Electromagnetic cellular interactions</a></p>
+            <p class="tmil-desc">Landmark review synthesising the mechanisms by which endogenous and exogenous electromagnetic fields interact with cells — became the field's primary reference for a decade.</p>
+            <div class="tmil-foot"><span class="tmil-cit">451 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.14s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2014</span><span class="tmil-badge tbp">Biophotons</span><span class="tmil-jrnl">J Photochem Photobiol B</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1016/j.jphotobiol.2014.02.009" target="_blank" rel="noopener">Ultra-weak photon emission from biological samples: definition, mechanisms, properties</a></p>
+            <p class="tmil-desc">Definitive review that structured the field: established shared definitions, catalogued generation mechanisms, and set the measurement standards still used today.</p>
+            <div class="tmil-foot"><span class="tmil-cit">273 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.21s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2018</span><span class="tmil-badge ttc">Technology</span><span class="tmil-jrnl">IEEE JETCAS</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1109/JETCAS.2018.2829205" target="_blank" rel="noopener">Microwave lab-on-chip for dielectric probing and stimulation of biological matter</a></p>
+            <p class="tmil-desc">First integrated chip platform combining microwave field delivery with optical microscopy — enabling simultaneous EM field application and real-time nanoscale imaging of biosystems.</p>
+            <div class="tmil-foot"><span class="tmil-cit">57 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.28s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2019</span><span class="tmil-badge tef">Protein EF</span><span class="tmil-jrnl">Advanced Materials</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1002/adma.201903636" target="_blank" rel="noopener">Reversible and irreversible modulation of tubulin self-assembly by intense nanosecond pulsed electric fields</a></p>
+            <p class="tmil-desc">Cover article &amp; <em>Best Paper of the Year (IPE CAS)</em> — first direct evidence that nanosecond pulses can reversibly or irreversibly switch protein assembly on and off.</p>
+            <div class="tmil-foot"><span class="tmil-cit">40 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.35s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2020</span><span class="tmil-badge ttc">Technology</span><span class="tmil-jrnl">Adv Materials Technol</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1002/admt.201900669" target="_blank" rel="noopener">Nanosecond Pulsed Electric Field Lab-on-Chip Integrated in Super-Resolution Microscope</a></p>
+            <p class="tmil-desc">World-first integration of a nanosecond EF chip with super-resolution optical microscopy — real-time nanoscale observation of electric field effects on biomolecular assemblies in living cells.</p>
+            <div class="tmil-foot"><span class="tmil-cit">12 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.42s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2023</span><span class="tmil-badge tbp">Biophotons</span><span class="tmil-jrnl">Analytical Chemistry</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1021/acs.analchem.3c01566" target="_blank" rel="noopener">Biological Auto(chemi)luminescence Imaging of Oxidative Processes in Human Skin</a></p>
+            <p class="tmil-desc">Label-free, non-invasive imaging of oxidative stress in human tissue — a new diagnostic modality based entirely on the body's own endogenous light emission. No dyes, no labels.</p>
+            <div class="tmil-foot"><span class="tmil-cit">3 citations</span></div>
+          </div>
+        </div>
+
+        <div class="tmil" style="transition-delay:.49s">
+          <div class="tmil-card">
+            <div class="tmil-head"><span class="tmil-yr">2024</span><span class="tmil-badge tef">Protein EF</span><span class="tmil-jrnl">J Phys Chem Lett</span></div>
+            <p class="tmil-title"><a href="https://doi.org/10.1021/acs.jpclett.4c01553" target="_blank" rel="noopener">Vibrational normal modes of proteins in the subTHz frequency range</a></p>
+            <p class="tmil-desc">Computational evidence that protein conformational dynamics have specific resonance frequencies in the GHz–subTHz band — key theoretical foundation for electromagnetic biotechnology.</p>
+            <div class="tmil-foot"><span class="tmil-new">● 2024 — new</span></div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <p class="label reveal" style="margin-top:64px">Service, societies &amp; leadership</p>
@@ -744,24 +921,32 @@ document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 
-/* ambient hero video — deferred 3 s after load; skipped on prefers-reduced-motion */
-window.addEventListener('load',()=>{
+/* ambient hero video — YouTube IFrame API for reliable muted autoplay */
+(function(){
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  setTimeout(()=>{
-    const bg=document.querySelector('.hero-bg'); if(!bg) return;
-    const f=document.createElement('iframe');
-    f.src='https://www.youtube-nocookie.com/embed/gezEio1mdjs?autoplay=1&mute=1&loop=1&playlist=gezEio1mdjs&controls=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&cc_load_policy=0';
-    f.title='Ambient background — Michal Cifra talk';
-    f.allow='autoplay; encrypted-media';
-    f.setAttribute('tabindex','-1');
-    f.setAttribute('aria-hidden','true');
-    bg.appendChild(f);
-  },3000);
-});
+  function initHeroPlayer(){
+    if(!document.getElementById('hero-yt')) return;
+    new YT.Player('hero-yt',{
+      videoId:'gezEio1mdjs',
+      playerVars:{autoplay:1,mute:1,loop:1,playlist:'gezEio1mdjs',controls:0,
+        modestbranding:1,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,cc_load_policy:0},
+      events:{onReady:function(e){e.target.playVideo();}}
+    });
+  }
+  if(window.YT&&window.YT.Player){initHeroPlayer();}
+  else{
+    var _prev=window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady=function(){if(_prev)_prev();initHeroPlayer();};
+    if(!document.querySelector('script[src*="youtube.com/iframe_api"]')){
+      var t=document.createElement('script');t.src='https://www.youtube.com/iframe_api';
+      document.head.appendChild(t);
+    }
+  }
+})();
 
-/* reveal on scroll */
+/* reveal on scroll — covers both .reveal and .tmil (timeline entries) */
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});
-document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+document.querySelectorAll(".reveal,.tmil").forEach(el=>io.observe(el));
 /* fire hero reveals immediately */
 window.addEventListener("load",()=>document.querySelectorAll(".hero .reveal,.chiprow.reveal").forEach(el=>el.classList.add("in")));
 </script>
