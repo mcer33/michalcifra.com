@@ -256,7 +256,7 @@
   .hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#04060a}
   .hero-bg img.poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6;filter:grayscale(.25) brightness(.6) contrast(1.05)}
   /* YT API replaces #hero-yt-player div with an iframe; wrapper clips it */
-  #hero-yt{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  #hero-yt{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .9s ease}
   #hero-yt iframe{position:absolute!important;top:50%!important;left:50%!important;
     transform:translate(-50%,-50%)!important;
     width:100vw!important;height:56.25vw!important;min-height:100%!important;min-width:177.78vh!important;
@@ -1066,6 +1066,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
         onReady:function(e){
           e.target.seekTo(SEGS[0].s,true);
           e.target.playVideo();
+          /* fade in once controls flash has passed */
+          setTimeout(function(){
+            var w=document.getElementById('hero-yt');
+            if(w) w.style.opacity='1';
+          },600);
           ticker=setInterval(function(){
             if(!player||typeof player.getCurrentTime!=='function') return;
             if(player.getCurrentTime()>=SEGS[idx].e) jumpTo(idx+1);
