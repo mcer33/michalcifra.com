@@ -1058,8 +1058,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
     var idx=0, ticker=null, player=null, seeking=false;
     var cover=document.getElementById('hero-yt-cover');
     function showHero(){
-      /* reveal video: fade cover to transparent */
-      if(cover){cover.style.transition='opacity .9s ease';cover.style.opacity='0';}
+      /* reveal video only after YT overlay has fully cleared (called with delay) */
+      if(cover){cover.style.transition='opacity .2s ease';cover.style.opacity='0';}
     }
     function jumpTo(i){
       if(seeking) return;
@@ -1086,8 +1086,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
           },400);
         },
         onStateChange:function(e){
-          /* only show video once YT confirms it is actually playing — never on a timer */
-          if(e.data===1){seeking=false;showHero();}
+          /* wait 600ms after PLAYING fires — YT overlay lingers visually after state change */
+          if(e.data===1){seeking=false;setTimeout(showHero,600);}
         }
       }
     });
