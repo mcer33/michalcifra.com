@@ -1055,22 +1055,29 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
       {s:522, e:540},
       {s:564, e:640}
     ];
-    var idx=0, ticker=null, player=null, seeking=false;
+    var idx=0, ticker=null, player=null, seeking=false, revealTimer=null;
     var cover=document.getElementById('hero-yt-cover');
     function showHero(){
-      /* reveal video only after YT overlay has fully cleared (called with delay) */
-      if(cover){cover.style.transition='opacity .2s ease';cover.style.opacity='0';}
+      /* instant snap — no fade, so there is zero window for the YT icon to bleed through */
+      if(cover){cover.style.transition='none';cover.style.opacity='0';}
+      revealTimer=null;
+    }
+    function scheduleReveal(){
+      /* reset timer on every PLAYING event; reveal only after icon is gone (1200ms) */
+      if(revealTimer) clearTimeout(revealTimer);
+      revealTimer=setTimeout(showHero,1200);
     }
     function jumpTo(i){
       if(seeking) return;
       seeking=true;
       idx=i%SEGS.length;
-      /* instantly hide iframe behind cover so YT seek icon is never seen */
+      if(revealTimer){clearTimeout(revealTimer);revealTimer=null;}
+      /* snap cover to opaque instantly — hides YT seek/pause icon */
       if(cover){cover.style.transition='none';cover.style.opacity='1';}
       player.seekTo(SEGS[idx].s,true);
       player.playVideo();
       /* safety: un-block if onStateChange never fires */
-      setTimeout(function(){if(seeking){seeking=false;showHero();}},3000);
+      setTimeout(function(){if(seeking){seeking=false;scheduleReveal();}},3500);
     }
     player=new YT.Player('hero-yt-player',{
       videoId:'gezEio1mdjs',
@@ -1086,8 +1093,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
           },400);
         },
         onStateChange:function(e){
-          /* wait 600ms after PLAYING fires — YT overlay lingers visually after state change */
-          if(e.data===1){seeking=false;setTimeout(showHero,600);}
+          if(e.data===1){seeking=false;scheduleReveal();}
         }
       }
     });
