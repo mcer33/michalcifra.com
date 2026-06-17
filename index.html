@@ -1047,53 +1047,29 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   function initHeroPlayer(){
     if(!document.getElementById('hero-yt-player')) return;
-    /* curated segments (seconds): speaker + graphics moments */
-    var SEGS=[
-      {s:0,   e:20},
-      {s:295, e:320},
-      {s:492, e:502},
-      {s:522, e:540},
-      {s:564, e:640}
-    ];
-    var idx=0, ticker=null, player=null, seeking=false, revealTimer=null;
     var cover=document.getElementById('hero-yt-cover');
+    var revealTimer=null;
     function showHero(){
-      /* instant snap — no fade, so there is zero window for the YT icon to bleed through */
       if(cover){cover.style.transition='none';cover.style.opacity='0';}
       revealTimer=null;
     }
     function scheduleReveal(){
-      /* reset timer on every PLAYING event; reveal only after icon is gone (1200ms) */
       if(revealTimer) clearTimeout(revealTimer);
       revealTimer=setTimeout(showHero,1200);
     }
-    function jumpTo(i){
-      if(seeking) return;
-      seeking=true;
-      idx=i%SEGS.length;
+    function hideCover(){
       if(revealTimer){clearTimeout(revealTimer);revealTimer=null;}
-      /* snap cover to opaque instantly — hides YT seek/pause icon */
       if(cover){cover.style.transition='none';cover.style.opacity='1';}
-      player.seekTo(SEGS[idx].s,true);
-      player.playVideo();
-      /* safety: un-block if onStateChange never fires */
-      setTimeout(function(){if(seeking){seeking=false;scheduleReveal();}},3500);
     }
-    player=new YT.Player('hero-yt-player',{
+    new YT.Player('hero-yt-player',{
       videoId:'gezEio1mdjs',
-      playerVars:{autoplay:1,mute:1,controls:0,
+      playerVars:{autoplay:1,mute:1,loop:1,playlist:'gezEio1mdjs',controls:0,
         modestbranding:1,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,cc_load_policy:0},
       events:{
-        onReady:function(e){
-          e.target.seekTo(SEGS[0].s,true);
-          e.target.playVideo();
-          ticker=setInterval(function(){
-            if(!player||typeof player.getCurrentTime!=='function'||seeking) return;
-            if(player.getCurrentTime()>=SEGS[idx].e) jumpTo(idx+1);
-          },400);
-        },
+        onReady:function(e){e.target.playVideo();},
         onStateChange:function(e){
-          if(e.data===1){seeking=false;scheduleReveal();}
+          if(e.data===1){scheduleReveal();}        /* PLAYING  → reveal after 1200ms */
+          else if(e.data===3){hideCover();}        /* BUFFERING → cover opaque       */
         }
       }
     });
