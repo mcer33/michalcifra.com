@@ -255,14 +255,10 @@
   .hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:60px 0 40px;overflow:hidden}
   .hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#04060a}
   .hero-bg img.poster{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6;filter:grayscale(.25) brightness(.6) contrast(1.05)}
-  /* YT API replaces #hero-yt-player div with an iframe; wrapper clips it */
   #hero-yt{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  /* opaque cover sits above iframe in DOM, blocks YT pause/seek icons */
-  #hero-yt-cover{position:absolute;inset:0;z-index:3;background:#04060a;pointer-events:none;transition:opacity .9s ease}
-  #hero-yt iframe{position:absolute!important;top:50%!important;left:50%!important;
-    transform:translate(-50%,-50%)!important;
-    width:100vw!important;height:56.25vw!important;min-height:100%!important;min-width:177.78vh!important;
-    border:0;pointer-events:none;opacity:.72;
+  #hero-vid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:100vw;height:56.25vw;min-height:100%;min-width:177.78vh;
+    pointer-events:none;opacity:0;transition:opacity 1.2s ease;
     filter:grayscale(.28) contrast(1.06) brightness(.86) saturate(1.2)}
   /* scrims: tint the video toward photon-cyan + keep text legible */
   .hero-bg::before{content:"";position:absolute;inset:0;z-index:1;
@@ -547,8 +543,11 @@
 <header class="hero" id="top">
   <div class="hero-bg">
     <img class="poster" src="https://img.youtube.com/vi/gezEio1mdjs/maxresdefault.jpg" alt="" aria-hidden="true" />
-    <div id="hero-yt" aria-hidden="true"><div id="hero-yt-player"></div></div>
-    <div id="hero-yt-cover" aria-hidden="true"></div>
+    <div id="hero-yt" aria-hidden="true">
+      <video id="hero-vid" autoplay loop muted playsinline preload="auto">
+        <source src="assets/hero-bg.mp4" type="video/mp4">
+      </video>
+    </div>
   </div>
 
   <div class="wrap">
@@ -1042,47 +1041,13 @@ document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 
-/* ambient hero video — YouTube IFrame API for reliable muted autoplay */
+/* ambient hero video — self-hosted MP4, fade in when ready */
 (function(){
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  function initHeroPlayer(){
-    if(!document.getElementById('hero-yt-player')) return;
-    var cover=document.getElementById('hero-yt-cover');
-    var revealTimer=null;
-    function showHero(){
-      if(cover){cover.style.transition='none';cover.style.opacity='0';}
-      revealTimer=null;
-    }
-    function scheduleReveal(){
-      if(revealTimer) clearTimeout(revealTimer);
-      revealTimer=setTimeout(showHero,1200);
-    }
-    function hideCover(){
-      if(revealTimer){clearTimeout(revealTimer);revealTimer=null;}
-      if(cover){cover.style.transition='none';cover.style.opacity='1';}
-    }
-    new YT.Player('hero-yt-player',{
-      videoId:'gezEio1mdjs',
-      playerVars:{autoplay:1,mute:1,loop:1,playlist:'gezEio1mdjs',controls:0,
-        modestbranding:1,rel:0,playsinline:1,disablekb:1,fs:0,iv_load_policy:3,cc_load_policy:0},
-      events:{
-        onReady:function(e){e.target.playVideo();},
-        onStateChange:function(e){
-          if(e.data===1){scheduleReveal();}        /* PLAYING  → reveal after 1200ms */
-          else if(e.data===3){hideCover();}        /* BUFFERING → cover opaque       */
-        }
-      }
-    });
-  }
-  if(window.YT&&window.YT.Player){initHeroPlayer();}
-  else{
-    var _prev=window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady=function(){if(_prev)_prev();initHeroPlayer();};
-    if(!document.querySelector('script[src*="youtube.com/iframe_api"]')){
-      var t=document.createElement('script');t.src='https://www.youtube.com/iframe_api';
-      document.head.appendChild(t);
-    }
-  }
+  var v=document.getElementById('hero-vid');
+  if(!v) return;
+  v.addEventListener('canplay',function(){v.style.opacity='.72';},{once:true});
+  v.load();
 })();
 
 /* reveal on scroll — covers both .reveal and .tmil (timeline entries) */
