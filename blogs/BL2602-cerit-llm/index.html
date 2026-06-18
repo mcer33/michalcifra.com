@@ -270,8 +270,9 @@
   </div>
 
   <p class="lead">
-    CERIT-SC, part of the Czech national e-INFRA CZ research infrastructure, runs a free
-    LLM gateway at <code>llm.ai.e-infra.cz</code> that speaks the Anthropic API protocol.
+    CERIT-SC, part of the Czech national e-INFRA CZ research infrastructure, runs an
+    LLM gateway at <code>llm.ai.e-infra.cz</code> that speaks the Anthropic API protocol
+    and is accessible to Czech academic users with no per-token billing.
     Redirecting Claude Code to it takes one environment variable. I wanted to know whether
     that's actually usable — so I ran 600+ agentic benchmark runs across 10 real development
     tasks and compared the results against native Claude. Here's what I found.
@@ -389,7 +390,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num good">0.807</td>
           <td class="num">119.6 s</td>
           <td class="num">16 634</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num good">81 %</td>
         </tr>
         <tr>
@@ -398,7 +399,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num">0.804</td>
           <td class="num">9.7 s</td>
           <td class="num">29 583</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num good">100 %</td>
         </tr>
         <tr>
@@ -407,7 +408,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num">0.782</td>
           <td class="num">112.7 s</td>
           <td class="num">28 190</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num good">93 %</td>
         </tr>
         <tr>
@@ -416,7 +417,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num">0.762</td>
           <td class="num">99.0 s</td>
           <td class="num">31 596</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num">65 %</td>
         </tr>
         <tr>
@@ -425,7 +426,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num">0.762</td>
           <td class="num">45.5 s</td>
           <td class="num">26 680</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num">64 %</td>
         </tr>
         <tr>
@@ -434,7 +435,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num">0.759</td>
           <td class="num">115.5 s</td>
           <td class="num">44 984</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num good">94 %</td>
         </tr>
         <tr>
@@ -443,7 +444,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num">0.755</td>
           <td class="num">148.7 s</td>
           <td class="num">43 748</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num">70 %</td>
         </tr>
         <tr>
@@ -452,7 +453,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num bad">0.692</td>
           <td class="num">46.1 s</td>
           <td class="num">1 030</td>
-          <td class="num good">free</td>
+          <td class="num good">no direct cost*</td>
           <td class="num bad">25 %</td>
         </tr>
       </tbody>
@@ -463,6 +464,8 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     "Completion rate" = percentage of runs where Claude Code actually produced output files
     and exited cleanly. Token averages for Track A are from successful runs (earlier 30-trial
     run, 93% completion); the 100-trial average is pulled down by zero-output failures.
+    * CERIT academic users pay no per-token fee, but CERIT bears real infrastructure costs
+    to operate this service — higher token consumption is not free at the system level.
   </p>
 
   <div class="chart-wrap">
@@ -476,7 +479,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
 
   <p>
     <strong>The headline number: gemma4 on CERIT scored 0.807, Claude Sonnet scored 0.841.</strong>
-    The gap is 0.034 — three hundredths on a 0–1 scale — and gemma4 costs nothing.
+    The gap is 0.034 — three hundredths on a 0–1 scale — with no direct billing to the academic user.
   </p>
 
   <!-- ══════════════════════════════ DIMENSIONS -->
@@ -677,8 +680,10 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   </p>
 
   <p>
-    For CERIT users this is mostly academic: the service doesn't charge per token, so higher
-    consumption doesn't mean higher cost.
+    Academic users aren't billed per token, so higher consumption doesn't affect them directly.
+    That said, CERIT does bear real infrastructure costs to run this service — using it
+    efficiently is still good practice, and it's worth keeping in mind that the service
+    is a shared resource funded by the national research infrastructure.
   </p>
 
   <!-- ══════════════════════════════ BUG -->
@@ -806,8 +811,8 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   <h2>What to take away</h2>
 
   <p>
-    Gemma4 on CERIT reached 96% of Claude Sonnet's composite score — for free, with no
-    token limits, on Czech national research infrastructure. The differences are real but
+    Gemma4 on CERIT reached 96% of Claude Sonnet's composite score — with no direct billing
+    to academic users, on Czech national research infrastructure. The differences are real but
     specific: Claude writes cleaner, safer code; CERIT models pass more functional tests
     and are more likely to actually finish complex tasks.
   </p>
