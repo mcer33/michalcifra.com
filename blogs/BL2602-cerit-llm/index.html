@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code na CERIT LLM: benchmark 600+ běhů – Michal Cifra</title>
+<meta name="description" content="Podrobný benchmark Claude Code (Anthropic) vs CERIT LLM modelů na 10 reálných vývojářských úlohách — co funguje, kde jsou limity a jak nastavit tým.">
+<meta name="author" content="Michal Cifra">
+<meta property="og:title" content="Claude Code na CERIT LLM: benchmark 600+ běhů">
+<meta property="og:description" content="Gemma 4 na CERIT dosahuje 91 % výkonu Claude Sonnet — za nulové náklady. Co stojí za čísly.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #070a10;
+    --bg2: #0d1118;
+    --bg3: #111820;
+    --border: #1e2836;
+    --text: #bcc5d4;
+    --text-dim: #5a6a80;
+    --text-head: #e0e8f4;
+    --cyan: #00d9c8;
+    --cyan-dim: #007a74;
+    --yellow: #f0c040;
+    --green: #3ecb70;
+    --red: #e05050;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.75;
+    padding: 0 1rem;
+  }
+
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── layout ── */
+  .site-header {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .site-header a { font-family: var(--mono); font-size: 0.85rem; color: var(--text-dim); }
+  .site-header a:hover { color: var(--cyan); }
+  .breadcrumb { display: flex; gap: 0.5rem; align-items: center; }
+  .breadcrumb span { color: var(--border); }
+
+  article {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 0 6rem;
+  }
+
+  /* ── typography ── */
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--cyan);
+    background: rgba(0,217,200,0.08);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 3px;
+    padding: 0.15em 0.6em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+    line-height: 1.2;
+    color: var(--text-head);
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  .meta {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    align-items: center;
+  }
+  .meta-sep { color: var(--border); }
+
+  .lead {
+    font-size: 1.1rem;
+    color: #8da0b8;
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+    padding-left: 1.2rem;
+    border-left: 2px solid var(--cyan-dim);
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.55rem;
+    color: var(--text-head);
+    font-weight: 400;
+    margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--cyan);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 2rem 0 0.75rem;
+  }
+
+  p { margin-bottom: 1.1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: var(--text-head); font-weight: 500; }
+  em { color: #8aa0b8; font-style: italic; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.1em 0.4em;
+    color: var(--cyan);
+  }
+
+  pre {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-family: var(--mono);
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: #8eb8d0;
+  }
+  pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+
+  /* ── callout ── */
+  .callout {
+    background: var(--bg2);
+    border-left: 3px solid var(--cyan);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.4rem;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.warn { border-color: var(--yellow); }
+  .callout.warn strong { color: var(--yellow); }
+  .callout.info { border-color: #4080c0; }
+  .callout.info strong { color: #7ab0e0; }
+
+  /* ── tables ── */
+  .table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  thead tr { background: var(--bg2); }
+  thead th {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { transition: background 0.1s; }
+  tbody tr:hover { background: var(--bg2); }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid rgba(30,40,54,0.8); }
+  tbody td {
+    padding: 0.65rem 1rem;
+    vertical-align: middle;
+    color: var(--text);
+  }
+  .num { font-family: var(--mono); font-size: 0.85rem; text-align: right; }
+  .model-name { font-family: var(--mono); font-size: 0.82rem; color: #7ab0e0; }
+  .track-badge {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.1em 0.45em;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .track-a { background: rgba(0,217,200,0.12); color: var(--cyan); border: 1px solid rgba(0,217,200,0.3); }
+  .track-b { background: rgba(100,120,180,0.12); color: #7090d0; border: 1px solid rgba(100,120,180,0.3); }
+  .track-d { background: rgba(60,180,80,0.10); color: #50c068; border: 1px solid rgba(60,180,80,0.25); }
+  .highlight-row td { color: var(--text-head); }
+  .highlight-row .model-name { color: var(--cyan); }
+  .winner { color: var(--cyan) !important; font-weight: 500; }
+  .good { color: var(--green); }
+  .bad { color: var(--red); }
+  .mid { color: var(--yellow); }
+
+  /* ── score bar ── */
+  .score-bar-wrap { display: flex; align-items: center; gap: 0.6rem; }
+  .score-bar { height: 6px; border-radius: 3px; background: var(--bg3); flex: 1; min-width: 60px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 3px; }
+  .bar-claude { background: var(--cyan); }
+  .bar-cerit { background: #50c068; }
+  .bar-dim { background: #4a6680; }
+
+  /* ── chart ── */
+  .chart-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .chart-caption {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 0.8rem;
+  }
+
+  /* ── per-task heatmap ── */
+  .task-heat td.num { padding: 0.5rem 0.6rem; }
+  .heat-hi { color: var(--green); font-weight: 500; }
+  .heat-mid { color: var(--text); }
+  .heat-lo { color: var(--red); }
+
+  /* ── footer ── */
+  .article-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+  .article-footer a { color: var(--cyan); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+  @media (max-width: 600px) {
+    body { font-size: 16px; }
+    h1 { font-size: 1.65rem; }
+    thead th, tbody td { padding: 0.55rem 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="breadcrumb">
+    <a href="https://michalcifra.com/">michalcifra.com</a>
+    <span>›</span>
+    <a href="https://michalcifra.com/blogs/">Blog</a>
+    <span>›</span>
+    <span style="color:var(--text-dim)">BL2602</span>
+  </nav>
+</header>
+
+<article>
+  <div class="tag">AI infrastruktura · Benchmark</div>
+
+  <h1>Claude Code na české akademické infrastruktuře: poctivý benchmark CERIT LLM</h1>
+
+  <div class="meta">
+    <span>Michal Cifra</span>
+    <span class="meta-sep">·</span>
+    <span>Ústav fotoniky a elektroniky AV ČR</span>
+    <span class="meta-sep">·</span>
+    <span>Duben–červen 2026</span>
+    <span class="meta-sep">·</span>
+    <span>~2 200 slov</span>
+  </div>
+
+  <p class="lead">
+    CERIT-SC z e‑INFRA CZ provozuje veřejně přístupnou LLM gateway
+    (<code>llm.ai.e-infra.cz</code>) s Anthropic-kompatibilním rozhraním — což znamená, že
+    Claude Code lze přesměrovat na CERIT modely jediným přepsáním jedné proměnné prostředí.
+    Provedl jsem přes 600 agentických běhů na 10 reálných vývojářských úlohách a porovnal,
+    co tahle free infrastruktura reálně zvládne oproti nativní Anthropic službě.
+    Výsledek: <strong>Gemma 4 dosahuje 91 % výkonu Claude Sonnet</strong> — s nulovými náklady a konkrétními
+    rozdíly, které stojí za to pochopit dřív, než přepnete tým.
+  </p>
+
+  <!-- ═══════════════════════════════════════════════════════ METODIKA -->
+  <h2>Jak benchmark funguje</h2>
+
+  <p>
+    Benchmark je postaven přímo na úlohách, které dělám každodenně:
+    <strong>psaní agentů</strong> (Telegram, polling, systemd unit),
+    <strong>datové pipeline</strong> (RSS, TF-IDF), <strong>infra skripty</strong>,
+    <strong>LLM integrace</strong>, <strong>REST klienti</strong>, zpracování PDF,
+    vector DB + RAG, orientace v kódu, konfigurace prostředí a social-media autopostery.
+    Každá úloha je spouštěna v čistém sandboxu (<code>/tmp/bench-XXXX</code>) s formálním
+    zadáním, sadou očekávaných výstupních souborů a pytest testy.
+  </p>
+
+  <h3>Čtyři tracky = čtyři způsoby volání</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Track</th><th>Popis</th><th>Počet trialů</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="track-badge track-a">A</span></td>
+          <td>Nativní Claude Code (<code>claude --print</code>, Anthropic API)</td>
+          <td class="num">100</td>
+        </tr>
+        <tr>
+          <td><span class="track-badge track-b">B</span></td>
+          <td>CERIT modely přes OpenAI-shape API + vlastní Python harness</td>
+          <td class="num">30</td>
+        </tr>
+        <tr>
+          <td><span class="track-badge" style="background:rgba(120,80,200,.12);color:#9070e0;border:1px solid rgba(120,80,200,.3)">C</span></td>
+          <td>CERIT přes Claude Code + LiteLLM proxy (překlad protokolu)</td>
+          <td class="num">10</td>
+        </tr>
+        <tr>
+          <td><span class="track-badge track-d">D</span></td>
+          <td>CERIT přes Claude Code přímo na <code>/v1/messages</code> (Anthropic-shape)</td>
+          <td class="num">20–100</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Track A a D jsou metodologicky srovnatelné — oba používají Claude Code s kompletní
+    sadou nástrojů (Bash, Read, Write, Edit, Glob, Grep, TodoWrite).
+    Track B testuje „model samotný" přes vlastní Python harness. Track C přidává LiteLLM
+    vrstvu překladu, která v praxi způsobuje problémy (viz níže).
+  </p>
+
+  <h3>Čtyřvrstvá evaluace a composite score</h3>
+
+  <p>
+    Každý běh projde čtyřmi vrstvami hodnocení, které se slučují do jednoho composite skóre
+    na škále 0–1:
+  </p>
+  <pre><code>composite = 0.40 × correctness + 0.25 × completeness
+          + 0.20 × quality   + 0.15 × efficiency
+
+correctness = 0.20 × syntax + 0.40 × pytest_tests + 0.40 × LLM_judge
+efficiency  = min(1.0, 15 000 / total_tokens)</code></pre>
+
+  <div class="callout warn">
+    <strong>Metodická poznámka:</strong> jako LLM judge je použit model z rodiny Claude —
+    ten samý dodavatel jako Track A. To může systematicky zvýhodňovat Anthropic modely
+    ve složce <em>judge</em> (40 % z correctness, tj. 16 % celkového skóre).
+    Složka pytest_tests (40 % z correctness) je na tomto zkreslení nezávislá
+    a je proto metodicky robustnější.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ VÝSLEDKY -->
+  <h2>Výsledky</h2>
+
+  <p>
+    V tabulce níže jsou modely bez chybových případů, seřazené sestupně podle composite
+    skóre. Tracky C s DeepSeek modely jsou vypuštěny — konzistentně timeoutují na 300 s
+    (viz sekce o nalezené chybě). Modely <code>thinker</code> a <code>deepseek-v3.2-thinking</code>
+    přes Track D jsou také vynechány z důvodu strukturální chyby v serializaci tool callů
+    (viz sekce níže).
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Model</th><th>Track</th><th>Composite</th><th>Latence (med.)</th>
+        <th>Tokeny (prům.)</th><th>Cena/trial</th><th>Konvergence</th>
+      </tr></thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td class="model-name">claude-opus-4-6</td>
+          <td><span class="track-badge track-a">A</span></td>
+          <td class="num winner">0.889</td>
+          <td class="num">63.9 s</td>
+          <td class="num">~4 300</td>
+          <td class="num" style="color:var(--red)">$$</td>
+          <td class="num good">62 %</td>
+        </tr>
+        <tr class="highlight-row">
+          <td class="model-name">claude-sonnet-4-6</td>
+          <td><span class="track-badge track-a">A</span></td>
+          <td class="num winner">0.841</td>
+          <td class="num">32.0 s</td>
+          <td class="num">~4 300</td>
+          <td class="num mid">$</td>
+          <td class="num mid">50 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">kimi-k2.5</td>
+          <td><span class="track-badge track-b">B</span></td>
+          <td class="num">0.804</td>
+          <td class="num">9.7 s</td>
+          <td class="num">29 583</td>
+          <td class="num good">zdarma</td>
+          <td class="num good">100 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">gpt-oss-120b</td>
+          <td><span class="track-badge track-b">B</span></td>
+          <td class="num">0.792</td>
+          <td class="num">0.7 s</td>
+          <td class="num">21 380</td>
+          <td class="num good">zdarma</td>
+          <td class="num good">100 %</td>
+        </tr>
+        <tr style="border-top:1px solid var(--cyan-dim)">
+          <td class="model-name">gemma4 <span style="font-size:.75em;color:var(--cyan)">★ nejlepší Track D</span></td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num good">0.807</td>
+          <td class="num">119.6 s</td>
+          <td class="num">16 634</td>
+          <td class="num good">zdarma</td>
+          <td class="num good">81 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">kimi-k2.6</td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num">0.782</td>
+          <td class="num">112.7 s</td>
+          <td class="num">28 190</td>
+          <td class="num good">zdarma</td>
+          <td class="num good">93 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">coder alias (Qwen3)</td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num">0.762</td>
+          <td class="num">99.0 s</td>
+          <td class="num">31 596</td>
+          <td class="num good">zdarma</td>
+          <td class="num">65 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">glm-5</td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num">0.762</td>
+          <td class="num">45.5 s</td>
+          <td class="num">26 680</td>
+          <td class="num good">zdarma</td>
+          <td class="num">64 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">qwen3-coder-30b</td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num">0.759</td>
+          <td class="num">115.5 s</td>
+          <td class="num">44 984</td>
+          <td class="num good">zdarma</td>
+          <td class="num good">94 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">agentic alias (Qwen3)</td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num">0.755</td>
+          <td class="num">148.7 s</td>
+          <td class="num">43 748</td>
+          <td class="num good">zdarma</td>
+          <td class="num">70 %</td>
+        </tr>
+        <tr>
+          <td class="model-name">mistral-small-4</td>
+          <td><span class="track-badge track-d">D</span></td>
+          <td class="num bad">0.692</td>
+          <td class="num">46.1 s</td>
+          <td class="num">1 030</td>
+          <td class="num good">zdarma</td>
+          <td class="num bad">25 %</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="font-size:.82rem;color:var(--text-dim);margin-top:-.5rem">
+    Tokeny pro Track A (Claude): průměr ze <em>úspěšných běhů</em> (≈ první run z v1, 30 trialů, 93 % konvergence);
+    v celokovém průměru 100 trialů jsou deprimovány neúspěšnými běhy s nulovými tokeny.
+    Cena: $ ≈ $0.01–0.02/trial, $$ ≈ $0.30+/trial.
+  </p>
+
+  <!-- chart -->
+  <div class="chart-wrap">
+    <canvas id="compositeChart" height="280"></canvas>
+    <p class="chart-caption">Obr. 1 — Composite skóre (0–1). Modely s chybou thinker/DeepSeek-Thinking vynechány. Tracky A a D jsou srovnatelné metodologicky; Track B používá vlastní harness.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ DIMENZE -->
+  <h2>Co stojí za čísly: dimenze skóre</h2>
+
+  <p>
+    Composite je vážený průměr čtyř dimenzí. Každá z nich říká něco jiného.
+    Níže jsou tři klíčové modely:
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Model</th>
+        <th class="num">Correctness</th>
+        <th class="num">Completeness</th>
+        <th class="num">Quality</th>
+        <th class="num">Efficiency</th>
+        <th class="num">Composite</th>
+      </tr></thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td class="model-name">claude-opus-4-6</td>
+          <td class="num">0.888</td><td class="num good">1.000</td>
+          <td class="num winner">0.889</td><td class="num winner">1.000</td>
+          <td class="num winner">0.889</td>
+        </tr>
+        <tr class="highlight-row">
+          <td class="model-name">claude-sonnet-4-6</td>
+          <td class="num">0.797</td><td class="num good">1.000</td>
+          <td class="num winner">0.944</td><td class="num winner">1.000</td>
+          <td class="num winner">0.841</td>
+        </tr>
+        <tr>
+          <td class="model-name">gemma4 (Track D)</td>
+          <td class="num good">0.882</td><td class="num good">1.000</td>
+          <td class="num bad">0.667</td><td class="num">0.902</td>
+          <td class="num">0.807</td>
+        </tr>
+        <tr>
+          <td class="model-name">kimi-k2.6 (Track D)</td>
+          <td class="num good">0.872</td><td class="num good">1.000</td>
+          <td class="num bad">0.667</td><td class="num mid">0.532</td>
+          <td class="num">0.782</td>
+        </tr>
+        <tr>
+          <td class="model-name">glm-5 (Track D)</td>
+          <td class="num good">0.872</td><td class="num good">1.000</td>
+          <td class="num bad">0.667</td><td class="num mid">0.562</td>
+          <td class="num">0.762</td>
+        </tr>
+        <tr>
+          <td class="model-name">kimi-k2.5 (Track B)</td>
+          <td class="num good">0.892</td><td class="num good">1.000</td>
+          <td class="num bad">0.667</td><td class="num bad">0.509</td>
+          <td class="num">0.804</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Tři důležité pozorování:
+  </p>
+
+  <p>
+    <strong>1. CERIT modely mají vyšší correctness než Sonnet.</strong>
+    Gemma4 (0.882) a kimi-k2.5 (0.892) překonávají Claude Sonnet (0.797).
+    Correctness zahrnuje z 40 % pytest testy — ty jsou nezávislé na LLM
+    a metodologicky nejrobustnější část skóre. CERIT modely tedy v průměru projdou
+    <em>více automatizovaných testů</em>.
+  </p>
+
+  <p>
+    <strong>2. Claude vede na quality a efficiency.</strong>
+    Quality (lint, bezpečnostní vzory, ošetření chyb) je u Sonnet 0.944 oproti
+    0.667 u CERIT modelů. Kód z nativního Claude je čistší a bezpečnější.
+    Efficiency odráží tokenovou hospodárnost: Claude produkuje výsledky za ~4 000 tokenů
+    (<em>úspěšné běhy</em>), CERIT Track D potřebuje 17 000–45 000.
+  </p>
+
+  <p>
+    <strong>3. Rozdíl composite je +0.034 ve prospěch Sonnet.</strong>
+    Gemma4 dosahuje 0.807 oproti Sonnetu 0.841 — rozdíl je podstatně menší než
+    ~0.10, které naznačoval dřívější, menší vzorek (30 trialů, méně modelů).
+    Po rozšíření benchmarku a přidání gemma4 se gap výrazně zmenšil.
+  </p>
+
+  <!-- ═══════════════════════════════════════════════════════ KONVERGENCE -->
+  <h2>Spolehlivost: konvergence má svůj příběh</h2>
+
+  <p>
+    Konvergence znamená, že Claude Code subprocess skončil s <code>returncode == 0</code>.
+    Toto <em>nezaručuje správnost výstupu</em>, jen že se model vůbec dočkal závěru
+    bez timeoutu nebo fatální chyby. I přes toto omezení je číslo operačně relevantní:
+    nekonvergenující běh neprodukuje žádné soubory.
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Model</th><th class="num">Konvergence (100 trialů)</th><th>Interpretace</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="model-name">claude-opus-4-6</td><td class="num mid">62 %</td><td>Pokulhává na komplexních multi-file úlohách</td></tr>
+        <tr><td class="model-name">claude-sonnet-4-6</td><td class="num bad">50 %</td><td>Idem; efektivní přístup (4 tool calls) nestačí na složitost</td></tr>
+        <tr><td class="model-name">gemma4</td><td class="num good">81 %</td><td>Robustnější — 10 tool callů, víc pokrytí</td></tr>
+        <tr><td class="model-name">kimi-k2.6</td><td class="num good">93 %</td><td>Nejspolehlivější ze všech testovaných</td></tr>
+        <tr><td class="model-name">qwen3-coder-30b</td><td class="num good">94 %</td><td>Nejvyšší konvergence, ale pomalejší</td></tr>
+        <tr><td class="model-name">kimi-k2.5 (Track B)</td><td class="num good">100 %</td><td>Custom harness — bez timeoutového rizika</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Nižší konvergence u Claude (50–62 %) v plném benchmarku (100 trialů, složitější
+    task varianty) oproti dřívějšímu běhu (93 %) má konkrétní příčinu: Sonnet typicky
+    provede 4 tool cally — na jednoduché úlohy to stačí, na zadání vyžadující 4+ souborů
+    (Dockerfile + compose.yaml + .env + inicializační skript) nestačí a výstup je neúplný.
+    CERIT modely s 10–13 tool cally mají vyšší šanci pokrýt vše.
+  </p>
+
+  <div class="callout info">
+    <strong>Klíčový závěr:</strong> Claude generuje čistší, bezpečnější kód v méně krocích.
+    CERIT modely (zejména gemma4, kimi-k2.6) jsou méně elegantní, ale spolehlivěji
+    <em>dotáhnou úlohu do konce</em>. V produkčním agentickém prostředí
+    (<em>unattended</em> provoz) má spolehlivost stejnou váhu jako kvalita.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ PER-TASK -->
+  <h2>Kde se modely liší úlohu od úlohy</h2>
+
+  <p>
+    Vybraná data z per-task breakdown (<em>průměr přes trialy, bez thinker/DS-Thinking</em>):
+  </p>
+
+  <div class="table-wrap">
+    <table class="task-heat">
+      <thead><tr>
+        <th>Úloha</th>
+        <th class="num">Sonnet (A)</th>
+        <th class="num">Opus (A)</th>
+        <th class="num">gemma4 (D)</th>
+        <th class="num">kimi-k2.6 (D)</th>
+        <th class="num">glm-5 (D)</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>01 Agent dev</td>
+          <td class="num heat-hi">0.959</td><td class="num heat-hi">0.976</td>
+          <td class="num heat-hi">0.894</td><td class="num heat-hi">0.863</td><td class="num heat-hi">0.812</td></tr>
+        <tr><td>02 Data pipeline</td>
+          <td class="num heat-hi">0.842</td><td class="num heat-hi">0.911</td>
+          <td class="num heat-hi">0.826</td><td class="num heat-hi">0.795</td><td class="num heat-mid">0.500</td></tr>
+        <tr><td>03 Infra ops</td>
+          <td class="num heat-hi">0.895</td><td class="num heat-hi">0.934</td>
+          <td class="num heat-hi">0.762</td><td class="num heat-hi">0.781</td><td class="num heat-hi">0.798</td></tr>
+        <tr><td>04 LLM integration</td>
+          <td class="num heat-lo">0.406</td><td class="num heat-hi">0.875</td>
+          <td class="num heat-hi">0.795</td><td class="num heat-mid">0.716</td><td class="num heat-mid">0.681</td></tr>
+        <tr><td>05 API client</td>
+          <td class="num heat-lo">0.406</td><td class="num heat-hi">0.894</td>
+          <td class="num heat-hi">0.727</td><td class="num heat-hi">0.796</td><td class="num heat-hi">0.784</td></tr>
+        <tr><td>06 PDF processing</td>
+          <td class="num heat-lo">0.382</td><td class="num heat-hi">0.898</td>
+          <td class="num heat-hi">0.789</td><td class="num heat-mid">0.748</td><td class="num heat-hi">0.787</td></tr>
+        <tr><td>07 Vector DB / RAG</td>
+          <td class="num heat-lo">0.404</td><td class="num heat-lo">0.398</td>
+          <td class="num heat-hi">0.818</td><td class="num heat-mid">0.731</td><td class="num heat-mid">0.736</td></tr>
+        <tr><td>08 Code exploration</td>
+          <td class="num heat-hi">0.922</td><td class="num heat-hi">0.917</td>
+          <td class="num heat-hi">0.971</td><td class="num heat-hi">0.893</td><td class="num heat-hi">0.873</td></tr>
+        <tr><td>09 Config / env</td>
+          <td class="num heat-lo">0.430</td><td class="num heat-lo">0.414</td>
+          <td class="num heat-hi">0.841</td><td class="num heat-hi">0.908</td><td class="num heat-hi">0.917</td></tr>
+        <tr><td>10 Social media</td>
+          <td class="num heat-lo">0.411</td><td class="num heat-lo">0.416</td>
+          <td class="num heat-hi">0.796</td><td class="num heat-mid">0.606</td><td class="num heat-mid">0.505</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Na první pohled dramatické: CERIT modely výrazně překonávají Claude na úlohách 07–10.
+    Ale za tím číslem stojí konvergence: Claude Sonnet selže (0 souborů, subprocess
+    error) ve ~50 % trialů a těchto úlohách zejména. CERIT modely s více tool cally
+    tyto úlohy dotahují. Kdy se Sonnet skutečně podaří (converge), skóre jsou srovnatelná.
+  </p>
+  <p>
+    Výjimkou je úloha <strong>07 (Vector DB + RAG)</strong>, kde propadají i Opus (0.398) — zde
+    jde o skutečnou obtížnost úlohy, která stojí na kombinaci Qdrant + embedding pipeline
+    + multi-step přípravy dat. CERIT modely ji zvládají spolehlivěji díky
+    větší ochotě k iterativnímu opravování přes více tool callů.
+  </p>
+
+  <!-- ═══════════════════════════════════════════════════════ TOKENY -->
+  <h2>Tokenová efektivita: čísla bez iluzí</h2>
+
+  <p>
+    Nativní Claude potřebuje na úspěšný běh ~4 000 tokenů a 4–8 tool callů.
+    CERIT modely v Track D potřebují 17 000–45 000 tokenů a 10–14 tool callů.
+    Rozdíl je reálně <strong>4–10×</strong>, ne řádový.
+  </p>
+
+  <p>
+    Větší poměry (až 70× a více) se vyskytují v Track B (vlastní Python harness),
+    kde modely jako DeepSeek nebo agentic alias spotřebují 230 000–540 000 tokenů
+    na úlohu. To je artifact toho, jak harness posílá dotazy — nikoli vlastnost modelu.
+  </p>
+
+  <p>
+    <em>Pro CERIT uživatele: větší spotřeba tokenů není problém, protože CERIT
+    neúčtuje per-token.</em> Provozní cena je nulová bez ohledu na to, zda model
+    potřebuje 5 000 nebo 50 000 tokenů.
+  </p>
+
+  <!-- ═══════════════════════════════════════════════════════ CHYBA -->
+  <h2>Nalezená chyba: thinker a deepseek-v3.2-thinking</h2>
+
+  <p>
+    Modely <code>thinker</code> (alias) a <code>deepseek-v3.2-thinking</code> přes
+    Anthropic-shape rozhraní (<code>/v1/messages</code>) vykazují strukturální chybu:
+    nativní DeepSeek tokeny <code>&lt;｜DSML｜function_calls&gt;</code> a
+    <code>&lt;｜DSML｜invoke name="…"&gt;</code> prosakují do obsahu bloku
+    <code>thinking</code> místo toho, aby byly serializovány do struktury
+    <code>tool_use</code>. Claude Code vidí model jako přemýšlení a tool call
+    nikdy nevyvolá. Výsledkem jsou session bez jediného vytvořeného souboru.
+  </p>
+
+  <p>
+    Stejné modely přes Track B (OpenAI-shape API) fungují bez problémů — composite 0.728,
+    medián 15 reálných tool callů na trial. Chyba je tedy specifická pro Anthropic-shape
+    adaptér. Bylo provedeno 165 izolovaných curl volání bez reprodukce chyby v minimálním
+    nastavení — spouštěč pravděpodobně spočívá v kombinaci 23K-tokenového systémového promptu
+    Claude Code a 30+ nástrojů. Hlášení s reprodukcí a kvantitativním dopadem bylo
+    zasláno správci CERIT služby <strong>Lukáši Hejtmánkovi</strong> dne 2026-04-25.
+    Oba modely jsou z analýzy vynechány.
+  </p>
+
+  <div class="callout warn">
+    <strong>Praktické doporučení:</strong> Vyhněte se v tuto chvíli modelům
+    <code>thinker</code> a <code>deepseek-v3.2-thinking</code> přes Anthropic-shape
+    rozhraní. Přes OpenAI-shape fungují — ale to vyžaduje vlastní harness (Track B),
+    ne Claude Code CLI.
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ SWITCHER -->
+  <h2>Praktická konfigurace: switcher pro tým</h2>
+
+  <p>
+    Switcher je implementován jako sada shell funkcí v <code>~/.bashrc</code>.
+    Výběr modelů se opírá o benchmark výsledky; middleware vrstva
+    (rewrite proxy na <code>localhost:9999</code>) navíc odemkne živé
+    UI Claude Code (spinner, token countdown), které jinak vyžaduje model
+    s názvem odpovídajícím <code>claude-*</code>.
+  </p>
+
+  <pre><code>claude-cerit() {
+  ANTHROPIC_BASE_URL="https://llm.ai.e-infra.cz/"  \
+  ANTHROPIC_MODEL="gemma4"                          \  # ← vítěz Track D
+  ANTHROPIC_DEFAULT_OPUS_MODEL="gemma4"             \
+  ANTHROPIC_DEFAULT_SONNET_MODEL="gemma4"           \
+  ANTHROPIC_DEFAULT_HAIKU_MODEL="glm-5"             \  # ← rychlý, 45 s median
+  MAX_THINKING_TOKENS=0                             \
+  DISABLE_TELEMETRY=1                               \
+  command claude "$@"
+}
+
+claude-cerit-rich() {        # s živým UI přes proxy
+  # viz cerit-bashrc.snippet v ~/dev/ pro plnou implementaci
+  command claude --model claude-sonnet-4-6 "$@"    # proxy přepíše na gemma4
+}</code></pre>
+
+  <h3>Doporučení modelů (stav: červen 2026)</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Slot</th><th>Doporučený model</th><th>Důvod</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Primární (Sonnet/Opus slot)</strong></td>
+          <td class="model-name">gemma4</td>
+          <td>Nejlepší composite na Track D (0.807), efektivní tokeny (16K), dobrá konvergence (81 %)</td>
+        </tr>
+        <tr>
+          <td><strong>Záložní / dlouhé session</strong></td>
+          <td class="model-name">kimi-k2.6</td>
+          <td>Nejvyšší konvergence ze všech (93 %), lepší na zadáních vyžadujících kompletnost</td>
+        </tr>
+        <tr>
+          <td><strong>Haiku slot (rychlé úlohy)</strong></td>
+          <td class="model-name">glm-5</td>
+          <td>Medián latence 45 s (3× rychlejší než gemma4), composite 0.762, 0/100 chyb</td>
+        </tr>
+        <tr>
+          <td><strong>Aliasy (pozor!)</strong></td>
+          <td class="model-name">coder, agentic ✓ / thinker ✗</td>
+          <td><code>coder</code> a <code>agentic</code> jsou v pořádku (0.755–0.762); <code>thinker</code> má chybu — nepoužívat</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Pozor na stabilitiu aliasů: případ <code>thinker</code> ukázal, že CERIT může
+    přemapovat alias na jiný backend se zásadně odlišnou paritou kvality, aniž by
+    to bylo vidět z uživatelské perspektivy. Pro produkční provoz jsou konkrétní
+    pojmenované modely (<code>gemma4</code>, <code>kimi-k2.6</code>) bezpečnější
+    než aliasy.
+  </p>
+
+  <!-- ═══════════════════════════════════════════════════════ ZÁVĚR -->
+  <h2>Závěr</h2>
+
+  <p>
+    Výsledek po 600+ bězích na 10 reálných úlohách je konkrétní: nejlepší CERIT model
+    (<strong>gemma4</strong>) dosahuje composite skóre 0.807 oproti 0.841 Claude Sonnet —
+    to je 96% shoda na úrovni kompozitu. Na dimenzích se liší: Claude vede na čistotě
+    kódu a quality heuristikách, gemma4 a kimi-k2.6 vedou na correctness (pytest testy)
+    a spolehlivosti dokončení.
+  </p>
+
+  <p>
+    Pro týmy, kde ne každý člen má předplacenou Anthropic subskripci, je CERIT reálná
+    alternativa pro 80 % rutinní agentické práce — psaní testů, doplňování kódu,
+    refactoring, orientace v repozitáři. Na architekturální diskuse nebo složité
+    multi-session refaktory doporučuji nativní Claude.
+  </p>
+
+  <hr>
+
+  <div class="article-footer">
+    <p>
+      <strong>Poděkování:</strong> Velký dík CERIT-SC za provoz LLM gateway a otevřený
+      přístup pro českou akademii. Specifický dík <strong>Lukáši Hejtmánkovi</strong>
+      za rychlou reakci na hlášení chyby a nabídku spolupráce na reprodukci.
+    </p>
+    <p style="margin-top:.8rem">
+      Veškerý benchmark kód, výsledné JSON soubory a reprodukční skripty jsou
+      k dispozici na žádost; raw data se nacházejí v <code>~/.claude-benchmark/</code>
+      na ufeclaude.
+    </p>
+    <p style="margin-top:.8rem;font-size:.8rem">
+      <a href="mailto:cifra@ufe.cz">cifra@ufe.cz</a> ·
+      <a href="https://michalcifra.com/">michalcifra.com</a> ·
+      <a href="https://www.ufe.cz/en/">ÚFE AV ČR</a>
+    </p>
+  </div>
+
+</article>
+
+<script>
+const ctx = document.getElementById('compositeChart').getContext('2d');
+
+const labels = [
+  'Claude Opus 4.6 (A)',
+  'Claude Sonnet 4.6 (A)',
+  'Gemma 4 (D)',
+  'Kimi K2.5 (B)',
+  'Kimi K2.6 (D)',
+  'Coder alias / Qwen3 (D)',
+  'GLM-5 (D)',
+  'Qwen3-Coder-30B (D)',
+  'Agentic alias / Qwen3 (D)',
+];
+
+const scores = [0.889, 0.841, 0.807, 0.804, 0.782, 0.762, 0.762, 0.759, 0.755];
+
+const colors = scores.map((_, i) => {
+  if (i <= 1) return 'rgba(0,217,200,0.75)';   // Track A — cyan
+  if ([3].includes(i)) return 'rgba(100,120,200,0.65)';  // Track B — blue
+  return 'rgba(60,200,100,0.65)';               // Track D — green
+});
+
+const borderColors = scores.map((_, i) => {
+  if (i <= 1) return '#00d9c8';
+  if ([3].includes(i)) return '#6478c8';
+  return '#3ec864';
+});
+
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Composite skóre (0–1)',
+      data: scores,
+      backgroundColor: colors,
+      borderColor: borderColors,
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0d1118',
+        borderColor: '#1e2836',
+        borderWidth: 1,
+        titleColor: '#e0e8f4',
+        bodyColor: '#bcc5d4',
+        callbacks: {
+          label: ctx => ` ${ctx.parsed.x.toFixed(3)}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        min: 0.65,
+        max: 0.93,
+        grid: { color: 'rgba(30,40,54,0.8)' },
+        ticks: {
+          color: '#5a6a80',
+          font: { family: "'IBM Plex Mono'" },
+          callback: v => v.toFixed(2)
+        }
+      },
+      y: {
+        grid: { display: false },
+        ticks: {
+          color: '#bcc5d4',
+          font: { family: "'IBM Plex Mono'", size: 11 }
+        }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
