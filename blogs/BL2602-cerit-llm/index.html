@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code na CERIT LLM: testoval jsem 600 běhů – Michal Cifra</title>
-<meta name="description" content="Přesměroval jsem Claude Code na českou akademickou AI infrastrukturu a spustil 600 testů na 10 reálných úlohách. Tady jsou výsledky — i nepříjemná zjištění.">
+<title>Claude Code on Czech academic AI infrastructure: a 600-run benchmark – Michal Cifra</title>
+<meta name="description" content="I redirected Claude Code to the free Czech CERIT LLM gateway and ran 600+ agentic benchmark runs across 10 real dev tasks. Here's what I found.">
 <meta name="author" content="Michal Cifra">
-<meta property="og:title" content="Claude Code na CERIT LLM: testoval jsem 600 běhů">
-<meta property="og:description" content="Gemma 4 na CERIT dosáhla 91 % výkonu Claude Sonnet — a to zdarma. Co se za tím číslem skrývá.">
+<meta property="og:title" content="Claude Code on Czech academic AI: a 600-run benchmark">
+<meta property="og:description" content="Gemma 4 on CERIT scored 91% of Claude Sonnet — for free. What the numbers actually mean.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -257,63 +257,62 @@
 <article>
   <div class="tag">AI · Benchmark · CERIT</div>
 
-  <h1>Claude Code na české akademické infrastruktuře: co ukázal benchmark 600 běhů</h1>
+  <h1>Claude Code on Czech academic AI infrastructure: a 600-run benchmark</h1>
 
   <div class="meta">
     <span>Michal Cifra</span>
     <span class="meta-sep">·</span>
-    <span>ÚFE AV ČR / Biophotoniq</span>
+    <span>Institute of Photonics and Electronics, Czech Academy of Sciences</span>
     <span class="meta-sep">·</span>
-    <span>testy: duben 2026</span>
+    <span>tests run: April 2026</span>
     <span class="meta-sep">·</span>
-    <span>~2 200 slov</span>
+    <span>~2 200 words</span>
   </div>
 
   <p class="lead">
-    CERIT-SC z e-INFRA CZ provozuje LLM gateway zdarma pro českou akademii — a to
-    s rozhraním kompatibilním s Anthropic API. Přesměrovat na ni Claude Code je otázka
-    jednoho řádku v terminálu. Testoval jsem, co to v praxi znamená: spustil jsem
-    přes 600 agentických běhů na 10 reálných vývojářských úlohách a porovnal výsledky
-    s nativním Claude. Tady je co z toho vzešlo.
+    CERIT-SC, part of the Czech national e-INFRA CZ research infrastructure, runs a free
+    LLM gateway at <code>llm.ai.e-infra.cz</code> that speaks the Anthropic API protocol.
+    Redirecting Claude Code to it takes one environment variable. I wanted to know whether
+    that's actually usable — so I ran 600+ agentic benchmark runs across 10 real development
+    tasks and compared the results against native Claude. Here's what I found.
   </p>
 
-  <!-- ═══════════════════════════════ JAK TO FUNGUJE -->
-  <h2>Jak to celé funguje</h2>
+  <!-- ══════════════════════════════ HOW IT WORKS -->
+  <h2>How it works</h2>
 
   <p>
-    Normálně Claude Code volá Anthropic servery. Jenže CERIT nabízí endpoint
-    (<code>https://llm.ai.e-infra.cz/</code>), který mluví stejným protokolem — stačí nastavit
-    proměnnou prostředí <code>ANTHROPIC_BASE_URL</code> a Claude Code začne posílat dotazy
-    na českou infrastrukturu místo do Ameriky. Model na druhé straně může být úplně jiný.
+    Normally Claude Code talks to Anthropic's servers. But because CERIT exposes an
+    endpoint that speaks the same Anthropic protocol (<code>/v1/messages</code>), you can
+    point Claude Code at it instead — just set <code>ANTHROPIC_BASE_URL</code>. The model
+    on the other end is completely different, but Claude Code doesn't care.
   </p>
 
   <p>
-    Aby to bylo smysluplné porovnání, navrhl jsem čtyři různé způsoby volání, které
-    jsem v benchmarku nazval tracky:
+    To get a meaningful comparison I designed four different calling modes, which I call tracks:
   </p>
 
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Track</th><th>Co se děje</th><th>Počet běhů</th></tr></thead>
+      <thead><tr><th>Track</th><th>What happens</th><th>Runs</th></tr></thead>
       <tbody>
         <tr>
           <td><span class="track-badge track-a">A</span></td>
-          <td>Nativní Claude Code s Anthropic API — zlatý standard</td>
+          <td>Native Claude Code against the Anthropic API — the gold standard</td>
           <td class="num">100</td>
         </tr>
         <tr>
           <td><span class="track-badge track-b">B</span></td>
-          <td>CERIT modely přes OpenAI-style API, vlastní Python skript místo Claude Code</td>
+          <td>CERIT models via OpenAI-style API with a custom Python agentic harness</td>
           <td class="num">30</td>
         </tr>
         <tr>
           <td><span class="track-badge" style="background:rgba(120,80,200,.12);color:#9070e0;border:1px solid rgba(120,80,200,.3)">C</span></td>
-          <td>CERIT přes Claude Code + LiteLLM proxy (překladač protokolů uprostřed)</td>
+          <td>CERIT via Claude Code + LiteLLM proxy doing protocol translation in the middle</td>
           <td class="num">10</td>
         </tr>
         <tr>
           <td><span class="track-badge track-d">D</span></td>
-          <td>CERIT přímo přes Claude Code — stejné nástroje, jiný model na pozadí</td>
+          <td>CERIT directly via Claude Code against the Anthropic-shape endpoint — apples-to-apples</td>
           <td class="num">20–100</td>
         </tr>
       </tbody>
@@ -321,48 +320,49 @@
   </div>
 
   <p>
-    Tracky A a D jsou nejsrovnatelnější — v obou případech běží Claude Code
-    s celou sadou nástrojů (čtení souborů, spouštění příkazů, psaní kódu). Rozdíl je jen
-    v tom, jaký model odpovídá. Track B testuje modely samotné bez Claude Code.
-    Track C jsem zkoušel, ale nedoporučuji — viz níže.
+    Tracks A and D are the most comparable: both run the full Claude Code agentic loop with
+    all tools available (file reads, shell commands, writes, search). The only difference is
+    which model responds. Track B tests models directly without Claude Code. Track C turned
+    out to be impractical — more on that later.
   </p>
 
   <p>
-    Úloh bylo deset: psaní agentů pro Telegram a systemd, datové pipeline (RSS, TF-IDF),
-    infra skripty, integrace LLM do kódu, REST klienti, zpracování PDF, vector databáze s RAG,
-    orientace v cizím repozitáři, konfigurace prostředí a automatizace sociálních sítí.
-    Každá úloha dostala čisté pracovní prostředí a sadu automatických testů.
+    The ten tasks covered work I actually do day-to-day: writing Telegram and systemd agents,
+    data pipelines (RSS, TF-IDF), infrastructure scripts, LLM integration, REST clients, PDF
+    processing, vector database + RAG, codebase exploration, environment configuration, and
+    social media automation. Each task ran in a clean sandbox with a formal spec, expected
+    output files, and a pytest test suite.
   </p>
 
   <p>
-    Výsledek každého běhu se skládá ze čtyř složek, které se váženě průměrují do jednoho
-    skóre 0–1:
+    Each run produces a composite score from 0 to 1:
   </p>
-  <pre><code>výsledné skóre = 0.40 × správnost + 0.25 × úplnost
-               + 0.20 × kvalita kódu + 0.15 × hospodárnost tokenů
+  <pre><code>composite = 0.40 × correctness + 0.25 × completeness
+          + 0.20 × code quality + 0.15 × token efficiency
 
-správnost = 0.20 × syntax + 0.40 × automatické testy + 0.40 × hodnocení LLM
-hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
+correctness    = 0.20 × syntax + 0.40 × pytest tests + 0.40 × LLM judge
+token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
 
   <div class="callout warn">
-    <strong>Jedno omezení dopředu:</strong> část hodnocení dělá sám Claude (jako „nezávislý hodnotič").
-    To je trochu konflikt zájmů — Claude hodnotí Claude. Tato složka tvoří přibližně 16 % celkového
-    skóre. Složka automatických testů je na tom nezávislá a je proto spolehlivější.
+    <strong>One caveat upfront:</strong> the LLM judge component uses a Claude-family model
+    to score the outputs — same vendor as Track A. This creates a potential conflict of interest
+    worth about 16% of the total score. The pytest component (40% of correctness) is fully
+    independent and the more reliable signal.
   </div>
 
-  <!-- ═══════════════════════════════ VÝSLEDKY -->
-  <h2>Výsledky bez příkras</h2>
+  <!-- ══════════════════════════════ RESULTS -->
+  <h2>The results</h2>
 
   <p>
-    Testy probíhaly v dubnu 2026. Níže jsou výsledky všech modelů, které se chovaly rozumně
-    — tedy bez dvou DeepSeek modelů, o jejichž problému píšu zvlášť.
+    Tests ran in April 2026. The table below covers all models that behaved correctly —
+    two DeepSeek models are excluded due to a bug I describe separately.
   </p>
 
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Model</th><th>Track</th><th>Skóre</th><th>Medián latence</th>
-        <th>Tokeny (prům.)</th><th>Cena/běh</th><th>Dotažení</th>
+        <th>Model</th><th>Track</th><th>Score</th><th>Median latency</th>
+        <th>Tokens (avg)</th><th>Cost/run</th><th>Completion rate</th>
       </tr></thead>
       <tbody>
         <tr class="highlight-row">
@@ -371,7 +371,7 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num winner">0.889</td>
           <td class="num">63.9 s</td>
           <td class="num">~4 300</td>
-          <td class="num bad">placené</td>
+          <td class="num bad">paid</td>
           <td class="num mid">62 %</td>
         </tr>
         <tr class="highlight-row">
@@ -380,16 +380,16 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num winner">0.841</td>
           <td class="num">32.0 s</td>
           <td class="num">~4 300</td>
-          <td class="num mid">placené</td>
+          <td class="num mid">paid</td>
           <td class="num mid">50 %</td>
         </tr>
         <tr style="border-top:1px solid var(--cyan-dim)">
-          <td class="model-name">gemma4 <span style="font-size:.75em;color:var(--cyan)">★ nejlepší CERIT</span></td>
+          <td class="model-name">gemma4 <span style="font-size:.75em;color:var(--cyan)">★ best CERIT</span></td>
           <td><span class="track-badge track-d">D</span></td>
           <td class="num good">0.807</td>
           <td class="num">119.6 s</td>
           <td class="num">16 634</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num good">81 %</td>
         </tr>
         <tr>
@@ -398,7 +398,7 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num">0.804</td>
           <td class="num">9.7 s</td>
           <td class="num">29 583</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num good">100 %</td>
         </tr>
         <tr>
@@ -407,16 +407,16 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num">0.782</td>
           <td class="num">112.7 s</td>
           <td class="num">28 190</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num good">93 %</td>
         </tr>
         <tr>
-          <td class="model-name">coder (alias, Qwen3)</td>
+          <td class="model-name">coder alias (Qwen3)</td>
           <td><span class="track-badge track-d">D</span></td>
           <td class="num">0.762</td>
           <td class="num">99.0 s</td>
           <td class="num">31 596</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num">65 %</td>
         </tr>
         <tr>
@@ -425,7 +425,7 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num">0.762</td>
           <td class="num">45.5 s</td>
           <td class="num">26 680</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num">64 %</td>
         </tr>
         <tr>
@@ -434,16 +434,16 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num">0.759</td>
           <td class="num">115.5 s</td>
           <td class="num">44 984</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num good">94 %</td>
         </tr>
         <tr>
-          <td class="model-name">agentic (alias, Qwen3)</td>
+          <td class="model-name">agentic alias (Qwen3)</td>
           <td><span class="track-badge track-d">D</span></td>
           <td class="num">0.755</td>
           <td class="num">148.7 s</td>
           <td class="num">43 748</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num">70 %</td>
         </tr>
         <tr>
@@ -452,7 +452,7 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
           <td class="num bad">0.692</td>
           <td class="num">46.1 s</td>
           <td class="num">1 030</td>
-          <td class="num good">zdarma</td>
+          <td class="num good">free</td>
           <td class="num bad">25 %</td>
         </tr>
       </tbody>
@@ -460,42 +460,42 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
   </div>
 
   <p style="font-size:.82rem;color:var(--text-dim)">
-    „Dotažení" = procento běhů, kde Claude Code vůbec vytvořil soubory a skončil bez chyby.
-    Tokeny pro Track A jsou průměr z úspěšných běhů (dřívější run, 30 trialů, 93 % dotažení);
-    v celokovém průměru 100 trialů jsou nižší kvůli neúspěšným běhům.
+    "Completion rate" = percentage of runs where Claude Code actually produced output files
+    and exited cleanly. Token averages for Track A are from successful runs (earlier 30-trial
+    run, 93% completion); the 100-trial average is pulled down by zero-output failures.
   </p>
 
   <div class="chart-wrap">
     <canvas id="compositeChart" height="270"></canvas>
     <p class="chart-caption">
-      Obr. 1 — Celkové skóre modelů (0–1). Azurová = nativní Claude (Track A),
-      zelená = CERIT přes Claude Code (Track D), modrá = CERIT s vlastním harnesem (Track B).
-      DeepSeek-Thinking modely vynechány kvůli bugu.
+      Fig. 1 — Composite score (0–1). Cyan = native Claude (Track A),
+      green = CERIT via Claude Code (Track D), blue = CERIT via custom harness (Track B).
+      DeepSeek-Thinking models excluded due to a tool-call serialization bug.
     </p>
   </div>
 
   <p>
-    <strong>Hlavní číslo: gemma4 na CERIT dosáhla 0.807, Claude Sonnet 0.841.</strong>
-    Rozdíl je 0.034 — tři setiny na škále nula až jedna. Přitom gemma4 je zdarma.
+    <strong>The headline number: gemma4 on CERIT scored 0.807, Claude Sonnet scored 0.841.</strong>
+    The gap is 0.034 — three hundredths on a 0–1 scale — and gemma4 costs nothing.
   </p>
 
-  <!-- ═══════════════════════════════ ZA ČÍSLY -->
-  <h2>Za číslem se skrývá příběh</h2>
+  <!-- ══════════════════════════════ DIMENSIONS -->
+  <h2>What's behind the number</h2>
 
   <p>
-    Celkové skóre je váženým průměrem čtyř věcí a každá z nich říká něco jiného.
-    Podívejme se na klíčové modely:
+    The composite score blends four things that tell very different stories. Here are the
+    key models broken out:
   </p>
 
   <div class="table-wrap">
     <table>
       <thead><tr>
         <th>Model</th>
-        <th class="num">Správnost</th>
-        <th class="num">Úplnost</th>
-        <th class="num">Kvalita kódu</th>
-        <th class="num">Hospodárnost</th>
-        <th class="num">Celkem</th>
+        <th class="num">Correctness</th>
+        <th class="num">Completeness</th>
+        <th class="num">Code quality</th>
+        <th class="num">Efficiency</th>
+        <th class="num">Composite</th>
       </tr></thead>
       <tbody>
         <tr class="highlight-row">
@@ -539,74 +539,74 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
   </div>
 
   <p>
-    Tady je zajímavost, která mě trochu překvapila: <strong>CERIT modely prošly více
-    automatickými testy než Claude Sonnet.</strong> Gemma4 správnost 0.882 vs Sonnet 0.797.
-    Tohle jsou pytestové testy bez závislosti na LLM hodnotiteli. CERIT modely jsou tedy
-    v průměru funkčně správnější, jenže...
+    The surprising finding: <strong>CERIT models passed more automated tests than Claude Sonnet</strong>
+    — gemma4 correctness 0.882 vs Sonnet 0.797. These are pytest tests with no LLM involvement,
+    so this is the cleanest signal in the benchmark.
   </p>
 
   <p>
-    ...Claude vede na <strong>čistotě kódu</strong>. Složka „kvalita kódu" (0.944 u Sonnetu
-    vs 0.667 u CERIT modelů) hodnotí věci jako ošetření chyb, bezpečnostní vzory nebo
-    čitelnost. Kód z nativního Claude je zkrátka uklizený. CERIT modely to dodělají,
-    ale bez lesku.
+    Where Claude wins clearly is <strong>code quality</strong>. Sonnet scored 0.944 vs 0.667 for
+    CERIT models on the quality dimension, which evaluates error handling, security patterns,
+    and readability. Native Claude writes tidier code. The CERIT models get the job done, but
+    without the polish.
   </p>
 
   <p>
-    Velký rozdíl je taky v hospodárnosti tokenů — Claude potřebuje na úspěšný běh okolo
-    4 000 tokenů, CERIT modely v Track D spíše 17 000–45 000. Jenže pro uživatele CERIT
-    to nehraje roli, protože tokeny na CERIT nestojí nic.
+    Token efficiency also heavily favors Claude — around 4 000 tokens per successful run vs
+    17 000–45 000 for CERIT Track D. But for CERIT users this doesn't matter in practice,
+    since the service doesn't charge per token.
   </p>
 
-  <!-- ═══════════════════════════════ DOTAŽENÍ -->
-  <h2>Dotažení: číslo, které potřebuje vysvětlení</h2>
+  <!-- ══════════════════════════════ COMPLETION -->
+  <h2>Completion rate needs context</h2>
 
   <p>
-    „Dotažení" znamená, že Claude Code vůbec úlohu dokončil — subprocess skončil bez
-    fatální chyby a vytvořil soubory. <strong>Neznamená to, že výsledek byl dobrý.</strong>
-    Ale bez dotažení nevznikne nic.
+    "Completion rate" means the Claude Code subprocess exited cleanly and actually produced
+    output files. <strong>It doesn't mean the output was good</strong> — just that something
+    came out. Still, a 0% completion rate means you have nothing to evaluate.
   </p>
 
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Model</th><th class="num">Dotažení</th><th>Co za tím stojí</th>
+        <th>Model</th><th class="num">Completion</th><th>What's going on</th>
       </tr></thead>
       <tbody>
-        <tr><td class="model-name">claude-opus-4-6</td><td class="num mid">62 %</td><td>Složitější úlohy nestíhá dokončit v limitu kroků</td></tr>
-        <tr><td class="model-name">claude-sonnet-4-6</td><td class="num bad">50 %</td><td>Stejný problém — polovina úloh nedokončena</td></tr>
-        <tr><td class="model-name">gemma4</td><td class="num good">81 %</td><td>Spolehlivěji dotáhne, protože udělá víc kroků</td></tr>
-        <tr><td class="model-name">kimi-k2.6</td><td class="num good">93 %</td><td>Nejspolehlivější ze všech testovaných</td></tr>
-        <tr><td class="model-name">qwen3-coder-30b</td><td class="num good">94 %</td><td>Taky velmi spolehlivý, ale pomalejší</td></tr>
-        <tr><td class="model-name">kimi-k2.5 (Track B)</td><td class="num good">100 %</td><td>Vlastní harness bez pevného limitu kroků</td></tr>
+        <tr><td class="model-name">claude-opus-4-6</td><td class="num mid">62 %</td><td>Stalls on multi-file tasks before finishing</td></tr>
+        <tr><td class="model-name">claude-sonnet-4-6</td><td class="num bad">50 %</td><td>Same — half the runs produce nothing</td></tr>
+        <tr><td class="model-name">gemma4</td><td class="num good">81 %</td><td>More tool calls, higher completion</td></tr>
+        <tr><td class="model-name">kimi-k2.6</td><td class="num good">93 %</td><td>Most reliable of all tested models</td></tr>
+        <tr><td class="model-name">qwen3-coder-30b</td><td class="num good">94 %</td><td>Also very reliable, but slower</td></tr>
+        <tr><td class="model-name">kimi-k2.5 (Track B)</td><td class="num good">100 %</td><td>Custom harness, no hard step limit</td></tr>
       </tbody>
     </table>
   </div>
 
   <p>
-    Proč Claude nedotahuje? Jde o strategii. Claude Sonnet typicky udělá 4–5 volání nástrojů
-    (čtení, psaní, spuštění příkazu). Na jednoduché úlohy to stačí. Na zadání, kde se čekají
-    čtyři výstupní soubory najednou (Dockerfile, docker-compose.yaml, .env a inicializační skript),
-    to nestačí — Claude skončí dřív, než je vše hotové. CERIT modely dělají 10–14 kroků
-    a úlohu spíše dodělají.
+    The reason Claude's completion rate is lower is a strategy difference. Claude Sonnet
+    typically makes 4–5 tool calls per task. For simple tasks that's enough. For tasks that
+    require four output files at once — say, a Dockerfile, docker-compose.yaml, .env, and an
+    init script — it often stops before everything is done. CERIT models make 10–14 tool calls
+    and are more likely to push through to the end.
   </p>
 
   <div class="callout good">
-    <strong>Prakticky vzato:</strong> pokud pouštíte agenta bez dozoru přes noc, záleží vám
-    na tom, aby úlohy vůbec skončily. V tomto ohledu gemma4 a kimi-k2.6 na CERIT vedou.
+    <strong>In practice:</strong> if you're running agents unattended overnight, finishing the task
+    reliably matters as much as the quality of what's produced. On that metric, gemma4 and
+    kimi-k2.6 win.
   </div>
 
-  <!-- ═══════════════════════════════ PER-TASK -->
-  <h2>Úloha od úlohy: kde se modely liší</h2>
+  <!-- ══════════════════════════════ PER-TASK -->
+  <h2>Task by task</h2>
 
   <p>
-    Průměrné skóre přes všechny úlohy zakrývá důležité rozdíly. Tady je přehled:
+    The per-task breakdown shows where things diverge most:
   </p>
 
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Úloha</th>
+        <th>Task</th>
         <th class="num">Sonnet</th>
         <th class="num">Opus</th>
         <th class="num">gemma4</th>
@@ -614,34 +614,34 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
         <th class="num">glm-5</th>
       </tr></thead>
       <tbody>
-        <tr><td>01 Psaní agentů</td>
+        <tr><td>01 Agent development</td>
           <td class="num good">0.959</td><td class="num good">0.976</td>
           <td class="num good">0.894</td><td class="num good">0.863</td><td class="num good">0.812</td></tr>
-        <tr><td>02 Datové pipeline</td>
+        <tr><td>02 Data pipeline</td>
           <td class="num good">0.842</td><td class="num good">0.911</td>
           <td class="num good">0.826</td><td class="num good">0.795</td><td class="num mid">0.500</td></tr>
-        <tr><td>03 Infra skripty</td>
+        <tr><td>03 Infrastructure scripts</td>
           <td class="num good">0.895</td><td class="num good">0.934</td>
           <td class="num good">0.762</td><td class="num good">0.781</td><td class="num good">0.798</td></tr>
-        <tr><td>04 Integrace LLM</td>
+        <tr><td>04 LLM integration</td>
           <td class="num bad">0.406</td><td class="num good">0.875</td>
           <td class="num good">0.795</td><td class="num mid">0.716</td><td class="num mid">0.681</td></tr>
-        <tr><td>05 REST klienti</td>
+        <tr><td>05 REST client</td>
           <td class="num bad">0.406</td><td class="num good">0.894</td>
           <td class="num mid">0.727</td><td class="num good">0.796</td><td class="num good">0.784</td></tr>
-        <tr><td>06 Zpracování PDF</td>
+        <tr><td>06 PDF processing</td>
           <td class="num bad">0.382</td><td class="num good">0.898</td>
           <td class="num good">0.789</td><td class="num mid">0.748</td><td class="num good">0.787</td></tr>
         <tr><td>07 Vector DB + RAG</td>
           <td class="num bad">0.404</td><td class="num bad">0.398</td>
           <td class="num good">0.818</td><td class="num mid">0.731</td><td class="num mid">0.736</td></tr>
-        <tr><td>08 Orientace v kódu</td>
+        <tr><td>08 Code exploration</td>
           <td class="num good">0.922</td><td class="num good">0.917</td>
           <td class="num good">0.971</td><td class="num good">0.893</td><td class="num good">0.873</td></tr>
-        <tr><td>09 Konfigurace, .env</td>
+        <tr><td>09 Config / env setup</td>
           <td class="num bad">0.430</td><td class="num bad">0.414</td>
           <td class="num good">0.841</td><td class="num good">0.908</td><td class="num good">0.917</td></tr>
-        <tr><td>10 Sociální sítě</td>
+        <tr><td>10 Social media automation</td>
           <td class="num bad">0.411</td><td class="num bad">0.416</td>
           <td class="num good">0.796</td><td class="num mid">0.606</td><td class="num mid">0.505</td></tr>
       </tbody>
@@ -649,98 +649,103 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
   </div>
 
   <p>
-    Na první pohled to vypadá dramaticky — Sonnet 0.406 na „Integrace LLM"? Jenže za tím
-    stojí hlavně nedotažení. Když se Sonnetu úloha podařila, výsledky byly srovnatelné.
-    Výjimkou je <strong>úloha 07 (Vector DB + RAG)</strong>, kde propadl i Opus (0.398) —
-    tam jde o skutečnou obtížnost: Qdrant, embedding pipeline, příprava dat ve více krocích.
-    CERIT modely to zvládají lépe díky tomu, že iterují přes více kroků a opravují se za chodu.
-  </p>
-
-  <!-- ═══════════════════════════════ TOKENY -->
-  <h2>Kolik tokenů to celé stojí</h2>
-
-  <p>
-    Nativní Claude potřebuje na úspěšný běh asi 4 000 tokenů a 4–8 kroků nástrojů.
-    CERIT modely v Track D potřebují 17 000–45 000 tokenů a 10–14 kroků.
-    To je <strong>zhruba 4–10× více</strong> — ne stovkový řád, jak by se možná čekalo.
+    Sonnet's low scores on tasks 04–07, 09, 10 look dramatic but are largely a completion
+    problem — half of Sonnet's runs produced nothing, which drags the average down. When
+    Sonnet did complete a run, the output quality was competitive.
   </p>
 
   <p>
-    Větší čísla (až 540 000 tokenů na běh) se vyskytla v Track B s vlastním harnesem
-    u některých modelů — to je ale důsledek toho, jak harness komunikuje, ne vlastnost
-    modelu. Do Track D to nepřenášejte.
+    The real exception is <strong>task 07 (Vector DB + RAG)</strong>, where even Opus scored
+    0.398. This task is genuinely harder — it requires setting up Qdrant, running embeddings,
+    and preparing data in multiple stages. CERIT models handle it better because they're willing
+    to iterate and self-correct over more tool calls.
+  </p>
+
+  <!-- ══════════════════════════════ TOKENS -->
+  <h2>Token usage: realistic numbers</h2>
+
+  <p>
+    Native Claude uses around 4 000 tokens on a successful run and makes 4–8 tool calls.
+    CERIT Track D models use 17 000–45 000 tokens and 10–14 tool calls. That's roughly
+    <strong>4–10× more</strong> — not orders of magnitude.
   </p>
 
   <p>
-    Pro uživatele CERIT je tahle úvaha stejně akademická — služba tokenový počet neúčtuje.
-    Větší spotřeba tokenů proto nepředstavuje praktickou nevýhodu.
-  </p>
-
-  <!-- ═══════════════════════════════ BUG -->
-  <h2>Bug, na který jsem narazil: thinker a deepseek-v3.2-thinking</h2>
-
-  <p>
-    Dva modely na CERIT — alias <code>thinker</code> a konkrétní model
-    <code>deepseek-v3.2-thinking</code> — se přes Anthropic rozhraní chovaly divně.
-    Claude Code s nimi v testech neudělal vůbec nic: žádné soubory, prázdný výsledek.
+    Much larger numbers (up to 540 000 tokens per run) appeared in Track B with the custom
+    Python harness on a few models. That's an artifact of how that harness communicates,
+    not a property of the models themselves.
   </p>
 
   <p>
-    Po delším zkoumání jsem zjistil příčinu. DeepSeek modely mají vlastní formát pro
-    volání nástrojů — používají speciální tokeny jako
-    <code>&lt;｜DSML｜function_calls&gt;</code>. Jenže CERIT adaptér tyto tokeny
-    nezpracovával správně a posílal je Claude Code jako „myšlenkový blok" místo jako
-    skutečné volání nástroje. Claude Code pak čekal, ale příkaz ke spuštění nástroje
-    nikdy nepřišel — a session skončila prázdná.
+    For CERIT users this is mostly academic: the service doesn't charge per token, so higher
+    consumption doesn't mean higher cost.
+  </p>
+
+  <!-- ══════════════════════════════ BUG -->
+  <h2>A bug I found: thinker and deepseek-v3.2-thinking</h2>
+
+  <p>
+    Two models on CERIT — the alias <code>thinker</code> and the specific model
+    <code>deepseek-v3.2-thinking</code> — produced nothing when used via the
+    Anthropic-shape endpoint. Every run: zero output files, empty session.
   </p>
 
   <p>
-    Přes OpenAI rozhraní (Track B) stejné modely fungují bez problémů a dosáhly
-    skóre 0.728. Chyba je tedy specifická pro Anthropic-shape adaptér na CERIT.
-    Nahlásil jsem to Lukáši Hejtmánkovi z CERIT v dubnu 2026.
+    After some digging I found the cause. DeepSeek models use their own native token format
+    for tool calls: <code>&lt;｜DSML｜function_calls&gt;</code>,
+    <code>&lt;｜DSML｜invoke name="…"&gt;</code>. The CERIT Anthropic-shape adapter was
+    passing these through into a <code>thinking</code> block instead of translating them
+    into proper <code>tool_use</code> objects. Claude Code saw what looked like the model
+    thinking, never got a tool call to execute, and the session ended empty.
+  </p>
+
+  <p>
+    The same models work fine via Track B (OpenAI-shape API), where they scored 0.728. The
+    bug is specific to the Anthropic-shape adapter. I reported it to Lukáš Hejtmánek at
+    CERIT in April 2026. Both models are excluded from the analysis.
   </p>
 
   <div class="callout warn">
-    <strong>Prakticky:</strong> Modely <code>thinker</code> a <code>deepseek-v3.2-thinking</code>
-    přes Claude Code zatím nepoužívejte. Pokud chcete DeepSeek, funguje přes vlastní
-    Python skript a OpenAI rozhraní.
+    <strong>Practical note:</strong> avoid <code>thinker</code> and
+    <code>deepseek-v3.2-thinking</code> with Claude Code for now. If you want DeepSeek,
+    use a custom Python client against the OpenAI-shape endpoint instead.
   </div>
 
-  <!-- ═══════════════════════════════ VÝVOJ -->
-  <h2>Infrastruktura se vyvíjí</h2>
+  <!-- ══════════════════════════════ INFRASTRUCTURE -->
+  <h2>The infrastructure is actively developing</h2>
 
   <p>
-    Testy probíhaly v dubnu 2026 — a to je důležité zmínit. CERIT LLM gateway se aktivně
-    rozvíjí. Od té doby se mohly přidat nové modely, změnit verze stávajících, nebo se
-    třeba opravila výše zmíněná chyba s DeepSeek tokeny. Výsledky tedy popisují konkrétní
-    stav v konkrétním čase, ne trvalou pravdu.
+    Tests ran in April 2026, and that date matters. The CERIT LLM gateway is actively
+    developed — new models are being added, versions change, and bugs like the DeepSeek
+    one may well be fixed by the time you read this. These results describe the state
+    at a specific point in time.
   </p>
 
   <p>
-    Nabídka modelů na CERIT roste. V době testování bylo dostupných zhruba deset funkčních
-    modelů přes Anthropic rozhraní, plus další přes OpenAI rozhraní. Jsou to modely
-    z rodin Qwen, GLM, Kimi a Gemma — tedy open-source modely vyvíjené převážně v Číně,
-    které ale na mezinárodních benchmarcích standardně obstojí a jsou pro akademické
-    prostředí velmi zajímavou možností.
+    The model lineup at the time of testing included roughly ten models via the Anthropic
+    endpoint and more via the OpenAI endpoint, drawn from the Qwen, GLM, Kimi, and Gemma
+    families — open-weight models developed primarily in China that consistently perform
+    well on international benchmarks and are a natural fit for an academic infrastructure
+    setting. The selection is likely to grow.
   </p>
 
-  <!-- ═══════════════════════════════ TRACK C -->
-  <h2>Track C (LiteLLM proxy): nedoporučuji</h2>
+  <!-- ══════════════════════════════ TRACK C -->
+  <h2>Track C (LiteLLM proxy): not recommended</h2>
 
   <p>
-    LiteLLM je nástroj, který překládá mezi různými API formáty. Myšlenka Track C byla:
-    přesměrovat Claude Code na lokální proxy, která převede volání na CERIT formát.
-    V praxi to ale většinou časovalo po 300 sekundách — modely prostě nestíhaly odpovědět
-    v limitu, který Claude Code očekává. Na 10 trialech jsem nenasbíral data na srovnání.
-    Pro běžné použití nedoporučuji.
+    LiteLLM translates between different API formats. The idea was to route Claude Code
+    through a local proxy that would convert calls into whatever CERIT expects. In practice,
+    most runs timed out at 300 seconds — the models just didn't respond fast enough for
+    Claude Code's timeout expectations. I collected 10 trials but not enough to report
+    meaningfully. Don't use this approach for day-to-day work.
   </p>
 
-  <!-- ═══════════════════════════════ NASTAVENÍ -->
-  <h2>Jak to nastavit v praxi</h2>
+  <!-- ══════════════════════════════ SETUP -->
+  <h2>How to set it up</h2>
 
   <p>
-    Nejjednodušší způsob je shell funkce v <code>~/.bashrc</code>.
-    Přepíše proměnné prostředí a spustí standardní <code>claude</code>:
+    The simplest approach is a shell function in <code>~/.bashrc</code> that overrides
+    the relevant environment variables:
   </p>
 
   <pre><code>claude-cerit() {
@@ -755,86 +760,86 @@ hospodárnost = min(1.0, 15 000 / počet tokenů)</code></pre>
 }</code></pre>
 
   <p>
-    Pak stačí napsat <code>claude-cerit</code> místo <code>claude</code>
-    a jedete na CERIT infrastruktuře.
+    Then <code>claude-cerit</code> instead of <code>claude</code> and you're running
+    on CERIT infrastructure.
   </p>
 
-  <h3>Doporučené modely (duben 2026)</h3>
+  <h3>Recommended models (April 2026)</h3>
 
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Slot</th><th>Model</th><th>Proč</th>
+        <th>Slot</th><th>Model</th><th>Why</th>
       </tr></thead>
       <tbody>
         <tr>
-          <td><strong>Hlavní (Sonnet/Opus slot)</strong></td>
+          <td><strong>Primary (Sonnet/Opus slot)</strong></td>
           <td class="model-name">gemma4</td>
-          <td>Nejlepší skóre na Track D (0.807), 81 % dotažení, rozumná spotřeba tokenů</td>
+          <td>Best Track D score (0.807), 81% completion, reasonable token usage</td>
         </tr>
         <tr>
-          <td><strong>Záloha / dlouhé úlohy</strong></td>
+          <td><strong>Fallback / long sessions</strong></td>
           <td class="model-name">kimi-k2.6</td>
-          <td>Nejvyšší dotažení ze všech (93 %), bezpečná volba pro složitá zadání</td>
+          <td>Highest completion rate overall (93%), best for complex multi-file tasks</td>
         </tr>
         <tr>
-          <td><strong>Rychlé úlohy (Haiku slot)</strong></td>
+          <td><strong>Fast tasks (Haiku slot)</strong></td>
           <td class="model-name">glm-5</td>
-          <td>Medián 45 s (3× rychlejší než gemma4), skóre 0.762</td>
+          <td>45 s median (3× faster than gemma4), score 0.762</td>
         </tr>
         <tr>
-          <td><strong>Aliasy: pozor</strong></td>
+          <td><strong>Aliases: be careful</strong></td>
           <td class="model-name">coder, agentic ✓ / thinker ✗</td>
-          <td><code>coder</code> a <code>agentic</code> jsou v pořádku; <code>thinker</code> má bug — nepoužívat</td>
+          <td><code>coder</code> and <code>agentic</code> are fine; <code>thinker</code> has the bug above</td>
         </tr>
       </tbody>
     </table>
   </div>
 
   <p>
-    U aliasů platí obecné upozornění: CERIT může alias přemapovat na jiný model bez
-    upozornění — případ <code>thinker</code> to ukázal plasticky. Pro důležité nebo
-    produkční úlohy používejte konkrétní názvy modelů, ne aliasy.
+    One general warning about aliases: CERIT can remap an alias to a different backend
+    without notice. The <code>thinker</code> case illustrated this well. For anything
+    important, use specific model names rather than aliases.
   </p>
 
-  <!-- ═══════════════════════════════ ZÁVĚR -->
-  <h2>Co si z toho odnést</h2>
+  <!-- ══════════════════════════════ CONCLUSION -->
+  <h2>What to take away</h2>
 
   <p>
-    Gemma4 na CERIT dosáhla 96 % výkonu Claude Sonnet na škále 0–1 — a to zdarma,
-    bez omezení tokenů, na české akademické infrastruktuře. Rozdíl je v detailech:
-    Claude píše čistější, bezpečnější kód; CERIT modely projdou více automatických testů
-    a spolehlivěji dotáhnou složitější úlohy do konce.
-  </p>
-
-  <p>
-    Pro rutinní programátorskou práci — psaní agentů, pipeline, skripty, orientace
-    v repozitáři — je CERIT reálná alternativa. Na architekturální diskuse nebo
-    delší složité session bych zatím sáhl po nativním Claude.
+    Gemma4 on CERIT reached 96% of Claude Sonnet's composite score — for free, with no
+    token limits, on Czech national research infrastructure. The differences are real but
+    specific: Claude writes cleaner, safer code; CERIT models pass more functional tests
+    and are more likely to actually finish complex tasks.
   </p>
 
   <p>
-    A ještě jednou: testy probíhaly v dubnu 2026. CERIT infrastruktura se aktivně vyvíjí
-    a nabídka modelů roste. Stojí za to benchmark čas od času zopakovat — čísla se budou
-    měnit, pravděpodobně k lepšímu.
+    For routine agentic work — writing scripts and agents, building pipelines, navigating a
+    codebase — CERIT is a genuine alternative. For longer sessions with complex architecture
+    decisions, I'd still reach for native Claude.
+  </p>
+
+  <p>
+    One last note: these tests are from April 2026, and the CERIT LLM gateway is actively
+    improving. More models are being added and the rough edges are being smoothed out. It's
+    worth re-running the benchmark periodically — the numbers will move, likely upward.
   </p>
 
   <hr>
 
   <div class="article-footer">
     <p>
-      <strong>Poděkování:</strong> Dík CERIT-SC za provoz LLM gateway a za to, že je
-      přístupná pro celou českou akademii. Konkrétní dík Lukáši Hejtmánkovi za rychlou
-      reakci na hlášení bugu s DeepSeek modely a zájem o spolupráci na reprodukci.
+      <strong>Thanks</strong> to CERIT-SC for running the LLM gateway and making it freely
+      accessible to Czech academia. Specific thanks to Lukáš Hejtmánek for the quick response
+      to the DeepSeek bug report and for the interest in reproducing it together.
     </p>
     <p style="margin-top:.8rem">
-      Benchmark kód, výsledné JSON soubory a skripty jsou k dispozici na žádost.
-      Raw data jsou v <code>~/.claude-benchmark/</code> na ufeclaude.
+      Benchmark code, raw JSON results, and reproduction scripts are available on request.
+      Raw data lives in <code>~/.claude-benchmark/</code> on ufeclaude.
     </p>
     <p style="margin-top:.8rem;font-size:.8rem">
       <a href="mailto:cifra@ufe.cz">cifra@ufe.cz</a> ·
       <a href="https://michalcifra.com/">michalcifra.com</a> ·
-      <a href="https://www.ufe.cz/en/">ÚFE AV ČR</a>
+      <a href="https://www.ufe.cz/en/">Institute of Photonics and Electronics, CAS</a>
     </p>
   </div>
 
@@ -869,7 +874,7 @@ new Chart(ctx, {
   data: {
     labels,
     datasets: [{
-      label: 'Celkové skóre (0–1)',
+      label: 'Composite score (0–1)',
       data: scores,
       backgroundColor: colors,
       borderColor: borders,
