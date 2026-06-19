@@ -930,6 +930,7 @@ new Chart(ctx, {
         ticks: { color: '#5a6a80', font: { family: "'IBM Plex Mono'" }, callback: v => v.toFixed(2) }
       },
       y: {
+        afterFit(scale) { scale.width = 210; },
         grid: { display: false },
         ticks: { color: '#bcc5d4', font: { family: "'IBM Plex Mono'", size: 11 } }
       }
