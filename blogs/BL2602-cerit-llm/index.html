@@ -9,253 +9,375 @@
 <meta property="og:title" content="Claude Code on Czech academic AI: a 600-run headless benchmark">
 <meta property="og:description" content="Gemma 4 on CERIT scored 96% of Claude Sonnet in headless batch mode — for free. What the numbers actually mean.">
 <meta property="og:type" content="article">
+<link rel="canonical" href="https://michalcifra.com/blogs/BL2602-cerit-llm/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #070a10;
-    --bg2: #0d1118;
-    --bg3: #111820;
-    --border: #1e2836;
-    --text: #bcc5d4;
-    --text-dim: #5a6a80;
-    --text-head: #e0e8f4;
-    --cyan: #00d9c8;
-    --cyan-dim: #007a74;
-    --yellow: #f0c040;
-    --green: #3ecb70;
-    --red: #e05050;
-    --serif: 'Instrument Serif', Georgia, serif;
-    --mono: 'IBM Plex Mono', 'Courier New', monospace;
-    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --bg:        #05070b;
+    --bg-elev:   #090d15;
+    --panel:     #0d1320;
+    --panel-2:   #111a2b;
+    --ink:       #eef2f8;
+    --ink-dim:   #9eafc6;
+    --ink-faint: #5e6c84;
+    --line:      rgba(140,170,210,.12);
+    --line-s:    rgba(140,170,210,.22);
+    --photon:    #5ef2e6;
+    --photon-2:  #7bd0ff;
+    --amber:     #f3c97c;
+    --green:     #4ade80;
+    --red:       #f87171;
+    --glow:      0 0 0 1px rgba(94,242,230,.25), 0 0 34px -6px rgba(94,242,230,.45);
+    --serif:     "Instrument Serif", Georgia, serif;
+    --sans:      "Hanken Grotesk", system-ui, sans-serif;
+    --mono:      "IBM Plex Mono", ui-monospace, monospace;
   }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
   body {
     background: var(--bg);
-    color: var(--text);
+    color: var(--ink);
     font-family: var(--sans);
     font-size: 17px;
-    line-height: 1.78;
-    padding: 0 1rem;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
-  a { color: var(--cyan); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  /* grain overlay — same as main site */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: .045;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 
-  .site-header {
+  a { color: var(--photon); text-decoration: none; }
+  a:hover { color: #a9fff6; }
+  ::selection { background: rgba(94,242,230,.28); color: #eafffc; }
+
+  /* ── NAV (matches main site) ─────────────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    backdrop-filter: blur(14px) saturate(1.3);
+    background: linear-gradient(180deg, rgba(5,7,11,.86), rgba(5,7,11,.5));
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
     max-width: 760px;
     margin: 0 auto;
-    padding: 2rem 0 1rem;
+    padding: 0 1.5rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    border-bottom: 1px solid var(--border);
+    justify-content: space-between;
+    height: 60px;
   }
-  .breadcrumb { display: flex; gap: 0.5rem; align-items: center; }
-  .breadcrumb a { font-family: var(--mono); font-size: 0.85rem; color: var(--text-dim); }
-  .breadcrumb a:hover { color: var(--cyan); }
-  .breadcrumb span { color: var(--border); }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: .88rem;
+    letter-spacing: .04em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand:hover { color: var(--photon); }
+  .brand .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--photon);
+    box-shadow: 0 0 12px var(--photon);
+    animation: pulse 2.6s ease-in-out infinite;
+    flex: 0 0 auto;
+  }
+  .back-link {
+    font-family: var(--mono);
+    font-size: .74rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .back-link:hover { color: var(--photon); }
 
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .35; transform: scale(.7); }
+  }
+
+  /* ── ARTICLE LAYOUT ──────────────────────────────────────────── */
   article {
     max-width: 760px;
     margin: 0 auto;
-    padding: 3rem 0 6rem;
+    padding: 3.5rem 1.5rem 6rem;
   }
 
-  .tag {
-    display: inline-block;
+  /* section label (matches .label on main site) */
+  .label {
     font-family: var(--mono);
-    font-size: 0.72rem;
-    color: var(--cyan);
-    background: rgba(0,217,200,0.08);
-    border: 1px solid var(--cyan-dim);
-    border-radius: 3px;
-    padding: 0.15em 0.6em;
-    letter-spacing: 0.08em;
+    font-size: .72rem;
+    letter-spacing: .22em;
     text-transform: uppercase;
-    margin-bottom: 1.2rem;
+    color: var(--photon);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 1.4rem;
   }
+  .label::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--photon);
+    box-shadow: 0 0 10px var(--photon);
+    animation: pulse 2.6s ease-in-out infinite;
+  }
+
+  /* article meta */
+  .meta {
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--ink-faint);
+    margin-bottom: 2.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+  .meta-sep { color: var(--line-s); }
 
   h1 {
     font-family: var(--serif);
-    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
-    line-height: 1.2;
-    color: var(--text-head);
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.15;
+    color: var(--ink);
     font-weight: 400;
     font-style: italic;
-    margin-bottom: 1rem;
+    margin-bottom: 1.1rem;
+    letter-spacing: .01em;
   }
-
-  .meta {
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    margin-bottom: 2rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.2rem;
-    align-items: center;
-  }
-  .meta-sep { color: var(--border); }
 
   .lead {
-    font-size: 1.08rem;
-    color: #8da0b8;
+    font-size: 1.05rem;
+    color: var(--ink-dim);
     line-height: 1.8;
-    margin-bottom: 2.5rem;
-    padding-left: 1.2rem;
-    border-left: 2px solid var(--cyan-dim);
+    margin-bottom: 2.8rem;
+    padding-left: 1.1rem;
+    border-left: 2px solid rgba(94,242,230,.35);
   }
 
   h2 {
     font-family: var(--serif);
-    font-size: 1.5rem;
-    color: var(--text-head);
+    font-size: 1.55rem;
+    color: var(--ink);
     font-weight: 400;
-    margin: 3rem 0 1rem;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid var(--border);
+    margin: 3.2rem 0 1rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid var(--line);
+    letter-spacing: .005em;
   }
 
   h3 {
     font-family: var(--mono);
-    font-size: 0.88rem;
-    color: var(--cyan);
-    letter-spacing: 0.06em;
+    font-size: .82rem;
+    color: var(--photon);
+    letter-spacing: .12em;
     text-transform: uppercase;
-    margin: 2rem 0 0.75rem;
+    margin: 2.2rem 0 .85rem;
   }
 
   p { margin-bottom: 1.15rem; }
   p:last-child { margin-bottom: 0; }
 
-  strong { color: var(--text-head); font-weight: 500; }
-  em { color: #8aa0b8; font-style: italic; }
+  strong { color: var(--ink); font-weight: 600; }
+  em     { color: var(--ink-dim); font-style: italic; }
 
   code {
     font-family: var(--mono);
-    font-size: 0.85em;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 0.1em 0.4em;
-    color: var(--cyan);
+    font-size: .84em;
+    background: var(--panel);
+    border: 1px solid var(--line-s);
+    border-radius: 4px;
+    padding: .1em .42em;
+    color: var(--photon);
   }
 
   pre {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line-s);
+    border-radius: 8px;
     padding: 1.2rem 1.4rem;
     overflow-x: auto;
-    margin: 1.5rem 0;
+    margin: 1.6rem 0;
     font-family: var(--mono);
-    font-size: 0.83rem;
-    line-height: 1.6;
+    font-size: .82rem;
+    line-height: 1.62;
     color: #8eb8d0;
   }
   pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
 
+  /* callouts */
   .callout {
-    background: var(--bg2);
-    border-left: 3px solid var(--cyan);
-    border-radius: 0 6px 6px 0;
+    background: var(--panel);
+    border-left: 3px solid var(--photon);
+    border-radius: 0 8px 8px 0;
     padding: 1rem 1.4rem;
-    margin: 1.5rem 0;
-    font-size: 0.96rem;
+    margin: 1.6rem 0;
+    font-size: .95rem;
   }
-  .callout.warn { border-color: var(--yellow); }
-  .callout.warn strong { color: var(--yellow); }
+  .callout.warn { border-color: var(--amber); }
+  .callout.warn strong { color: var(--amber); }
   .callout.good { border-color: var(--green); }
   .callout.good strong { color: var(--green); }
 
-  .table-wrap { overflow-x: auto; margin: 1.5rem 0; border-radius: 8px; border: 1px solid var(--border); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-  thead tr { background: var(--bg2); }
+  /* tables */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1.6rem 0;
+    border-radius: 10px;
+    border: 1px solid var(--line-s);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .87rem; }
+  thead tr { background: var(--panel); }
   thead th {
     font-family: var(--mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.05em;
+    font-size: .72rem;
+    letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--text-dim);
-    padding: 0.75rem 1rem;
+    color: var(--ink-faint);
+    padding: .75rem 1rem;
     text-align: left;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line-s);
     white-space: nowrap;
   }
-  tbody tr:hover { background: var(--bg2); }
-  tbody tr:not(:last-child) td { border-bottom: 1px solid rgba(30,40,54,0.8); }
-  tbody td { padding: 0.65rem 1rem; vertical-align: middle; color: var(--text); }
-  .num { font-family: var(--mono); font-size: 0.85rem; text-align: right; }
-  .model-name { font-family: var(--mono); font-size: 0.82rem; color: #7ab0e0; }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: var(--panel); }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--line); }
+  tbody td { padding: .65rem 1rem; vertical-align: middle; color: var(--ink-dim); }
+  .num { font-family: var(--mono); font-size: .84rem; text-align: right; }
+  .model-name { font-family: var(--mono); font-size: .81rem; color: var(--photon-2); }
   .track-badge {
     font-family: var(--mono);
-    font-size: 0.7rem;
-    padding: 0.1em 0.45em;
-    border-radius: 3px;
+    font-size: .69rem;
+    padding: .12em .5em;
+    border-radius: 4px;
   }
-  .track-a { background: rgba(0,217,200,0.12); color: var(--cyan); border: 1px solid rgba(0,217,200,0.3); }
-  .track-b { background: rgba(100,120,180,0.12); color: #7090d0; border: 1px solid rgba(100,120,180,0.3); }
-  .track-d { background: rgba(60,180,80,0.10); color: #50c068; border: 1px solid rgba(60,180,80,0.25); }
-  .highlight-row td { color: var(--text-head); }
-  .highlight-row .model-name { color: var(--cyan); }
-  .winner { color: var(--cyan) !important; font-weight: 500; }
-  .good { color: var(--green); }
-  .bad { color: var(--red); }
-  .mid { color: var(--yellow); }
+  .track-a { background: rgba(94,242,230,.10); color: var(--photon);   border: 1px solid rgba(94,242,230,.3); }
+  .track-b { background: rgba(100,120,200,.10); color: #7090d8;         border: 1px solid rgba(100,120,200,.3); }
+  .track-d { background: rgba(74,222,128,.08);  color: var(--green);    border: 1px solid rgba(74,222,128,.28); }
+  .highlight-row td { color: var(--ink); }
+  .highlight-row .model-name { color: var(--photon); }
+  .winner { color: var(--photon) !important; font-weight: 600; }
+  .good   { color: var(--green); }
+  .bad    { color: var(--red); }
+  .mid    { color: var(--amber); }
 
+  /* chart */
   .chart-wrap {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line-s);
+    border-radius: 10px;
     padding: 1.5rem;
-    margin: 1.5rem 0;
+    margin: 1.6rem 0;
   }
   .chart-caption {
     font-family: var(--mono);
-    font-size: 0.74rem;
-    color: var(--text-dim);
+    font-size: .72rem;
+    color: var(--ink-faint);
     text-align: center;
-    margin-top: 0.8rem;
-    line-height: 1.5;
+    margin-top: .9rem;
+    line-height: 1.55;
   }
 
+  /* hr */
+  hr { border: none; border-top: 1px solid var(--line); margin: 2.8rem 0; }
+
+  /* ── FOOTER ──────────────────────────────────────────────────── */
   .article-footer {
     margin-top: 4rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--border);
-    font-size: 0.88rem;
-    color: var(--text-dim);
+    border-top: 1px solid var(--line);
+    font-size: .88rem;
+    color: var(--ink-faint);
   }
-  .article-footer a { color: var(--cyan); }
+  .article-footer a { color: var(--photon); }
 
-  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 48px 0 64px;
+    background: var(--bg-elev);
+    margin-top: 4rem;
+  }
+  .footer-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .footer-brand {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    color: var(--ink);
+  }
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .06em;
+    color: var(--ink-faint);
+    text-align: right;
+    line-height: 1.8;
+  }
+  .footer-meta a { color: var(--photon-2); }
 
+  /* ── SCROLL REVEAL ──────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+  /* ── RESPONSIVE ─────────────────────────────────────────────── */
   @media (max-width: 600px) {
     body { font-size: 16px; }
-    h1 { font-size: 1.65rem; }
-    thead th, tbody td { padding: 0.55rem 0.7rem; }
+    h1   { font-size: 1.7rem; }
+    thead th, tbody td { padding: .5rem .65rem; }
+    article { padding: 2rem 1rem 4rem; }
   }
 </style>
 </head>
 <body>
 
-<header class="site-header">
-  <nav class="breadcrumb">
-    <a href="https://michalcifra.com/">michalcifra.com</a>
-    <span>›</span>
-    <a href="https://michalcifra.com/blogs/">Blog</a>
-    <span>›</span>
-    <span style="color:var(--text-dim)">BL2602</span>
-  </nav>
-</header>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="https://michalcifra.com/"><span class="dot"></span>M. CIFRA</a>
+    <a class="back-link" href="https://michalcifra.com/">← michalcifra.com</a>
+  </div>
+</nav>
 
 <article>
-  <div class="tag">AI · Benchmark · CERIT</div>
+  <div class="label">AI · Benchmark · CERIT</div>
 
   <h1>Claude Code on Czech academic AI infrastructure: a 600-run headless benchmark</h1>
 
@@ -269,7 +391,7 @@
     <span>~2 000 words</span>
   </div>
 
-  <p class="lead">
+  <p class="lead reveal">
     CERIT-SC, part of the Czech national e-INFRA CZ research infrastructure, runs an
     LLM gateway at <code>llm.ai.e-infra.cz</code> that speaks the Anthropic API protocol
     and is accessible to Czech academic users with no per-token billing.
@@ -280,20 +402,20 @@
   </p>
 
   <!-- ══════════════════════════════ HOW IT WORKS -->
-  <h2>How it works</h2>
+  <h2 class="reveal">How it works</h2>
 
-  <p>
+  <p class="reveal">
     Normally Claude Code talks to Anthropic's servers. But because CERIT exposes an
     endpoint that speaks the same Anthropic protocol (<code>/v1/messages</code>), you can
     point Claude Code at it instead — just set <code>ANTHROPIC_BASE_URL</code>. The model
     on the other end is completely different, but Claude Code doesn't care.
   </p>
 
-  <p>
+  <p class="reveal">
     To get a meaningful comparison I designed four different calling modes, which I call tracks:
   </p>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead><tr><th>Track</th><th>What happens</th><th>Runs</th></tr></thead>
       <tbody>
@@ -308,7 +430,7 @@
           <td class="num">30</td>
         </tr>
         <tr>
-          <td><span class="track-badge" style="background:rgba(120,80,200,.12);color:#9070e0;border:1px solid rgba(120,80,200,.3)">C</span></td>
+          <td><span class="track-badge" style="background:rgba(120,80,200,.10);color:#9070e0;border:1px solid rgba(120,80,200,.28)">C</span></td>
           <td>CERIT via Claude Code + LiteLLM proxy doing protocol translation in the middle</td>
           <td class="num">10</td>
         </tr>
@@ -321,14 +443,14 @@
     </table>
   </div>
 
-  <p>
+  <p class="reveal">
     Tracks A and D are the most comparable: both run the full Claude Code agentic loop with
     all tools available (file reads, shell commands, writes, search). The only difference is
     which model responds. Track B tests models directly without Claude Code. Track C turned
     out to be impractical — more on that later.
   </p>
 
-  <p>
+  <p class="reveal">
     The ten tasks covered work I actually do day-to-day: writing Telegram and systemd agents,
     data pipelines (RSS, TF-IDF), infrastructure scripts, LLM integration, REST clients, PDF
     processing, vector database + RAG, codebase exploration, environment configuration, and
@@ -336,31 +458,50 @@
     output files, and a pytest test suite.
   </p>
 
-  <p>
+  <p class="reveal">
     Each run produces a composite score from 0 to 1:
   </p>
-  <pre><code>composite = 0.40 × correctness + 0.25 × completeness
+  <pre class="reveal"><code>composite = 0.40 × correctness + 0.25 × completeness
           + 0.20 × code quality + 0.15 × token efficiency
 
 correctness    = 0.20 × syntax + 0.40 × pytest tests + 0.40 × LLM judge
 token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
 
-  <div class="callout warn">
+  <div class="callout warn reveal">
     <strong>One caveat upfront:</strong> the LLM judge component uses a Claude-family model
     to score the outputs — same vendor as Track A. This creates a potential conflict of interest
     worth about 16% of the total score. The pytest component (40% of correctness) is fully
     independent and the more reliable signal.
   </div>
 
-  <!-- ══════════════════════════════ RESULTS -->
-  <h2>The results</h2>
+  <!-- ══════════════════════════════ METHODOLOGY -->
+  <h2 class="reveal">Methodology: headless batch invocations</h2>
 
-  <p>
+  <p class="reveal">
+    Each of the 600+ runs executed as <code>claude --print -p "prompt"</code> — one headless
+    subprocess per task, fresh context every time. This models the most natural use case for
+    CERIT: automated, unattended batch work — code generation, pipeline stages, CI helpers —
+    where a defined task is fired off and the result collected. Each run got a clean sandbox,
+    a formal spec, expected output files, and a pytest test suite.
+  </p>
+
+  <p class="reveal">
+    Claude Code's system prompt (tool definitions included) weighed roughly
+    <strong>21K tokens</strong> in the version used for this benchmark (v2.1.119). In headless
+    mode that prompt is sent exactly once per session, leaving ample room on any model with a
+    32K+ context window. All models in the benchmark completed at least some runs without
+    hitting context limits.
+  </p>
+
+  <!-- ══════════════════════════════ RESULTS -->
+  <h2 class="reveal">The results</h2>
+
+  <p class="reveal">
     Tests ran in April 2026. The table below covers all models that behaved correctly —
     two DeepSeek models are excluded due to a bug I describe separately.
   </p>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead><tr>
         <th>Model</th><th>Track</th><th>Score</th><th>Median latency</th>
@@ -385,8 +526,8 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
           <td class="num mid">paid</td>
           <td class="num mid">50 %</td>
         </tr>
-        <tr style="border-top:1px solid var(--cyan-dim)">
-          <td class="model-name">gemma4 <span style="font-size:.75em;color:var(--cyan)">★ best CERIT</span></td>
+        <tr style="border-top:1px solid rgba(94,242,230,.2)">
+          <td class="model-name">gemma4 <span style="font-size:.73em;color:var(--photon)">★ best CERIT</span></td>
           <td><span class="track-badge track-d">D</span></td>
           <td class="num good">0.807</td>
           <td class="num">119.6 s</td>
@@ -461,7 +602,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     </table>
   </div>
 
-  <p style="font-size:.82rem;color:var(--text-dim)">
+  <p class="reveal" style="font-size:.82rem;color:var(--ink-faint)">
     "Completion rate" = percentage of runs where Claude Code actually produced output files
     and exited cleanly. Token averages for Track A are from successful runs (earlier 30-trial
     run, 93% completion); the 100-trial average is pulled down by zero-output failures.
@@ -469,29 +610,29 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     to operate this service — higher token consumption is not free at the system level.
   </p>
 
-  <div class="chart-wrap">
+  <div class="chart-wrap reveal">
     <canvas id="compositeChart" height="270"></canvas>
     <p class="chart-caption">
-      Fig. 1 — Composite score (0–1). Cyan = native Claude (Track A),
+      Fig. 1 — Composite score (0–1). Teal = native Claude (Track A),
       green = CERIT via Claude Code (Track D), blue = CERIT via custom harness (Track B).
       DeepSeek-Thinking models excluded due to a tool-call serialization bug.
     </p>
   </div>
 
-  <p>
+  <p class="reveal">
     <strong>The headline number: gemma4 on CERIT scored 0.807, Claude Sonnet scored 0.841.</strong>
     The gap is 0.034 — three hundredths on a 0–1 scale — with no direct billing to the academic user.
   </p>
 
   <!-- ══════════════════════════════ DIMENSIONS -->
-  <h2>What's behind the number</h2>
+  <h2 class="reveal">What's behind the number</h2>
 
-  <p>
+  <p class="reveal">
     The composite score blends four things that tell very different stories. Here are the
     key models broken out:
   </p>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead><tr>
         <th>Model</th>
@@ -542,35 +683,35 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     </table>
   </div>
 
-  <p>
+  <p class="reveal">
     The surprising finding: <strong>CERIT models passed more automated tests than Claude Sonnet</strong>
     — gemma4 correctness 0.882 vs Sonnet 0.797. These are pytest tests with no LLM involvement,
     so this is the cleanest signal in the benchmark.
   </p>
 
-  <p>
+  <p class="reveal">
     Where Claude wins clearly is <strong>code quality</strong>. Sonnet scored 0.944 vs 0.667 for
     CERIT models on the quality dimension, which evaluates error handling, security patterns,
     and readability. Native Claude writes tidier code. The CERIT models get the job done, but
     without the polish.
   </p>
 
-  <p>
+  <p class="reveal">
     Token efficiency also heavily favors Claude — around 4 000 tokens per successful run vs
     17 000–45 000 for CERIT Track D. But for CERIT users this doesn't matter in practice,
     since the service doesn't charge per token.
   </p>
 
   <!-- ══════════════════════════════ COMPLETION -->
-  <h2>Completion rate needs context</h2>
+  <h2 class="reveal">Completion rate needs context</h2>
 
-  <p>
+  <p class="reveal">
     "Completion rate" means the Claude Code subprocess exited cleanly and actually produced
     output files. <strong>It doesn't mean the output was good</strong> — just that something
     came out. Still, a 0% completion rate means you have nothing to evaluate.
   </p>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead><tr>
         <th>Model</th><th class="num">Completion</th><th>What's going on</th>
@@ -586,7 +727,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     </table>
   </div>
 
-  <p>
+  <p class="reveal">
     The reason Claude's completion rate is lower is a strategy difference. Claude Sonnet
     typically makes 4–5 tool calls per task. For simple tasks that's enough. For tasks that
     require four output files at once — say, a Dockerfile, docker-compose.yaml, .env, and an
@@ -594,20 +735,20 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     and are more likely to push through to the end.
   </p>
 
-  <div class="callout good">
+  <div class="callout good reveal">
     <strong>In practice:</strong> if you're running agents unattended overnight, finishing the task
     reliably matters as much as the quality of what's produced. On that metric, gemma4 and
     kimi-k2.6 win.
   </div>
 
   <!-- ══════════════════════════════ PER-TASK -->
-  <h2>Task by task</h2>
+  <h2 class="reveal">Task by task</h2>
 
-  <p>
+  <p class="reveal">
     The per-task breakdown shows where things diverge most:
   </p>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead><tr>
         <th>Task</th>
@@ -652,13 +793,13 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     </table>
   </div>
 
-  <p>
+  <p class="reveal">
     Sonnet's low scores on tasks 04–07, 09, 10 look dramatic but are largely a completion
     problem — half of Sonnet's runs produced nothing, which drags the average down. When
     Sonnet did complete a run, the output quality was competitive.
   </p>
 
-  <p>
+  <p class="reveal">
     The real exception is <strong>task 07 (Vector DB + RAG)</strong>, where even Opus scored
     0.398. This task is genuinely harder — it requires setting up Qdrant, running embeddings,
     and preparing data in multiple stages. CERIT models handle it better because they're willing
@@ -666,21 +807,21 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   </p>
 
   <!-- ══════════════════════════════ TOKENS -->
-  <h2>Token usage: realistic numbers</h2>
+  <h2 class="reveal">Token usage: realistic numbers</h2>
 
-  <p>
+  <p class="reveal">
     Native Claude uses around 4 000 tokens on a successful run and makes 4–8 tool calls.
     CERIT Track D models use 17 000–45 000 tokens and 10–14 tool calls. That's roughly
     <strong>4–10× more</strong> — not orders of magnitude.
   </p>
 
-  <p>
+  <p class="reveal">
     Much larger numbers (up to 540 000 tokens per run) appeared in Track B with the custom
     Python harness on a few models. That's an artifact of how that harness communicates,
     not a property of the models themselves.
   </p>
 
-  <p>
+  <p class="reveal">
     Academic users aren't billed per token, so higher consumption doesn't affect them directly.
     That said, CERIT does bear real infrastructure costs to run this service — using it
     efficiently is still good practice, and it's worth keeping in mind that the service
@@ -688,15 +829,15 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   </p>
 
   <!-- ══════════════════════════════ BUG -->
-  <h2>A bug I found: thinker and deepseek-v3.2-thinking</h2>
+  <h2 class="reveal">A bug I found: thinker and deepseek-v3.2-thinking</h2>
 
-  <p>
+  <p class="reveal">
     Two models on CERIT — the alias <code>thinker</code> and the specific model
     <code>deepseek-v3.2-thinking</code> — produced nothing when used via the
     Anthropic-shape endpoint. Every run: zero output files, empty session.
   </p>
 
-  <p>
+  <p class="reveal">
     After some digging I found the cause. DeepSeek models use their own native token format
     for tool calls: <code>&lt;｜DSML｜function_calls&gt;</code>,
     <code>&lt;｜DSML｜invoke name="…"&gt;</code>. The CERIT Anthropic-shape adapter was
@@ -705,29 +846,29 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     thinking, never got a tool call to execute, and the session ended empty.
   </p>
 
-  <p>
+  <p class="reveal">
     The same models work fine via Track B (OpenAI-shape API), where they scored 0.728. The
     bug is specific to the Anthropic-shape adapter. I reported it to Lukáš Hejtmánek at
     CERIT in April 2026. Both models are excluded from the analysis.
   </p>
 
-  <div class="callout warn">
+  <div class="callout warn reveal">
     <strong>Practical note:</strong> avoid <code>thinker</code> and
     <code>deepseek-v3.2-thinking</code> with Claude Code for now. If you want DeepSeek,
     use a custom Python client against the OpenAI-shape endpoint instead.
   </div>
 
   <!-- ══════════════════════════════ INFRASTRUCTURE -->
-  <h2>The infrastructure is actively developing</h2>
+  <h2 class="reveal">The infrastructure is actively developing</h2>
 
-  <p>
+  <p class="reveal">
     Tests ran in April 2026, and that date matters. The CERIT LLM gateway is actively
     developed — new models are being added, versions change, and bugs like the DeepSeek
     one may well be fixed by the time you read this. These results describe the state
     at a specific point in time.
   </p>
 
-  <p>
+  <p class="reveal">
     The model lineup at the time of testing included roughly ten models via the Anthropic
     endpoint and more via the OpenAI endpoint, drawn from the Qwen, GLM, Kimi, and Gemma
     families — open-weight models developed primarily in China that consistently perform
@@ -736,9 +877,9 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   </p>
 
   <!-- ══════════════════════════════ TRACK C -->
-  <h2>Track C (LiteLLM proxy): not recommended</h2>
+  <h2 class="reveal">Track C (LiteLLM proxy): not recommended</h2>
 
-  <p>
+  <p class="reveal">
     LiteLLM translates between different API formats. The idea was to route Claude Code
     through a local proxy that would convert calls into whatever CERIT expects. In practice,
     most runs timed out at 300 seconds — the models just didn't respond fast enough for
@@ -746,34 +887,15 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     meaningfully. Don't use this approach for day-to-day work.
   </p>
 
-  <!-- ══════════════════════════════ METHODOLOGY NOTE -->
-  <h2>Methodology: headless batch invocations</h2>
-
-  <p>
-    Each of the 600+ runs executed as <code>claude --print -p "prompt"</code> — one headless
-    subprocess per task, fresh context every time. This models the most natural use case for
-    CERIT: automated, unattended batch work — code generation, pipeline stages, CI helpers —
-    where a defined task is fired off and the result collected. Each run got a clean sandbox,
-    a formal spec, expected output files, and a pytest test suite.
-  </p>
-
-  <p>
-    Claude Code's system prompt (tool definitions included) weighed roughly
-    <strong>21K tokens</strong> in the version used for this benchmark (v2.1.119). In headless
-    mode that prompt is sent exactly once per session, leaving ample room on any model with a
-    32K+ context window. All models in the benchmark completed at least some runs without
-    hitting context limits.
-  </p>
-
   <!-- ══════════════════════════════ SETUP -->
-  <h2>How to set it up</h2>
+  <h2 class="reveal">How to set it up</h2>
 
-  <p>
+  <p class="reveal">
     The simplest approach is a shell function in <code>~/.bashrc</code> that overrides
     the relevant environment variables:
   </p>
 
-  <pre><code>claude-cerit() {
+  <pre class="reveal"><code>claude-cerit() {
   ANTHROPIC_BASE_URL="https://llm.ai.e-infra.cz/"  \
   ANTHROPIC_MODEL="gemma4"                          \
   ANTHROPIC_DEFAULT_OPUS_MODEL="gemma4"             \
@@ -784,14 +906,14 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   command claude "$@"
 }</code></pre>
 
-  <p>
+  <p class="reveal">
     Then use <code>claude-cerit --print -p "your task"</code> to run headless batch
     invocations on CERIT infrastructure.
   </p>
 
   <h3>Recommended models (April 2026)</h3>
 
-  <div class="table-wrap">
+  <div class="table-wrap reveal">
     <table>
       <thead><tr>
         <th>Slot</th><th>Model</th><th>Why</th>
@@ -821,23 +943,23 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     </table>
   </div>
 
-  <p>
+  <p class="reveal">
     One general warning about aliases: CERIT can remap an alias to a different backend
     without notice. The <code>thinker</code> case illustrated this well. For anything
     important, use specific model names rather than aliases.
   </p>
 
   <!-- ══════════════════════════════ CONCLUSION -->
-  <h2>What to take away</h2>
+  <h2 class="reveal">What to take away</h2>
 
-  <p>
+  <p class="reveal">
     Gemma4 on CERIT reached 96% of Claude Sonnet's composite score in headless batch mode —
     with no direct billing to academic users, on Czech national research infrastructure.
     The differences are real but specific: Claude writes cleaner, safer code; CERIT models
     pass more functional tests and are more likely to push multi-file tasks to completion.
   </p>
 
-  <p>
+  <p class="reveal">
     The sweet spot is <strong>automated, unattended batch work</strong>:
     scripts that invoke <code>claude --print -p "..."</code> for defined tasks — code generation,
     pipeline stages, CI helpers, overnight research automation. On that axis, gemma4 and
@@ -845,7 +967,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     correctness scores, and zero per-token cost to the academic user.
   </p>
 
-  <p>
+  <p class="reveal">
     These tests are from April 2026, and the CERIT LLM gateway is actively improving — new
     models are being added and the lineup is broadening. The numbers here are a snapshot;
     it's worth re-running the benchmark periodically as the infrastructure evolves.
@@ -853,7 +975,7 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
 
   <hr>
 
-  <div class="article-footer">
+  <div class="article-footer reveal">
     <p>
       <strong>Thanks</strong> to CERIT-SC for running the LLM gateway and making it freely
       accessible to Czech academia. Specific thanks to Lukáš Hejtmánek for the quick response
@@ -872,7 +994,20 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
 
 </article>
 
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-brand">Michal Cifra, Ph.D.</span>
+    <div class="footer-meta">
+      <a href="https://michalcifra.com/">michalcifra.com</a> ·
+      <a href="https://michalcifra.com/blogs/">Blog</a><br>
+      Institute of Photonics and Electronics, CAS · Prague
+    </div>
+  </div>
+</footer>
+
 <script>
+/* ── Chart ─────────────────────────────────────────────────────── */
 const ctx = document.getElementById('compositeChart').getContext('2d');
 const labels = [
   'Claude Opus 4.6 (A)',
@@ -887,14 +1022,14 @@ const labels = [
 ];
 const scores = [0.889, 0.841, 0.807, 0.804, 0.782, 0.762, 0.762, 0.759, 0.755];
 const colors = scores.map((_, i) => {
-  if (i <= 1) return 'rgba(0,217,200,0.75)';
-  if (i === 3) return 'rgba(100,120,200,0.65)';
-  return 'rgba(60,200,100,0.65)';
+  if (i <= 1) return 'rgba(94,242,230,0.70)';
+  if (i === 3) return 'rgba(100,120,200,0.60)';
+  return 'rgba(74,222,128,0.60)';
 });
 const borders = scores.map((_, i) => {
-  if (i <= 1) return '#00d9c8';
+  if (i <= 1) return '#5ef2e6';
   if (i === 3) return '#6478c8';
-  return '#3ec864';
+  return '#4ade80';
 });
 new Chart(ctx, {
   type: 'bar',
@@ -915,28 +1050,42 @@ new Chart(ctx, {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#0d1118',
-        borderColor: '#1e2836',
+        backgroundColor: '#0d1320',
+        borderColor: 'rgba(140,170,210,.22)',
         borderWidth: 1,
-        titleColor: '#e0e8f4',
-        bodyColor: '#bcc5d4',
+        titleColor: '#eef2f8',
+        bodyColor: '#9eafc6',
         callbacks: { label: c => ` ${c.parsed.x.toFixed(3)}` }
       }
     },
     scales: {
       x: {
         min: 0.65, max: 0.93,
-        grid: { color: 'rgba(30,40,54,0.8)' },
-        ticks: { color: '#5a6a80', font: { family: "'IBM Plex Mono'" }, callback: v => v.toFixed(2) }
+        grid: { color: 'rgba(140,170,210,.08)' },
+        ticks: {
+          color: '#5e6c84',
+          font: { family: "'IBM Plex Mono'" },
+          callback: v => v.toFixed(2)
+        }
       },
       y: {
         afterFit(scale) { scale.width = 210; },
         grid: { display: false },
-        ticks: { color: '#bcc5d4', font: { family: "'IBM Plex Mono'", size: 11 } }
+        ticks: {
+          color: '#9eafc6',
+          font: { family: "'IBM Plex Mono'", size: 11 }
+        }
       }
     }
   }
 });
+
+/* ── Scroll reveal ──────────────────────────────────────────────── */
+const observer = new IntersectionObserver(
+  entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); observer.unobserve(e.target); } }),
+  { threshold: 0.08 }
+);
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
 
 </body>
