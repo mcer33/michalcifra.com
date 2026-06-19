@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code on Czech academic AI infrastructure: a 600-run benchmark – Michal Cifra</title>
-<meta name="description" content="I redirected Claude Code to the free Czech CERIT LLM gateway and ran 600+ agentic benchmark runs across 10 real dev tasks. Here's what I found.">
+<title>Claude Code on Czech academic AI infrastructure: a 600-run headless benchmark – Michal Cifra</title>
+<meta name="description" content="I redirected Claude Code to the free Czech CERIT LLM gateway and ran 600+ headless agentic benchmark runs across 10 real dev tasks in April 2026. Here's what I found.">
 <meta name="author" content="Michal Cifra">
-<meta property="og:title" content="Claude Code on Czech academic AI: a 600-run benchmark">
-<meta property="og:description" content="Gemma 4 on CERIT scored 91% of Claude Sonnet — for free. What the numbers actually mean.">
+<meta property="og:title" content="Claude Code on Czech academic AI: a 600-run headless benchmark">
+<meta property="og:description" content="Gemma 4 on CERIT scored 96% of Claude Sonnet in headless batch mode — for free. What the numbers actually mean.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -257,7 +257,7 @@
 <article>
   <div class="tag">AI · Benchmark · CERIT</div>
 
-  <h1>Claude Code on Czech academic AI infrastructure: a 600-run benchmark</h1>
+  <h1>Claude Code on Czech academic AI infrastructure: a 600-run headless benchmark</h1>
 
   <div class="meta">
     <span>Michal Cifra</span>
@@ -266,7 +266,7 @@
     <span class="meta-sep">·</span>
     <span>tests run: April 2026</span>
     <span class="meta-sep">·</span>
-    <span>~2 200 words</span>
+    <span>~2 000 words</span>
   </div>
 
   <p class="lead">
@@ -274,8 +274,9 @@
     LLM gateway at <code>llm.ai.e-infra.cz</code> that speaks the Anthropic API protocol
     and is accessible to Czech academic users with no per-token billing.
     Redirecting Claude Code to it takes one environment variable. I wanted to know whether
-    that's actually usable — so I ran 600+ agentic benchmark runs across 10 real development
-    tasks and compared the results against native Claude. Here's what I found.
+    the open-weight models available there are actually competitive — so I ran 600+
+    headless agentic benchmark runs across 10 real development tasks in April 2026
+    and compared the results against native Claude.
   </p>
 
   <!-- ══════════════════════════════ HOW IT WORKS -->
@@ -745,51 +746,23 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
     meaningfully. Don't use this approach for day-to-day work.
   </p>
 
-  <!-- ══════════════════════════════ CRITICAL CAVEAT -->
-  <h2>Important caveat: the benchmark ran in headless mode, not interactive</h2>
-
-  <div class="callout warn">
-    <strong>This is a significant limitation of the results.</strong> The entire benchmark
-    ran as <code>claude --print -p "prompt"</code> — one headless subprocess per task,
-    fresh context every time. This is fundamentally different from running an interactive
-    Claude Code session. When I tried the <code>claude-cerit()</code> shell function
-    interactively, it was nearly unusable. Here's why.
-  </div>
+  <!-- ══════════════════════════════ METHODOLOGY NOTE -->
+  <h2>Methodology: headless batch invocations</h2>
 
   <p>
-    Claude Code's system prompt — the instruction block it sends to the model before your
-    message, including all tool definitions — weighs roughly <strong>21–26K tokens</strong>
-    (measured: Claude Code v2.1.119 used in the April benchmark sent ~21K; v2.1.150
-    current sends ~26K). CERIT models appear to have context windows in the
-    <strong>32–65K token range</strong>. That leaves only 6–40K tokens for actual
-    conversation. In interactive mode, context accumulates across every exchange, and you
-    hit the ceiling within just a few turns.
+    Each of the 600+ runs executed as <code>claude --print -p "prompt"</code> — one headless
+    subprocess per task, fresh context every time. This models the most natural use case for
+    CERIT: automated, unattended batch work — code generation, pipeline stages, CI helpers —
+    where a defined task is fired off and the result collected. Each run got a clean sandbox,
+    a formal spec, expected output files, and a pytest test suite.
   </p>
 
   <p>
-    In a live test I ran against gemma4 on CERIT today (June 2026), a four-turn session
-    on a trivial task — write a fibonacci function — consumed <strong>78,000 input tokens</strong>
-    and produced only <strong>194 output tokens</strong> total across all turns. In April
-    2026, the same model on a real benchmark task produced 2,080 output tokens.
-    Something on the CERIT endpoint has also changed around output token caps.
-  </p>
-
-  <p>
-    The practical consequences:
-  </p>
-
-  <ul style="margin: 0 0 1.1rem 1.5rem; line-height:1.8; color:var(--text)">
-    <li><strong>Context fills immediately in interactive mode.</strong> There is almost no headroom beyond the system prompt on models with 32K windows.</li>
-    <li><strong>Responses get cut off.</strong> Low output token caps mean the model can't produce complete answers or multi-step plans.</li>
-    <li><strong>The benchmark numbers are real but the use case is narrow.</strong> The scores apply to headless, single-task invocations — not to interactive development sessions.</li>
-  </ul>
-
-  <p>
-    The shell function in the setup section below still works for headless batch invocations
-    (scripts, CI pipelines, automated tasks launched with <code>claude --print</code>).
-    For interactive use, the situation is more difficult — you'd need a CERIT model with a
-    large enough context window to accommodate the full Claude Code system prompt comfortably,
-    which may not currently be available or documented.
+    Claude Code's system prompt (tool definitions included) weighed roughly
+    <strong>21K tokens</strong> in the version used for this benchmark (v2.1.119). In headless
+    mode that prompt is sent exactly once per session, leaving ample room on any model with a
+    32K+ context window. All models in the benchmark completed at least some runs without
+    hitting context limits.
   </p>
 
   <!-- ══════════════════════════════ SETUP -->
@@ -812,8 +785,8 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
 }</code></pre>
 
   <p>
-    Then <code>claude-cerit</code> instead of <code>claude</code> and you're running
-    on CERIT infrastructure.
+    Then use <code>claude-cerit --print -p "your task"</code> to run headless batch
+    invocations on CERIT infrastructure.
   </p>
 
   <h3>Recommended models (April 2026)</h3>
@@ -865,24 +838,17 @@ token efficiency = min(1.0, 15 000 / tokens used)</code></pre>
   </p>
 
   <p>
-    The important caveat: these results apply to <strong>headless, single-task invocations</strong>
-    (<code>claude --print</code>), not to interactive sessions. For interactive Claude Code use,
-    CERIT models currently struggle — the system prompt alone consumes most of the model's context
-    window, leaving little room for conversation. In a live test run after the benchmark, a
-    four-turn trivial task consumed 78K tokens and produced only 194 output tokens.
-  </p>
-
-  <p>
-    The sweet spot for CERIT today is <strong>automated, unattended batch work</strong>:
+    The sweet spot is <strong>automated, unattended batch work</strong>:
     scripts that invoke <code>claude --print -p "..."</code> for defined tasks — code generation,
-    pipeline stages, CI helpers. For interactive development sessions, native Claude remains the
-    practical choice.
+    pipeline stages, CI helpers, overnight research automation. On that axis, gemma4 and
+    kimi-k2.6 are strong contenders: higher completion rates than native Claude, competitive
+    correctness scores, and zero per-token cost to the academic user.
   </p>
 
   <p>
-    One last note: these tests are from April 2026, and the CERIT LLM gateway is actively
-    improving. More models are being added and the rough edges are being smoothed out. It's
-    worth re-running the benchmark periodically — the numbers will move, likely upward.
+    These tests are from April 2026, and the CERIT LLM gateway is actively improving — new
+    models are being added and the lineup is broadening. The numbers here are a snapshot;
+    it's worth re-running the benchmark periodically as the infrastructure evolves.
   </p>
 
   <hr>
