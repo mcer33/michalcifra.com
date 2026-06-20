@@ -662,6 +662,132 @@ but less reliable for sustained work.
   for current availability.
 </div>
 
+<!-- ── 4b. EXTENDED BENCHMARK (run10) ─────────────────────────────────── -->
+<h2>Extended benchmark: 117 tasks, quality scoring (June 2026)</h2>
+
+<p>
+After the 7-task comparison above, the benchmark suite was expanded to
+<strong>117 tests across 11 categories</strong> (A–K), covering every major
+Claude Code tool type: file reads, code generation, edit/refactor, bash scripts,
+search/audit, multi-tool workflows, long-context stress, vibe-style variants
+(terse, vague, conversational, aggressive), verification, web research, and
+autonomous tasks. A secondary LLM quality judge (qwen3.5-122b, 1–10 scoring)
+evaluated each output independently of the success regex.
+</p>
+
+<div class="callout">
+  <strong>run10 results — GLM-5.2, 117 tests:</strong> 103/117 (88%) completed,
+  <strong>0 idle stops</strong> across 947 tool calls, avg quality 5.37/10.
+  The 14 failures were 10 genuine timeouts on hard long-running tasks and
+  4 success-regex mismatches on tasks the model completed correctly.
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Tests</th>
+      <th style="text-align:right">Completion</th>
+      <th style="text-align:right">Avg quality</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="label">D — Bash / Shell</td>
+      <td class="num">15</td>
+      <td class="win">15/15</td>
+      <td class="win">9.0</td>
+      <td>Best quality across all categories</td>
+    </tr>
+    <tr>
+      <td class="label">C — Edit &amp; Refactor</td>
+      <td class="num">15</td>
+      <td class="win">15/15</td>
+      <td class="win">8.0</td>
+      <td>Complex proxy edits, clean output</td>
+    </tr>
+    <tr>
+      <td class="label">I — Verify / Self-checking</td>
+      <td class="num">5</td>
+      <td class="win">5/5</td>
+      <td class="num">6.0</td>
+      <td>Unit tests, syntax checks</td>
+    </tr>
+    <tr>
+      <td class="label">A — Read &amp; Understand</td>
+      <td class="num">13</td>
+      <td class="win">13/13</td>
+      <td class="num">6.2</td>
+      <td>Accurate file reads and analysis</td>
+    </tr>
+    <tr>
+      <td class="label">J — Web Research</td>
+      <td class="num">5</td>
+      <td class="win">5/5</td>
+      <td class="num">5.3</td>
+      <td>WebSearch tool works via proxy</td>
+    </tr>
+    <tr>
+      <td class="label">B — Code Generation</td>
+      <td class="num">16</td>
+      <td class="mid">14/16</td>
+      <td class="mid">3.4</td>
+      <td>Misses edge cases in underspecified prompts</td>
+    </tr>
+    <tr>
+      <td class="label">F — Multi-tool Workflows</td>
+      <td class="num">18</td>
+      <td class="mid">13/18</td>
+      <td class="mid">4.4</td>
+      <td>Deep tasks hit timeout</td>
+    </tr>
+    <tr>
+      <td class="label">H — Vibe Style Variants</td>
+      <td class="num">10</td>
+      <td class="mid">7/10</td>
+      <td class="mid">4.3</td>
+      <td>Terse prompts need longer timeouts</td>
+    </tr>
+    <tr>
+      <td class="label">G — Long-context Stress</td>
+      <td class="num">5</td>
+      <td class="mid">4/5</td>
+      <td class="mid">3.5</td>
+      <td>G04 longitudinal analysis timed out at 360 s</td>
+    </tr>
+    <tr>
+      <td class="label">E — Search &amp; Audit</td>
+      <td class="num">10</td>
+      <td class="mid">8/10</td>
+      <td class="bad">2.0</td>
+      <td>Regex mismatch on passes; quality depressed by timed-out tests</td>
+    </tr>
+    <tr>
+      <td class="label">K — Autonomous</td>
+      <td class="num">5</td>
+      <td class="mid">4/5</td>
+      <td class="bad">2.0</td>
+      <td>K02 Zotero diagnosis timed out at 360 s (27 turns, 28 tools)</td>
+    </tr>
+    <tr class="total-row">
+      <td class="label">TOTAL</td>
+      <td class="num">117</td>
+      <td class="win">103/117 — 88%</td>
+      <td class="num">5.37</td>
+      <td>0 idle stops · 947 tool calls</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+A notable finding: during the C-category (edit/refactor) tests, GLM-5.2 was
+asked to implement improvements directly on the live proxy — and did so correctly,
+adding HTTP 429 retry logic, a thread-safe request counter, and extracting prompt
+strings to a separate <code>cerit_prompts.py</code> module. The benchmark served
+simultaneously as a test harness and a live coding session.
+</p>
+
 <!-- ── 5. SETUP ──────────────────────────────────────────────────────── -->
 <h2>Setup: step by step</h2>
 
@@ -854,24 +980,31 @@ target = MODEL_OVERRIDES.get(model) <span class="kw">or</span> DEFAULT_TOOL_TARG
 <h2>What's next</h2>
 
 <p>
-The one missing mechanism is a <strong><code>task_complete</code> sentinel tool</strong>:
-giving the model an explicit <code>task_complete(summary)</code> tool that the proxy
-intercepts to cleanly terminate the session. Right now the exit path is
-"model writes a text-only turn," which relies on the TURN_WARN_HARD injection at
-turn 20 as a backstop. A sentinel tool would be cleaner and more reliable.
+The proxy now includes a <strong><code>TASK_COMPLETE</code> sentinel</strong>:
+the continuation rule instructs the model to end its final response with the
+line <code>TASK_COMPLETE</code>. The test runner detects this as a supplemental
+completion signal, disambiguating genuine completion from success-regex mismatch.
 </p>
 
 <p>
-DeepSeek V4 Pro's 1 M token context is attractive for long codebase sessions;
-the upstream errors seen in benchmarks are likely transient vLLM load issues
-worth re-testing as the service stabilizes. The <code>claude-cerit-deep</code>
-alias routes there via the proxy.
+<strong>Llama-4-scout tool support</strong> remains unverified. A dedicated L01 test
+exercises <code>claude-cerit-long</code> with a minimal file-read task to confirm
+whether the 270 K context model supports tool calling. Until confirmed, it remains
+in the text-only routing tier.
 </p>
 
 <p>
-The benchmark suite (<code>run_tests.py</code>) is in the same repository — you can
-run it against any new CERIT model by adding an entry to <code>MODEL_PRESETS</code>
-and passing <code>--model your-preset</code>.
+<strong>DeepSeek V4 Pro</strong> (1 M token context) is worth re-testing as CERIT's
+vLLM infrastructure stabilises — the 68 upstream errors in run7 were likely transient
+load issues rather than a fundamental limitation.
+</p>
+
+<p>
+The benchmark suite (<code>run_tests.py</code>) now covers 117 tests with
+<code>--suite base|ext|all</code>, <code>--category A,B,...</code>,
+<code>--timeout-scale</code> for overnight runs, and a built-in LLM quality judge.
+An idle-stop reproducer (<code>cerit_idle_stop_reproducer.py</code>) quantifies
+baseline vs. mitigated idle-stop rates for comparison with future CERIT server-side fixes.
 </p>
 
 <hr class="divider">
