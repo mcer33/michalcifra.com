@@ -3,1103 +3,1114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code on Czech academic AI — free agentic coding with GLM-5.2 — Michal Cifra</title>
-<meta name="description" content="How to route Claude Code's tool-calling agent to the free CERIT LLM gateway, why you need a rewrite proxy, and benchmark results across GLM-5.2, qwen3.5-122b and DeepSeek V4 Pro.">
+<title>Claude Code on Czech academic AI — the full story: proxy, 117 tests, idle-stop mystery</title>
+<meta name="description" content="A local proxy routes Claude Code to free Czech academic LLMs (CERIT). Full story: what broke, 6 fixes, GLM-5.2 winning 7/7 tasks in 494 s, 117-test benchmark, and the idle-stop that wasn't quite what we thought.">
 <meta name="author" content="Michal Cifra">
-<meta property="og:title" content="Claude Code on Czech academic AI — free agentic coding with GLM-5.2">
-<meta property="og:description" content="A 600-line Python proxy routes Claude Code to CERIT's LLM gateway. GLM-5.2 with thinking disabled beats qwen3.5-122b by 44% in wall time — for free.">
-<meta property="og:type" content="article">
 <link rel="canonical" href="https://michalcifra.com/blogs/BL2605-claude-via-cerit-llms/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <style>
-  :root {
-    --bg:        #05070b;
-    --bg-elev:   #090d15;
-    --panel:     #0d1320;
-    --panel-2:   #111a2b;
-    --ink:       #eef2f8;
-    --ink-dim:   #9eafc6;
-    --ink-faint: #5e6c84;
-    --line:      rgba(140,170,210,.12);
-    --line-s:    rgba(140,170,210,.22);
-    --photon:    #5ef2e6;
-    --photon-2:  #7bd0ff;
-    --amber:     #f3c97c;
-    --green:     #4ade80;
-    --red:       #f87171;
-    --glow:      0 0 0 1px rgba(94,242,230,.25), 0 0 34px -6px rgba(94,242,230,.45);
-    --serif:     "Instrument Serif", Georgia, serif;
-    --sans:      "Hanken Grotesk", system-ui, sans-serif;
-    --mono:      "IBM Plex Mono", ui-monospace, monospace;
-  }
+:root {
+  --bg: #05070b; --bg-elev: #090d15; --panel: #0d1320; --panel-2: #111a2b;
+  --ink: #eef2f8; --ink-dim: #9eafc6; --ink-faint: #5e6c84;
+  --line: rgba(140,170,210,.12); --line-s: rgba(140,170,210,.22);
+  --photon: #5ef2e6; --photon-2: #7bd0ff; --amber: #f3c97c;
+  --green: #4ade80; --red: #f87171;
+  --glow: 0 0 0 1px rgba(94,242,230,.25), 0 0 34px -6px rgba(94,242,230,.45);
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "Hanken Grotesk", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: var(--bg);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 17px;
-    line-height: 1.72;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
+html { scroll-behavior: smooth; font-size: 16px; -webkit-text-size-adjust: 100%; }
 
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: .045;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
 
-  a { color: var(--photon); text-decoration: none; }
-  a:hover { color: #a9fff6; }
-  ::selection { background: rgba(94,242,230,.28); color: #eafffc; }
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: .045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
 
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 200;
-    backdrop-filter: blur(14px) saturate(1.3);
-    background: linear-gradient(180deg, rgba(5,7,11,.86), rgba(5,7,11,.5));
-    border-bottom: 1px solid var(--line);
-  }
-  .nav-inner {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-  .nav-brand { font-weight: 600; font-size: .92rem; color: var(--ink); letter-spacing: .01em; }
-  .nav-sep { color: var(--ink-faint); font-size: .85rem; }
-  .nav-links { display: flex; gap: 1.4rem; margin-left: auto; }
-  .nav-links a { font-size: .88rem; color: var(--ink-dim); }
-  .nav-links a:hover { color: var(--ink); }
+a { color: var(--photon); text-decoration: none; }
+a:hover { color: #a9fff6; text-decoration: underline; text-underline-offset: 3px; }
+::selection { background: rgba(94,242,230,.25); color: #eafffc; }
 
-  .hero {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 4.5rem 1.5rem 3rem;
-  }
-  .hero-tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: .78rem;
-    color: var(--photon);
-    background: rgba(94,242,230,.08);
-    border: 1px solid rgba(94,242,230,.2);
-    border-radius: 4px;
-    padding: .25em .7em;
-    margin-bottom: 1.4rem;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-  .hero h1 {
-    font-family: var(--serif);
-    font-size: clamp(2rem, 5vw, 2.9rem);
-    font-weight: 400;
-    line-height: 1.18;
-    color: var(--ink);
-    margin-bottom: 1.1rem;
-  }
-  .hero-sub {
-    font-size: 1.08rem;
-    color: var(--ink-dim);
-    max-width: 620px;
-    line-height: 1.65;
-    margin-bottom: 2rem;
-  }
-  .meta-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    font-size: .86rem;
-    color: var(--ink-faint);
-    font-family: var(--mono);
-  }
-  .meta-row span { display: flex; align-items: center; gap: .35rem; }
+/* NAV */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  background: linear-gradient(180deg, rgba(5,7,11,.88), rgba(5,7,11,.55));
+  border-bottom: 1px solid var(--line);
+}
 
-  .article-body {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 0 1.5rem 5rem;
-  }
-  .article-body h2 {
-    font-family: var(--serif);
-    font-size: 1.65rem;
-    font-weight: 400;
-    color: var(--ink);
-    margin: 3rem 0 1rem;
-  }
-  .article-body h3 {
-    font-size: 1.08rem;
-    font-weight: 600;
-    color: var(--ink);
-    margin: 2rem 0 .65rem;
-    letter-spacing: .01em;
-  }
-  .article-body p { margin-bottom: 1.1rem; color: var(--ink-dim); }
-  .article-body p:first-of-type { color: var(--ink); }
-  .article-body strong { color: var(--ink); font-weight: 600; }
-  .article-body em { font-style: italic; color: var(--ink); }
+.nav-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
 
-  .callout {
-    background: var(--panel);
-    border: 1px solid var(--line-s);
-    border-left: 3px solid var(--photon);
-    border-radius: 6px;
-    padding: 1.1rem 1.3rem;
-    margin: 1.5rem 0;
-    font-size: .94rem;
-    color: var(--ink-dim);
-  }
-  .callout strong { color: var(--photon); }
+.nav-brand {
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--photon);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.nav-brand:hover { color: #a9fff6; text-decoration: none; }
 
-  .callout-amber {
-    border-left-color: var(--amber);
-  }
-  .callout-amber strong { color: var(--amber); }
+.nav-links {
+  display: flex;
+  gap: 1.4rem;
+  margin-left: auto;
+  list-style: none;
+}
+.nav-links a {
+  font-size: .88rem;
+  color: var(--ink-dim);
+  text-decoration: none;
+  transition: color .15s;
+}
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
 
-  pre, code {
-    font-family: var(--mono);
-  }
-  code {
-    background: rgba(94,242,230,.07);
-    border: 1px solid rgba(94,242,230,.12);
-    border-radius: 3px;
-    padding: .12em .4em;
-    font-size: .88em;
-    color: var(--photon);
-  }
-  pre {
-    background: var(--panel);
-    border: 1px solid var(--line-s);
-    border-radius: 8px;
-    padding: 1.2rem 1.4rem;
-    overflow-x: auto;
-    margin: 1.4rem 0;
-    font-size: .84rem;
-    line-height: 1.6;
-    color: #c8d8f0;
-  }
-  pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: inherit;
-    color: inherit;
-  }
-  .kw { color: var(--photon-2); }
-  .cm { color: var(--ink-faint); font-style: italic; }
-  .st { color: var(--amber); }
-  .va { color: #a9d4ff; }
+/* HERO */
+.hero {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3rem;
+  border-bottom: 1px solid var(--line);
+}
 
-  .chart-wrap {
-    background: var(--panel);
-    border: 1px solid var(--line-s);
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin: 1.8rem 0;
-  }
-  .chart-title {
-    font-size: .84rem;
-    font-family: var(--mono);
-    color: var(--ink-dim);
-    margin-bottom: 1rem;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-  }
+.hero-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .75rem;
+  font-variant: small-caps;
+  color: var(--photon);
+  letter-spacing: .1em;
+  margin-bottom: 1.4rem;
+  padding: .22rem .68rem;
+  border: 1px solid rgba(94,242,230,.28);
+  border-radius: 4px;
+  background: rgba(94,242,230,.06);
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.6rem 0;
-    font-size: .9rem;
-  }
-  th {
-    font-family: var(--mono);
-    font-size: .78rem;
-    font-weight: 500;
-    color: var(--ink-faint);
-    text-align: left;
-    padding: .5rem .75rem;
-    border-bottom: 1px solid var(--line-s);
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-  td {
-    padding: .55rem .75rem;
-    border-bottom: 1px solid var(--line);
-    color: var(--ink-dim);
-    vertical-align: top;
-  }
-  tr:last-child td { border-bottom: none; }
-  td.num { font-family: var(--mono); font-size: .86rem; color: var(--ink); text-align: right; }
-  td.win { color: var(--green); font-weight: 600; font-family: var(--mono); font-size: .86rem; text-align: right; }
-  td.mid { color: var(--amber); font-family: var(--mono); font-size: .86rem; text-align: right; }
-  td.bad { color: var(--red); font-family: var(--mono); font-size: .86rem; text-align: right; }
-  td.label { color: var(--ink); font-weight: 500; }
-  tr.total-row td { border-top: 1px solid var(--line-s); font-weight: 600; }
-  tr.total-row td.win { color: var(--green); }
+.hero h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 2.9rem);
+  line-height: 1.17;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  margin-bottom: 1.15rem;
+}
 
-  .step {
-    display: flex;
-    gap: 1.1rem;
-    margin: 1.2rem 0;
-    align-items: flex-start;
-  }
-  .step-num {
-    flex-shrink: 0;
-    width: 26px;
-    height: 26px;
-    background: rgba(94,242,230,.1);
-    border: 1px solid rgba(94,242,230,.25);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: .78rem;
-    color: var(--photon);
-    margin-top: .2rem;
-  }
-  .step-body { flex: 1; }
-  .step-body p { margin-bottom: .4rem; }
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--ink-dim);
+  max-width: 640px;
+  line-height: 1.66;
+  margin-bottom: 2rem;
+}
 
-  .pill {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: .75rem;
-    padding: .18em .6em;
-    border-radius: 3px;
-    font-weight: 500;
-  }
-  .pill-green { background: rgba(74,222,128,.12); color: var(--green); border: 1px solid rgba(74,222,128,.25); }
-  .pill-amber { background: rgba(243,201,124,.1); color: var(--amber); border: 1px solid rgba(243,201,124,.22); }
-  .pill-red   { background: rgba(248,113,113,.1); color: var(--red);   border: 1px solid rgba(248,113,113,.22); }
-  .pill-blue  { background: rgba(94,242,230,.08); color: var(--photon); border: 1px solid rgba(94,242,230,.2); }
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: .83rem;
+  color: var(--ink-faint);
+  font-family: var(--mono);
+}
 
-  .arch-box {
-    background: var(--panel);
-    border: 1px solid var(--line-s);
-    border-radius: 10px;
-    padding: 1.4rem 1.6rem;
-    margin: 1.5rem 0;
-    font-family: var(--mono);
-    font-size: .82rem;
-    line-height: 2;
-    color: var(--ink-dim);
-  }
-  .arch-box .arr { color: var(--photon); }
-  .arch-box .lbl { color: var(--ink); font-weight: 500; }
-  .arch-box .note { color: var(--ink-faint); }
+/* ARTICLE BODY */
+.article-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+}
 
-  .divider {
-    border: none;
-    border-top: 1px solid var(--line);
-    margin: 3rem 0;
-  }
+.article-body h2 {
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 3.25rem 0 1.1rem;
+  letter-spacing: -.01em;
+}
 
-  footer {
-    border-top: 1px solid var(--line);
-    padding: 2.5rem 1.5rem;
-    max-width: 760px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    flex-wrap: wrap;
-  }
-  footer p { font-size: .85rem; color: var(--ink-faint); }
-  footer a { color: var(--photon); }
+.article-body h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 2rem 0 .65rem;
+  letter-spacing: .01em;
+}
+
+.article-body h4 {
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--photon);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin: 1.75rem 0 .55rem;
+}
+
+.article-body p {
+  margin-bottom: 1.1rem;
+  color: var(--ink-dim);
+}
+
+.article-body p strong { color: var(--ink); font-weight: 600; }
+.article-body ul, .article-body ol { padding-left: 1.4rem; margin-bottom: 1.1rem; }
+.article-body li { color: var(--ink-dim); margin-bottom: .4rem; }
+.article-body li strong { color: var(--ink); font-weight: 600; }
+
+/* CALLOUT BOXES */
+.callout {
+  border-radius: 6px;
+  padding: 1.1rem 1.35rem;
+  margin: 1.5rem 0;
+  font-size: .94rem;
+}
+
+.callout-photon {
+  background: rgba(94,242,230,.055);
+  border-left: 3px solid var(--photon);
+  border: 1px solid rgba(94,242,230,.18);
+  border-left: 3px solid var(--photon);
+}
+
+.callout-amber {
+  background: rgba(243,201,124,.055);
+  border: 1px solid rgba(243,201,124,.18);
+  border-left: 3px solid var(--amber);
+}
+
+.callout-green {
+  background: rgba(74,222,128,.05);
+  border: 1px solid rgba(74,222,128,.18);
+  border-left: 3px solid var(--green);
+}
+
+.callout-red {
+  background: rgba(248,113,113,.05);
+  border: 1px solid rgba(248,113,113,.18);
+  border-left: 3px solid var(--red);
+}
+
+.callout p { margin-bottom: .5rem; color: var(--ink-dim); }
+.callout p:last-child { margin-bottom: 0; }
+.callout ul { padding-left: 1.25rem; margin-bottom: 0; }
+.callout li { color: var(--ink-dim); margin-bottom: .45rem; font-size: .93rem; }
+.callout li strong { color: var(--ink); }
+.callout strong { color: var(--ink); font-weight: 600; }
+
+.callout-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  margin-bottom: .7rem;
+  color: var(--photon);
+}
+.callout-amber .callout-label { color: var(--amber); }
+.callout-green .callout-label { color: var(--green); }
+.callout-red .callout-label { color: var(--red); }
+
+/* CODE */
+pre, code { font-family: var(--mono); }
+
+code {
+  background: rgba(94,242,230,.07);
+  border: 1px solid rgba(94,242,230,.13);
+  border-radius: 3px;
+  padding: .1em .4em;
+  font-size: .87em;
+  color: var(--photon);
+}
+
+pre {
+  background: var(--panel);
+  border: 1px solid var(--line-s);
+  border-radius: 8px;
+  padding: 1.15rem 1.4rem;
+  overflow-x: auto;
+  margin: 1.4rem 0;
+  font-size: .82rem;
+  line-height: 1.65;
+  color: #c8d8f0;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.code-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: .7rem;
+  color: var(--ink-faint);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin-bottom: .4rem;
+}
+
+/* TABLES */
+.table-wrap { overflow-x: auto; margin: 1.6rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+
+thead { background: var(--panel-2); }
+
+th {
+  font-family: var(--mono);
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-align: left;
+  padding: .55rem .8rem;
+  border-bottom: 1px solid var(--line-s);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+td {
+  padding: .58rem .8rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-dim);
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(140,170,210,.035); }
+tbody tr:nth-child(even) { background: rgba(140,170,210,.02); }
+tbody tr:nth-child(even):hover { background: rgba(140,170,210,.05); }
+
+td.label { color: var(--ink); font-weight: 500; }
+td.num { font-family: var(--mono); font-size: .85rem; color: var(--ink); }
+td.win { font-family: var(--mono); font-size: .85rem; color: var(--green); font-weight: 600; }
+td.mid { font-family: var(--mono); font-size: .85rem; color: var(--amber); }
+td.bad { font-family: var(--mono); font-size: .85rem; color: var(--red); }
+td.pho { font-family: var(--mono); font-size: .85rem; color: var(--photon); font-weight: 600; }
+td.dim { color: var(--ink-faint); font-size: .83rem; }
+
+tr.total-row td { border-top: 1px solid var(--line-s); font-weight: 600; }
+tr.winner-row { background: rgba(94,242,230,.035) !important; }
+tr.winner-row td { color: var(--ink) !important; }
+tr.winner-row td.label { color: var(--photon) !important; }
+
+/* STATS ROW */
+.stats-row {
+  display: flex;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  flex: 1;
+  min-width: 110px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: .9rem 1rem;
+}
+
+.stat-number {
+  font-family: var(--mono);
+  font-size: 1.55rem;
+  font-weight: 500;
+  color: var(--photon);
+  line-height: 1;
+  margin-bottom: .3rem;
+}
+
+.stat-label {
+  font-size: .74rem;
+  color: var(--ink-faint);
+  letter-spacing: .025em;
+}
+
+/* CHART */
+.chart-wrap {
+  background: var(--panel);
+  border: 1px solid var(--line-s);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1.8rem 0;
+}
+
+.chart-title {
+  font-size: .8rem;
+  font-family: var(--mono);
+  color: var(--ink-dim);
+  margin-bottom: 1rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 420px;
+}
+
+/* PILLS */
+.pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .73rem;
+  padding: .15em .58em;
+  border-radius: 3px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pill-green { background: rgba(74,222,128,.12); color: var(--green); border: 1px solid rgba(74,222,128,.25); }
+.pill-amber { background: rgba(243,201,124,.1); color: var(--amber); border: 1px solid rgba(243,201,124,.22); }
+.pill-red   { background: rgba(248,113,113,.1); color: var(--red);   border: 1px solid rgba(248,113,113,.22); }
+.pill-blue  { background: rgba(94,242,230,.08); color: var(--photon); border: 1px solid rgba(94,242,230,.2); }
+
+/* DIVIDER */
+.divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 3rem 0;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 2.5rem 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+footer p { font-size: .85rem; color: var(--ink-faint); }
+footer a { color: var(--photon); }
+footer a:hover { color: #a9fff6; text-decoration: none; }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .hero { padding: 3rem 1.25rem 2rem; }
+  .article-body { padding: 0 1.25rem 4rem; }
+  .hero h1 { font-size: 1.95rem; }
+  .article-body h2 { font-size: 1.45rem; }
+  .stats-row { gap: .65rem; }
+  .stat-number { font-size: 1.3rem; }
+  .chart-canvas-wrap { height: 500px; }
+  footer { flex-direction: column; }
+}
+@media (max-width: 420px) {
+  .nav-links { display: none; }
+}
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a class="nav-brand" href="https://michalcifra.com/">Michal Cifra</a>
-    <span class="nav-sep">/</span>
-    <span style="font-size:.88rem;color:var(--ink-dim)">Blog</span>
-    <div class="nav-links">
-      <a href="https://michalcifra.com/">Home</a>
-      <a href="https://michalcifra.com/#research">Research</a>
-      <a href="https://biophotoniq.net/">Biophotoniq</a>
-    </div>
+    <a class="nav-brand" href="https://michalcifra.com">michalcifra.com</a>
+    <ul class="nav-links">
+      <li><a href="https://michalcifra.com">Home</a></li>
+      <li><a href="https://michalcifra.com/talks">Talks</a></li>
+      <li><a href="https://github.com/mcer33/claude-code-cerit-llm">GitHub</a></li>
+    </ul>
   </div>
 </nav>
 
+<!-- HERO -->
 <header class="hero">
-  <div class="hero-tag">BL2605 &middot; Infrastructure &middot; June 2026</div>
-  <h1>Claude Code on Czech academic AI&nbsp;&mdash; free agentic coding with GLM-5.2</h1>
-  <p class="hero-sub">
-    A 620-line Python proxy routes Claude Code's tool-calling agent to the free CERIT
-    LLM gateway at <code>llm.ai.e-infra.cz</code>. After benchmarking four models
-    across seven real research-engineering tasks, GLM-5.2 with thinking disabled
-    emerges as the winner: <strong>7/7 tasks, 494 s total, 0% idle-stop,
-    zero context inflation</strong> — at zero token cost.
-  </p>
+  <div class="hero-tag">BL2605 &middot; June 2026</div>
+  <h1>Claude Code on Czech academic AI &mdash; the full story</h1>
+  <p class="hero-sub">A local proxy routes Claude Code&rsquo;s agentic tool-calls to the free CERIT LLM gateway. This post covers everything: what broke, why, six proxy interventions, a 117-task benchmark, and the idle-stop mystery that turned out to be more complicated than expected.</p>
   <div class="meta-row">
-    <span>&#128197; June 2026</span>
+    <span>Michal Cifra</span>
     <span>&middot;</span>
-    <span>&#128203; Michal Cifra, UFE CAS</span>
+    <span>June 2026</span>
     <span>&middot;</span>
-    <span><a href="https://github.com/mcer33/claude-code-cerit-llm" target="_blank" rel="noopener">&#128279; GitHub</a></span>
+    <span><a href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a></span>
   </div>
 </header>
 
+<!-- MAIN -->
 <main class="article-body">
 
-<!-- ── 1. MOTIVATION ─────────────────────────────────────────────────── -->
-<h2>Why bother?</h2>
-
-<p>
-Claude Code is Anthropic's agentic CLI: it reads your codebase, calls shell tools,
-writes files, and iterates — often completing in minutes what would take an hour
-manually. For heavy users, the API bill is $25–100+ per month. Czech academic
-researchers, however, already have access to a free frontier-model gateway through
-the <strong>e-INFRA CZ</strong> national research infrastructure, operated by CERIT-SC
-at Brno. The gateway at <code>https://llm.ai.e-infra.cz</code> exposes an
-OpenAI-compatible API — and, crucially, an Anthropic-compatible endpoint — running
-on NVIDIA DGX H100/B200 hardware. Models include GLM-5.2 (≈ Claude Opus 4.8 per
-independent evals), qwen3.5-122b, DeepSeek V4 Pro (1 M token context), and
-kimi-k2.6, all available at no token cost to MetaCentrum users.
-</p>
-
-<p>
-The motivation is not only cost. Running on academic infrastructure means
-<strong>data stays on Czech national infrastructure</strong>, which matters for
-pre-publication research code. And because the endpoint exposes the full Anthropic
-messages API shape, Claude Code can talk to it with minimal friction — once a small
-compatibility proxy is in place.
-</p>
-
-<div class="callout">
-  <strong>Who this is for:</strong> MetaCentrum / MUNI / e-INFRA CZ users who want
-  to run Claude Code agent sessions on their own research machines (Linux workstation,
-  university server, or a remote JupyterHub node) without an Anthropic subscription.
-  The proxy runs locally; your CERIT API token never leaves your machine.
+<!-- TL;DR -->
+<div class="callout callout-photon" style="margin-top:2.5rem">
+  <span class="callout-label">TL;DR</span>
+  <ul>
+    <li>Czech academics get free LLM API access at <strong>llm.ai.e-infra.cz</strong> (MetaCentrum / MUNI account required)</li>
+    <li>Naive forwarding fails in 3 ways; a ~700-line local proxy fixes all of them</li>
+    <li><strong>Best model: GLM-5.2 (thinking disabled)</strong> &mdash; 494 s &middot; 7/7 &middot; 0 idle stops &middot; 0 errors &middot; 0 context inflation</li>
+    <li><strong>Extended 117-test suite:</strong> 88% completion &middot; 0 idle stops &middot; 947 tool calls &middot; avg quality 5.37/10</li>
+    <li>The &ldquo;idle-stop problem&rdquo; is real in complex multi-turn sessions but context-dependent &mdash; simple calls work fine</li>
+    <li>Code + benchmark suite: <a href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a></li>
+  </ul>
 </div>
 
-<!-- ── 2. THE CHALLENGE ──────────────────────────────────────────────── -->
-<h2>The challenge: three things Claude Code expects that CERIT doesn't provide</h2>
+<!-- SECTION 1 -->
+<h2 id="opportunity">1. The opportunity</h2>
 
-<p>
-Pointing <code>ANTHROPIC_BASE_URL</code> at <code>llm.ai.e-infra.cz</code> and
-setting a CERIT token gets you a working chat session. But the <em>agent</em> loop —
-where Claude Code reads files, calls tools, and iterates — breaks in three distinct
-ways:
-</p>
+<p>CERIT-SC, part of the <strong>e-INFRA CZ national research infrastructure</strong>, runs a free LLM gateway at <code>llm.ai.e-infra.cz</code> &mdash; an Anthropic-compatible <code>/v1/messages</code> endpoint, no usage fees for MetaCentrum or MUNI members. For researchers already using MetaCentrum HPC, it is a natural complement: the same account covers both GPU compute and LLM access.</p>
 
-<h3>1 — Idle-stop: the model outputs text instead of calling a tool</h3>
-<p>
-Claude Code's agent loop expects the model to call at least one tool per turn until
-the task is done. When the model instead produces a plain-text turn with
-<code>finish_reason: end_turn</code> and no <code>tool_use</code> block, Claude Code
-treats the session as complete and exits — even if the task is half-finished.
-In early benchmarks with the proxy naively forwarding requests, 33% of turns were
-"idle stops." For reference, with native Claude Sonnet the rate is near zero.
-</p>
+<p>The case is not only cost. Data stays on Czech national infrastructure &mdash; relevant for pre-publication research code. No cloud vendor, no usage cap, no billing alarm. And because the endpoint exposes the full Anthropic messages API shape, Claude Code can talk to it with minimal friction once a small compatibility proxy is in place.</p>
 
-<h3>2 — Runaway sessions: the model loops without converging</h3>
-<p>
-The opposite problem: some models, particularly GLM-5.2 with its default reasoning
-mode active, call tools in bursts of 9–10 per turn and never synthesize a final
-answer. One T1 run accumulated <strong>143 tool calls in 15 turns</strong> and timed
-out at 900 seconds without producing output.
-</p>
+<p>Here is what is deployed as of June 2026, confirmed via <code>/v1/models</code>:</p>
 
-<h3>3 — The TUI spinner gates on model name</h3>
-<p>
-Claude Code's live progress UI (token countdown, spinner) is shown only when
-<code>ANTHROPIC_MODEL</code> starts with <code>claude-</code>. Setting it to
-<code>gemma4</code> or <code>glm-5.2</code> produces a degraded, silent interface
-that looks like a hang.
-</p>
-
-<!-- ── 3. ARCHITECTURE ───────────────────────────────────────────────── -->
-<h2>Solution: a local rewrite proxy</h2>
-
-<p>
-The full solution is a single Python file (<code>cerit-rewrite-proxy.py</code>, ~620
-lines) that runs as a local HTTP server on <code>127.0.0.1:9999</code>. Claude Code
-talks to the proxy as if it were Anthropic; the proxy forwards to CERIT with
-appropriate rewrites.
-</p>
-
-<div class="arch-box">
-  <span class="lbl">Claude Code</span>
-  <span class="arr"> ──→ </span>
-  <span class="lbl">proxy :9999</span>
-  <span class="arr"> ──→ </span>
-  <span class="lbl">llm.ai.e-infra.cz</span>
-  <br>
-  <span class="note">ENV: ANTHROPIC_BASE_URL=http://127.0.0.1:9999/</span><br>
-  <span class="note">ENV: ANTHROPIC_MODEL=claude-sonnet-4-6  <span class="arr">→</span>  proxy rewrites to glm-5.2 on the wire</span>
-</div>
-
-<p>The proxy applies five interventions, in order:</p>
-
-<div class="step">
-  <div class="step-num">1</div>
-  <div class="step-body">
-    <strong>Tool-definition sanitizer.</strong> Claude Code sends Anthropic proprietary
-    tool types (<code>web_search_20250305</code>, <code>computer_20241022</code>, etc.)
-    that CERIT's vLLM backend rejects with HTTP 400. The proxy converts
-    <code>web_search_*</code> to a standard tool definition and strips
-    <code>computer_*</code> / <code>bash_*</code> / <code>text_editor_*</code>
-    variants entirely.
-  </div>
-</div>
-
-<div class="step">
-  <div class="step-num">2</div>
-  <div class="step-body">
-    <strong>Agentic continuation injection.</strong> For every tool-using request, the
-    proxy appends an imperative block to the system prompt:
-    <em>"Call a tool immediately. Do not explain. Do not narrate."</em> — with a
-    BAD/GOOD example. Research on RLHF-trained models shows direct imperatives
-    outperform polite phrasings by ~30% for compliance. This alone reduces idle-stop
-    from 33% to 0%.
-  </div>
-</div>
-
-<div class="step">
-  <div class="step-num">3</div>
-  <div class="step-body">
-    <strong>Turn-count and repetition guards.</strong> The proxy reads the
-    <code>messages</code> array in each request (stateless — no session tracking
-    needed) to count assistant turns and detect repeated tool calls. At turn 12: a
-    gentle synthesis nudge. At turn 20: an imperative hard stop. If any single tool
-    appears ≥ 3 times in the last 30 messages: a loop-break injection. This
-    eliminated the 143-tool GLM runaway.
-  </div>
-</div>
-
-<div class="step">
-  <div class="step-num">4</div>
-  <div class="step-body">
-    <strong>GLM thinking disable.</strong> GLM-5.2 has a reasoning ("thinking") mode
-    that is <em>on by default</em>. With thinking enabled, each tool call is preceded
-    by a long internal monologue — 143 calls × ~6 s thinking = 858 s before any
-    output. The proxy injects <code>chat_template_kwargs: &#123;"enable_thinking": false&#125;</code>
-    when routing to <code>glm-5.2</code>. T1 wall time dropped from 900 s (timeout)
-    to <strong>48 s</strong>.
-  </div>
-</div>
-
-<div class="step">
-  <div class="step-num">5</div>
-  <div class="step-body">
-    <strong>Model routing and fallback chain.</strong> The incoming
-    <code>claude-sonnet-4-6</code> model name is rewritten to the CERIT target.
-    Default for tool sessions: <code>glm-5.2</code>. On HTTP 400 context-overflow:
-    retry with <code>kimi</code>, then <code>qwen3.5-122b</code>. The
-    <code>claude-*</code> spoofed model name is preserved toward Claude Code, so the
-    TUI spinner stays alive.
-  </div>
-</div>
-
-<div class="callout callout-amber">
-  <strong>Why not <code>tool_choice: any</code>?</strong> The obvious fix for
-  idle-stop is to force <code>tool_choice: &#123;"type": "any"&#125;</code> so the model
-  <em>must</em> call a tool. This was tried and removed. kimi-k2.6's thinking phase
-  without <code>tool_choice:any</code> takes 500+ s; with it, the model enters a
-  cat-loop — repeating <code>cat file.pbs</code> 24+ times when it wants to write a
-  final answer. The imperative system-prompt injection is both more reliable and
-  doesn't prevent clean exits.
-</div>
-
-<!-- ── 4. BENCHMARK ──────────────────────────────────────────────────── -->
-<h2>Benchmark: seven real tasks, four model configurations</h2>
-
-<p>
-All benchmarks run Claude Code via the proxy against a fixed set of seven tasks drawn
-from real research-engineering work on the A2507 protein electric-field project.
-Tasks range from a 600-file tools catalogue (T1, hardest) to a single-script
-write-and-execute (T6, simplest). Each run is fully automated: <code>run_tests.py</code>
-spawns Claude Code as a subprocess, captures <code>--stream-json</code> events, and
-extracts turns, tool calls, idle-stop rate, and context growth.
-</p>
-
-<div class="chart-wrap">
-  <div class="chart-title">Total wall time — 7 tasks, seconds (lower is better)</div>
-  <canvas id="chartTime" height="110"></canvas>
-</div>
-
+<div class="table-wrap">
 <table>
   <thead>
-    <tr>
-      <th>Task</th>
-      <th style="text-align:right">qwen3.5-122b</th>
-      <th style="text-align:right">DeepSeek V4 Pro</th>
-      <th style="text-align:right">GLM-5.2 (thinking ON)</th>
-      <th style="text-align:right">GLM-5.2 (thinking OFF)</th>
-    </tr>
+    <tr><th>Model</th><th>Context</th><th>Tier</th><th>Notes</th></tr>
   </thead>
   <tbody>
     <tr>
-      <td class="label">T1 — A2507 tools catalogue</td>
-      <td class="mid">619 s / 25t</td>
-      <td class="num">265 s / 8t</td>
-      <td class="bad">900 s ❌ timeout</td>
-      <td class="win">48 s / 7t</td>
+      <td class="label pho" style="font-family:var(--mono)">glm-5.2</td>
+      <td class="num">~110K</td>
+      <td><span class="pill pill-amber">Experimental</span></td>
+      <td>&asymp; Opus 4.8 per MCP Atlas; <strong>best for tool sessions</strong></td>
     </tr>
     <tr>
-      <td class="label">T2 — PBS script generation</td>
-      <td class="win">37 s / 4t</td>
-      <td class="num">54 s / 3t</td>
-      <td class="bad">538 s / 10t</td>
-      <td class="num">46 s / 4t</td>
+      <td class="label" style="font-family:var(--mono)">qwen3.5-122b</td>
+      <td class="num">256K</td>
+      <td><span class="pill pill-green">Guaranteed</span></td>
+      <td><code>qwen3-coder</code> / <code>agentic</code> are aliases &mdash; same model</td>
     </tr>
     <tr>
-      <td class="label">T3 — Zotero agent code review</td>
-      <td class="win">67 s / 8t</td>
-      <td class="num">73 s / 5t</td>
-      <td class="num">159 s / 7t</td>
-      <td class="mid">228 s / 13t</td>
+      <td class="label" style="font-family:var(--mono)">kimi (&rarr; k2.7)</td>
+      <td class="num">131K prefill</td>
+      <td><span class="pill pill-green">Guaranteed</span></td>
+      <td>Use alias <code>kimi</code>, not version-pinned names</td>
     </tr>
     <tr>
-      <td class="label">T4 — Memory consistency audit</td>
-      <td class="win">23 s / 3t</td>
-      <td class="bad">202 s / 2t</td>
-      <td class="num">33 s / 3t</td>
-      <td class="num">35 s / 8t</td>
+      <td class="label" style="font-family:var(--mono)">deepseek-v4</td>
+      <td class="num">1M</td>
+      <td><span class="pill pill-green">Guaranteed</span></td>
+      <td>DeepSeek V4 Pro; tools confirmed</td>
     </tr>
     <tr>
-      <td class="label">T5 — Proxy robustness review</td>
-      <td class="win">31 s / 2t</td>
-      <td class="num">44 s / 2t</td>
-      <td class="bad">132 s / 3t</td>
-      <td class="num">46 s / 2t</td>
+      <td class="label" style="font-family:var(--mono)">llama-4-scout</td>
+      <td class="num">270K</td>
+      <td><span class="pill pill-amber">Experimental</span></td>
+      <td>Long context; tool support unverified</td>
     </tr>
     <tr>
-      <td class="label">T6 — Script write + self-execute</td>
-      <td class="num">39 s / 6t</td>
-      <td class="num">43 s / 5t</td>
-      <td class="win">36 s / 5t</td>
-      <td class="num">42 s / 6t</td>
+      <td class="label" style="font-family:var(--mono)">gemma4</td>
+      <td class="num">110K</td>
+      <td><span class="pill pill-green">Guaranteed</span></td>
+      <td>Fast text-only; unreliable tool output</td>
     </tr>
     <tr>
-      <td class="label">T7 — Deep multi-file index</td>
-      <td class="num">67 s / 7t</td>
-      <td class="num">75 s / 8t</td>
-      <td class="num">66 s / 8t</td>
-      <td class="win">49 s / 7t</td>
-    </tr>
-    <tr class="total-row">
-      <td class="label">TOTAL</td>
-      <td class="mid">883 s &nbsp; 7/7</td>
-      <td class="mid">755 s &nbsp; 7/7</td>
-      <td class="bad">1865 s &nbsp; 6/7</td>
-      <td class="win">494 s &nbsp; 7/7</td>
+      <td class="label" style="font-family:var(--mono)">gpt-oss-120b</td>
+      <td class="num">128K</td>
+      <td><span class="pill pill-green">Guaranteed</span></td>
+      <td>Alias: <code>mini</code></td>
     </tr>
     <tr>
-      <td class="label">Idle-stop rate</td>
-      <td class="win">0%</td>
-      <td class="win">0%</td>
-      <td class="win">0%</td>
-      <td class="win">0%</td>
+      <td class="label" style="font-family:var(--mono)">mistral-medium-3.5</td>
+      <td class="dim">&mdash;</td>
+      <td class="dim">&mdash;</td>
+      <td>New addition</td>
     </tr>
     <tr>
-      <td class="label">Upstream API errors</td>
-      <td class="win">0</td>
-      <td class="bad">68</td>
-      <td class="mid">68 (T1 only)</td>
-      <td class="win">0</td>
-    </tr>
-    <tr>
-      <td class="label">Context inflation</td>
-      <td class="win">1.0× all tasks</td>
-      <td class="bad">2.2–2.4× on T1/T3</td>
-      <td class="mid">1.1–2.6× various</td>
-      <td class="win">1.0× all tasks</td>
-    </tr>
-    <tr>
-      <td class="label">Proxy injections needed</td>
-      <td class="mid">56</td>
-      <td class="bad">188</td>
-      <td class="bad">255</td>
-      <td class="win">0</td>
+      <td class="label" style="font-family:var(--mono)">qwen3-coder-30b</td>
+      <td class="dim">&mdash;</td>
+      <td class="dim">&mdash;</td>
+      <td>Different from qwen3.5-122b</td>
     </tr>
   </tbody>
 </table>
-
-<p>
-The <strong>GLM-5.2 (thinking OFF)</strong> column is striking: not only is it the
-fastest (494 s vs. qwen's 883 s, a 44% reduction), it also required
-<em>zero proxy continuation injections</em>. The model naturally called tools and
-exited cleanly without any prompting beyond the task description. The 0 injections
-figure suggests that GLM-5.2 in non-thinking mode has better intrinsic instruction
-following for agentic tasks than the other models tested.
-</p>
-
-<p>
-DeepSeek V4 Pro deserves a note: it is fast on simple tasks but generated 68
-upstream API errors (CERIT vLLM under load) and triggered auto-compact twice on T1
-and T3, causing context to grow 2.4× beyond the 110 K target window. Usable,
-but less reliable for sustained work.
-</p>
-
-<div class="callout">
-  <strong>Important caveat:</strong> GLM-5.2 is on CERIT's experimental tier
-  (qwen3.5-122b is guaranteed). The proxy fallback chain is
-  <code>glm-5.2 → kimi → qwen3.5-122b</code>, so sessions degrade gracefully if
-  GLM is offline. Check <a href="https://llm.ai.e-infra.cz/status/" target="_blank" rel="noopener">llm.ai.e-infra.cz/status/</a>
-  for current availability.
 </div>
 
-<!-- ── 4b. EXTENDED BENCHMARK (run10) ─────────────────────────────────── -->
-<h2>Extended benchmark: 117 tasks, quality scoring (June 2026)</h2>
+<!-- SECTION 2 -->
+<h2 id="problems">2. Three problems with naive forwarding</h2>
 
-<p>
-After the 7-task comparison above, the benchmark suite was expanded to
-<strong>117 tests across 11 categories</strong> (A–K), covering every major
-Claude Code tool type: file reads, code generation, edit/refactor, bash scripts,
-search/audit, multi-tool workflows, long-context stress, vibe-style variants
-(terse, vague, conversational, aggressive), verification, web research, and
-autonomous tasks. A secondary LLM quality judge (qwen3.5-122b, 1–10 scoring)
-evaluated each output independently of the success regex.
-</p>
+<p>The naive approach: set <code>ANTHROPIC_BASE_URL=https://llm.ai.e-infra.cz</code> and launch Claude Code. Three things break immediately.</p>
 
-<div class="callout">
-  <strong>run10 results — GLM-5.2, 117 tests:</strong> 103/117 (88%) completed,
-  <strong>0 idle stops</strong> across 947 tool calls, avg quality 5.37/10.
-  The 14 failures were 10 genuine timeouts on hard long-running tasks and
-  4 success-regex mismatches on tasks the model completed correctly.
+<h3>Problem 1 &mdash; Tool-definition rejection (HTTP 400)</h3>
+
+<p>Claude Code sends Anthropic proprietary tool types: <code>web_search_20250305</code>, <code>computer_20241022</code>, <code>text_editor_20250429</code>. CERIT&rsquo;s vLLM / sglang backends reject these with HTTP 400. Claude Code crashes before accomplishing anything. No workaround on the client side; the proxy must intercept and sanitize every request before forwarding.</p>
+
+<h3>Problem 2 &mdash; GLM-5.2 thinking mode</h3>
+
+<p>GLM-5.2 has thinking mode <strong>on by default</strong>. Without disabling it, the model burns 143 tool calls thinking about the first task and times out at 900 seconds with no useful output. Disabling via <code>chat_template_kwargs: {"enable_thinking": false}</code> brings T1 wall time from <span style="color:var(--red)">900 s</span> to <span style="color:var(--green)">48 s</span>. This single intervention accounts for most of GLM-5.2&rsquo;s benchmark advantage.</p>
+
+<h3>Problem 3 &mdash; Model name / TUI spinner</h3>
+
+<p>Claude Code only shows its live progress spinner when <code>ANTHROPIC_MODEL</code> starts with <code>claude-</code>. With <code>glm-5.2</code> or <code>kimi</code> as the model name, the TUI looks like a hang with no output. The proxy preserves a spoofed <code>claude-</code> model name toward Claude Code while sending the real model name upstream.</p>
+
+<div class="callout callout-amber">
+  <span class="callout-label">Additional bug &mdash; DeepSeek thinking tokens</span>
+  <p>With <code>deepseek-v4-pro-thinking</code>, internal chain-of-thought tokens leaked into the text response, corrupting tool-call JSON. Filed as ticket #1519943 (April 2026). A separate server-side issue from the three core problems above.</p>
 </div>
 
+<!-- SECTION 3 -->
+<h2 id="proxy">3. The proxy &mdash; six interventions</h2>
+
+<p>The proxy runs locally as a <code>ThreadingHTTPServer</code> on <code>127.0.0.1:9999</code>, intercepts all <code>/v1/messages</code> requests from Claude Code, transforms them for CERIT compatibility, and relays SSE streams back. About 700 lines of Python, no external dependencies beyond the standard library. Here are the six interventions it applies.</p>
+
+<h3>1 &middot; Tool sanitizer</h3>
+<p>Strips or converts Anthropic proprietary tool types (<code>web_search_20250305</code>, <code>computer_20241022</code>, <code>text_editor_20250429</code>). Patches missing <code>input_schema</code> fields. Strips spurious outer quotes from tool-call JSON &mdash; a gemma4-specific formatting bug where the model wraps its entire JSON output in an extra string layer.</p>
+
+<h3>2 &middot; Continuation injection</h3>
+<p>Appends <code>CERIT_CONTINUATION</code> to the system prompt. The model signals task completion with <code>TASK_COMPLETE</code> on its own line. Also injects <code>tool_choice: {type: any}</code> to force a tool call rather than a prose response. Note: this was tested on kimi and caused a thinking-phase deadlock &mdash; removed for kimi sessions.</p>
+
+<span class="code-label">CERIT_CONTINUATION system prompt injection</span>
+<pre><code>AGENTIC EXECUTION &mdash; NON-NEGOTIABLE
+When tools are available: call a tool immediately. Do not explain. Do not narrate.
+FORBIDDEN before a tool call: 'I will now' / 'Let me' / 'I'll first'
+end_turn is ONLY valid: (a) task 100% done &mdash; write your FULL final answer now,
+  OR (b) you need information only the human can provide.
+All other turns: CALL A TOOL. No exceptions.
+Completion signal: when the task is 100% done, end your final response with: TASK_COMPLETE</code></pre>
+
+<h3>3 &middot; Turn + repetition guards</h3>
+<p>At turn 12, a synthesis nudge is injected. At turn 20, a hard stop message is sent. If any single tool has been called 3 or more times in the last 30 messages, a loop-break injection fires. These prevent runaway sessions that accumulate context without making progress.</p>
+
+<h3>4 &middot; GLM thinking disable</h3>
+<p>For any request targeting <code>glm-5.2</code>, the proxy injects <code>chat_template_kwargs: {"enable_thinking": false}</code> into the request body before forwarding. Wall time for T1: <span style="color:var(--red)">900 s</span> &rarr; <span style="color:var(--green)">48 s</span>. The most impactful single intervention in the entire proxy.</p>
+
+<h3>5 &middot; Fallback chain</h3>
+<p>On HTTP 400 context overflow: <code>glm-5.2</code> &rarr; <code>kimi</code> &rarr; <code>qwen3.5-122b</code>. Each model in the chain has progressively larger context windows (110K &rarr; 131K &rarr; 256K), covering most real-world session lengths.</p>
+
+<h3>6 &middot; HTTP 429 retry</h3>
+<p>Three retries with 5-second backoff on HTTP 429 rate-limit responses. A thread-safe <code>REQUEST_COUNTER</code> logs all upstream requests for debugging. During run10, GLM-5.2 itself implemented this counter &mdash; the benchmark doubled as a live coding session.</p>
+
+<!-- SECTION 4 -->
+<h2 id="benchmark">4. The benchmark journey</h2>
+
+<p>The benchmark started as a structured overnight test with 7 real research tasks and evolved into a 117-test formal suite across 11 categories. Here is the chronological story.</p>
+
+<h4>Night 1 (June 18&ndash;19): kimi target, metric bug, 37% idle</h4>
+
+<p>First structured overnight test. Configuration: kimi as default tool target (admin had recommended it), early proxy. Results were mixed:</p>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Task</th><th>Time (s)</th><th>Tools</th><th>Idle %</th><th>Done</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">T1 Tools catalogue</td><td class="num">10.2</td><td class="num">1</td><td class="bad">67%</td><td class="bad">N</td></tr>
+    <tr><td class="label">T2 PBS script</td><td class="num">72.4</td><td class="num">2</td><td class="mid">50%</td><td class="win">Y</td></tr>
+    <tr><td class="label">T3 Code review</td><td class="num">105.1</td><td class="num">9</td><td class="mid">25%</td><td class="win">Y</td></tr>
+    <tr><td class="label">T4 Memory audit</td><td class="num">33.3</td><td class="num">6</td><td class="mid">25%</td><td class="win">Y</td></tr>
+    <tr><td class="label">T5 Proxy review</td><td class="num">44.9</td><td class="num">1</td><td class="bad">67%</td><td class="win">Y</td></tr>
+    <tr><td class="label">T6 Script + execute</td><td class="num">65.5</td><td class="num">9</td><td class="mid">25%</td><td class="win">Y</td></tr>
+    <tr><td class="label">T7 File index</td><td class="num">360.1</td><td class="num">0</td><td class="dim">0%</td><td class="bad">N</td></tr>
+    <tr class="total-row">
+      <td class="label">Average</td><td class="dim"></td><td class="dim"></td>
+      <td class="bad">37%</td><td class="mid">5/7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Two issues discovered: (1) kimi underperforms as tool target; (2) the idle-stop metric was double-counting. The stream-JSON emitter fires 2 events per message (text + tool_use), both counted as separate turns &mdash; and the final text-only turn always counted as idle. Both bugs fixed before run6.</p>
+
+<h4>run6 &mdash; qwen3.5-122b baseline (883 s, 7/7)</h4>
+<p>After fixing the metric bug and switching to <code>qwen3-coder</code> (alias for qwen3.5-122b). Result: all 7 tasks completed, 56 proxy continuation injections needed. Reliable but slow.</p>
+
+<h4>run7 &mdash; DeepSeek V4 Pro (755 s, 7/7)</h4>
+<p>Faster than qwen3.5-122b, but with 68 upstream errors and 2.2&ndash;2.4&times; context inflation. 188 continuation injections required. Technically functional but operationally unreliable.</p>
+
+<h4>run8 &mdash; GLM-5.2 thinking ON (1865 s, 6/7)</h4>
+<p>Thinking mode enabled (default). T1 alone burned 143 tool calls and hit the 900-second wall. Fix: add the thinking-disable intervention &rarr; run9.</p>
+
+<h4>run9 &mdash; GLM-5.2 thinking OFF, the winner (494 s, 7/7)</h4>
+
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-number">494 s</div>
+    <div class="stat-label">total wall time</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-number">7/7</div>
+    <div class="stat-label">tasks completed</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-number">0</div>
+    <div class="stat-label">idle stops</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-number">0</div>
+    <div class="stat-label">proxy injections needed</div>
+  </div>
+</div>
+
+<div class="table-wrap">
 <table>
   <thead>
     <tr>
-      <th>Category</th>
-      <th>Tests</th>
-      <th style="text-align:right">Completion</th>
-      <th style="text-align:right">Avg quality</th>
-      <th>Notes</th>
+      <th>Metric</th>
+      <th>qwen3.5-122b</th>
+      <th>DeepSeek V4 Pro</th>
+      <th>GLM-5.2 ON</th>
+      <th>GLM-5.2 OFF</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td class="label">D — Bash / Shell</td>
+      <td class="label">Total</td>
+      <td class="mid">883 s &middot; 7/7</td>
+      <td class="mid">755 s &middot; 7/7</td>
+      <td class="bad">1865 s &middot; 6/7</td>
+      <td class="pho">494 s &middot; 7/7</td>
+    </tr>
+    <tr>
+      <td class="label">Idle stops</td>
+      <td class="win">0%</td>
+      <td class="win">0%</td>
+      <td class="win">0%</td>
+      <td class="pho">0%</td>
+    </tr>
+    <tr>
+      <td class="label">Upstream errors</td>
+      <td class="win">0</td>
+      <td class="bad">68</td>
+      <td class="bad">68</td>
+      <td class="pho">0</td>
+    </tr>
+    <tr>
+      <td class="label">Context inflation</td>
+      <td class="win">1.0&times;</td>
+      <td class="bad">2.2&ndash;2.4&times;</td>
+      <td class="mid">1.1&ndash;2.6&times;</td>
+      <td class="pho">1.0&times;</td>
+    </tr>
+    <tr>
+      <td class="label">Proxy injections</td>
+      <td class="mid">56</td>
+      <td class="bad">188</td>
+      <td class="bad">255</td>
+      <td class="pho">0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>GLM-5.2 with thinking disabled required <strong>zero</strong> continuation injections &mdash; it naturally called tools and exited cleanly when done. This suggests the model is trained to follow the agentic execution contract without external scaffolding.</p>
+
+<h4>run10 &mdash; 117-test suite (88%, 0 idle stops)</h4>
+
+<p>Expanded to 117 tests across 11 categories (A&ndash;K), scored by an LLM judge (qwen3.5-122b, 1&ndash;10 scale). Total: 947 tool calls, 0 idle stops, 88% completion.</p>
+
+<p>Notable: during C-category (edit/refactor) tests, GLM-5.2 was asked to improve the live proxy and did so correctly &mdash; implementing <code>REQUEST_COUNTER</code>, HTTP 429 retry, extracting prompt strings to <code>cerit_prompts.py</code>, and splitting <code>_relay_sse</code>. The benchmark served simultaneously as a test harness and a live coding session.</p>
+
+<div class="chart-wrap">
+  <div class="chart-title">run10 &mdash; completion % and avg quality by category (117 tests, GLM-5.2)</div>
+  <div class="chart-canvas-wrap">
+    <canvas id="run10Chart"></canvas>
+  </div>
+</div>
+
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Category</th><th>Tests</th><th>Completion</th><th>Avg quality</th><th>Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="label">D &middot; Bash / Shell</td>
       <td class="num">15</td>
-      <td class="win">15/15</td>
+      <td class="win">15/15 &mdash; 100%</td>
       <td class="win">9.0</td>
       <td>Best quality across all categories</td>
     </tr>
     <tr>
-      <td class="label">C — Edit &amp; Refactor</td>
+      <td class="label">C &middot; Edit / Refactor</td>
       <td class="num">15</td>
-      <td class="win">15/15</td>
+      <td class="win">15/15 &mdash; 100%</td>
       <td class="win">8.0</td>
       <td>Complex proxy edits, clean output</td>
     </tr>
     <tr>
-      <td class="label">I — Verify / Self-checking</td>
-      <td class="num">5</td>
-      <td class="win">5/5</td>
-      <td class="num">6.0</td>
-      <td>Unit tests, syntax checks</td>
-    </tr>
-    <tr>
-      <td class="label">A — Read &amp; Understand</td>
+      <td class="label">A &middot; Read / Analyze</td>
       <td class="num">13</td>
-      <td class="win">13/13</td>
-      <td class="num">6.2</td>
+      <td class="win">13/13 &mdash; 100%</td>
+      <td class="mid">6.2</td>
       <td>Accurate file reads and analysis</td>
     </tr>
     <tr>
-      <td class="label">J — Web Research</td>
+      <td class="label">I &middot; Verify / Test</td>
       <td class="num">5</td>
-      <td class="win">5/5</td>
-      <td class="num">5.3</td>
+      <td class="win">5/5 &mdash; 100%</td>
+      <td class="mid">6.0</td>
+      <td>Unit tests, syntax checks</td>
+    </tr>
+    <tr>
+      <td class="label">J &middot; Web Research</td>
+      <td class="num">5</td>
+      <td class="win">5/5 &mdash; 100%</td>
+      <td class="mid">5.3</td>
       <td>WebSearch tool works via proxy</td>
     </tr>
     <tr>
-      <td class="label">B — Code Generation</td>
+      <td class="label">B &middot; Code Gen</td>
       <td class="num">16</td>
-      <td class="mid">14/16</td>
+      <td class="mid">14/16 &mdash; 88%</td>
       <td class="mid">3.4</td>
       <td>Misses edge cases in underspecified prompts</td>
     </tr>
     <tr>
-      <td class="label">F — Multi-tool Workflows</td>
-      <td class="num">18</td>
-      <td class="mid">13/18</td>
-      <td class="mid">4.4</td>
-      <td>Deep tasks hit timeout</td>
-    </tr>
-    <tr>
-      <td class="label">H — Vibe Style Variants</td>
-      <td class="num">10</td>
-      <td class="mid">7/10</td>
-      <td class="mid">4.3</td>
-      <td>Terse prompts need longer timeouts</td>
-    </tr>
-    <tr>
-      <td class="label">G — Long-context Stress</td>
+      <td class="label">G &middot; Stress</td>
       <td class="num">5</td>
-      <td class="mid">4/5</td>
+      <td class="mid">4/5 &mdash; 80%</td>
       <td class="mid">3.5</td>
       <td>G04 longitudinal analysis timed out at 360 s</td>
     </tr>
     <tr>
-      <td class="label">E — Search &amp; Audit</td>
+      <td class="label">E &middot; Search / Audit</td>
       <td class="num">10</td>
-      <td class="mid">8/10</td>
+      <td class="mid">8/10 &mdash; 80%</td>
       <td class="bad">2.0</td>
-      <td>Regex mismatch on passes; quality depressed by timed-out tests</td>
+      <td>Regex mismatches on passes; quality depressed by timeouts</td>
     </tr>
     <tr>
-      <td class="label">K — Autonomous</td>
+      <td class="label">K &middot; Autonomous</td>
       <td class="num">5</td>
-      <td class="mid">4/5</td>
+      <td class="mid">4/5 &mdash; 80%</td>
       <td class="bad">2.0</td>
       <td>K02 Zotero diagnosis timed out at 360 s (27 turns, 28 tools)</td>
+    </tr>
+    <tr>
+      <td class="label">F &middot; Multi-tool</td>
+      <td class="num">18</td>
+      <td class="mid">13/18 &mdash; 72%</td>
+      <td class="mid">4.4</td>
+      <td>Deep tasks hit timeout</td>
+    </tr>
+    <tr>
+      <td class="label">H &middot; Vibe Styles</td>
+      <td class="num">10</td>
+      <td class="mid">7/10 &mdash; 70%</td>
+      <td class="mid">4.3</td>
+      <td>Terse prompts need longer timeouts</td>
     </tr>
     <tr class="total-row">
       <td class="label">TOTAL</td>
       <td class="num">117</td>
-      <td class="win">103/117 — 88%</td>
+      <td class="win">103/117 &mdash; 88%</td>
       <td class="num">5.37</td>
-      <td>0 idle stops · 947 tool calls</td>
+      <td>0 idle stops &middot; 947 tool calls</td>
     </tr>
   </tbody>
 </table>
-
-<p>
-A notable finding: during the C-category (edit/refactor) tests, GLM-5.2 was
-asked to implement improvements directly on the live proxy — and did so correctly,
-adding HTTP 429 retry logic, a thread-safe request counter, and extracting prompt
-strings to a separate <code>cerit_prompts.py</code> module. The benchmark served
-simultaneously as a test harness and a live coding session.
-</p>
-
-<!-- ── 5. SETUP ──────────────────────────────────────────────────────── -->
-<h2>Setup: step by step</h2>
-
-<h3>Prerequisites</h3>
-<p>
-You need: (a) a MetaCentrum or MUNI account with access to the e-INFRA CZ LLM
-gateway, (b) Claude Code installed (<code>npm i -g @anthropic-ai/claude-code</code>
-or the official installer), (c) Python 3.10+ on the machine that will run the proxy.
-</p>
-
-<div class="step">
-  <div class="step-num">1</div>
-  <div class="step-body">
-    <strong>Get your CERIT API token.</strong>
-    Log in to <a href="https://llm.ai.e-infra.cz/" target="_blank" rel="noopener">llm.ai.e-infra.cz</a>
-    with your institutional account. Under your profile, generate an API key.
-    Store it:
-    <pre><code>mkdir -p ~/.config/cerit
-echo 'YOUR_TOKEN_HERE' > ~/.config/cerit/token
-chmod 600 ~/.config/cerit/token</code></pre>
-  </div>
 </div>
 
-<div class="step">
-  <div class="step-num">2</div>
-  <div class="step-body">
-    <strong>Clone the setup repo.</strong>
-    <pre><code>git clone https://github.com/mcer33/claude-code-cerit-llm.git ~/dev/claude-code-cerit-llm
-cd ~/dev/claude-code-cerit-llm
-bash install.sh</code></pre>
-    The install script copies <code>cerit-rewrite-proxy.py</code> to <code>~/dev/</code>,
-    appends the shell functions to <code>~/.bashrc</code>, and optionally sets up the
-    MCP delegation venv for subagent workloads.
-  </div>
+<!-- SECTION 5 -->
+<h2 id="idle-stop">5. The idle-stop mystery</h2>
+
+<p>This deserves its own section because it is the most interesting part of the investigation &mdash; and the answer is messier than we first thought.</p>
+
+<h3>What we observed</h3>
+<p>In complex Claude Code sessions &mdash; 20+ tool definitions, multi-turn, long context &mdash; the model would output text describing what it <em>would</em> do instead of calling a tool. <code>stop_reason: end_turn</code>. Claude Code interprets this as session completion and exits. Task incomplete.</p>
+
+<h3>What we measured</h3>
+<p>First tests showed up to <strong>37% idle-stop rate</strong>. We built the continuation-injection proxy to fight it. The proxy tracks every turn, classifies it as tool-call or idle, and injects <code>CERIT_CONTINUATION</code> on the next message if the model idles.</p>
+
+<h3>What we sent to the admin</h3>
+<p>Three support requests, including asking for <code>--enable-auto-tool-choice</code> on kimi &mdash; assuming a vllm backend. We were confident this was a server-side configuration issue.</p>
+
+<h3>What the admin said</h3>
+<p>Admin Lukas Hejtmanek (CERIT-SC): all models have tool parsers configured. kimi runs on <strong>sglang</strong>, not vllm &mdash; the flag does not apply. GLM-5.2 is far better than the GLM-4.x we had been referencing. The difference is significant.</p>
+
+<h3>What the reproducer shows today</h3>
+<p>A minimal 1-tool, 1-message request to both qwen3.5-122b and kimi &rarr; <strong>0% idle-stop, no continuation needed</strong>. Simple calls work fine.</p>
+
+<h3>Resolution</h3>
+
+<div class="callout callout-amber">
+  <span class="callout-label">Finding</span>
+  <p>The idle-stop is <strong>context-complexity dependent</strong>. Simple calls work fine. Complex multi-turn sessions with the full Claude Code tool suite (~20 tools, long message history) are where it manifests.</p>
+  <p>The 37% figure from night 1 was also inflated by a metric bug (double-counting, fixed before run6). The continuation prompt in the proxy still helps in real complex sessions &mdash; run10 recorded 0 idle stops across 947 tool calls.</p>
+  <p>Whether the LiteLLM middleware layer (broken for Claude Code since v1.81.14, confirmed by admin, not yet fixed) plays a role in complex-session idle-stops remains an open question.</p>
 </div>
 
-<div class="step">
-  <div class="step-num">3</div>
-  <div class="step-body">
-    <strong>Reload your shell and verify.</strong>
-    <pre><code>source ~/.bashrc
-claude-cerit-ping</code></pre>
-    Expected output: <code>PONG</code> followed by <code>HTTP 200 | ttfb ~0.5s</code>.
-    If you see <code>401</code>, your token file is wrong or empty.
-  </div>
+<!-- SECTION 6 -->
+<h2 id="admin">6. What the admin confirmed</h2>
+
+<p>Admin <strong>Lukas Hejtmanek</strong> (CERIT-SC), confirmed June 19, 2026:</p>
+
+<ul>
+  <li>All deployed models have tool calling and parsers configured server-side</li>
+  <li><code>qwen3-coder</code> = alias for <code>qwen3.5-122b</code> (same model, same weights)</li>
+  <li>Use <code>kimi</code> alias &mdash; tracks current version (k2.7 as of June 2026); never pin to numbered suffix</li>
+  <li>GLM-5.2 is far better than old GLM-4.x (confirmed &asymp; Opus 4.8 per MCP Atlas)</li>
+  <li>LiteLLM frontend: broken for Claude Code since v1.81.14, not yet fixed</li>
+</ul>
+
+<div class="callout callout-green">
+  <span class="callout-label">Key lesson</span>
+  <p><strong>Check <code>/v1/models</code> first.</strong> The full list of available models is always there and avoids redundant admin requests. New models appear without announcement. We wasted two support cycles asking about models that were already deployed.</p>
 </div>
 
-<div class="step">
-  <div class="step-num">4</div>
-  <div class="step-body">
-    <strong>Launch Claude Code via CERIT.</strong>
-    <pre><code>claude-cerit-rich</code></pre>
-    This starts the proxy on <code>:9999</code> (if not already running), sets
-    <code>ANTHROPIC_BASE_URL=http://127.0.0.1:9999/</code>, and launches Claude Code
-    with a spoofed <code>ANTHROPIC_MODEL=claude-sonnet-4-6</code> so the TUI spinner
-    stays active. On the wire the proxy routes to <code>glm-5.2</code> with thinking
-    disabled.
-  </div>
-</div>
+<span class="code-label">List all available models</span>
+<pre><code>curl -s -H "Authorization: Bearer $(cat ~/.config/cerit/token)" \
+  https://llm.ai.e-infra.cz/v1/models | jq '.data[].id' | sort</code></pre>
 
-<h3>Available commands</h3>
+<!-- SECTION 7 -->
+<h2 id="setup">7. Getting started</h2>
+
+<span class="code-label">Setup &mdash; four steps</span>
+<pre><code># 1. Get a MetaCentrum or MUNI account &rarr; llm.ai.e-infra.cz &rarr; token
+mkdir -p ~/.config/cerit
+echo 'YOUR_TOKEN' > ~/.config/cerit/token &amp;&amp; chmod 600 ~/.config/cerit/token
+
+# 2. Clone + install
+git clone https://github.com/mcer33/claude-code-cerit-llm ~/dev/claude-code-cerit-llm
+cd ~/dev/claude-code-cerit-llm &amp;&amp; bash install.sh
+
+# 3. Verify
+source ~/.bashrc &amp;&amp; claude-cerit-ping
+
+# 4. Launch
+claude-cerit-rich    # GLM-5.2, 110K context &mdash; recommended default</code></pre>
+
+<div class="table-wrap">
 <table>
   <thead>
-    <tr><th>Command</th><th>Model (on wire)</th><th>Context</th><th>Use when</th></tr>
+    <tr><th>Command</th><th>Model</th><th>Context</th><th>Use when</th></tr>
   </thead>
   <tbody>
     <tr>
-      <td class="label"><code>claude-cerit-rich</code></td>
-      <td><span class="pill pill-green">glm-5.2</span> (default)</td>
-      <td class="num">110 K</td>
-      <td>Normal sessions — recommended default</td>
+      <td class="pho" style="font-family:var(--mono)">claude-cerit-rich</td>
+      <td>glm-5.2</td>
+      <td class="num">110K</td>
+      <td>Normal sessions &mdash; <strong>recommended default</strong></td>
     </tr>
     <tr>
-      <td class="label"><code>claude-cerit-medium</code></td>
-      <td><span class="pill pill-blue">qwen3.5-122b</span></td>
-      <td class="num">230 K</td>
-      <td>Sessions in 80 K–220 K range that overflow GLM</td>
+      <td style="font-family:var(--mono)">claude-cerit-medium</td>
+      <td>qwen3.5-122b</td>
+      <td class="num">230K</td>
+      <td>Sessions in the 80K&ndash;220K range</td>
     </tr>
     <tr>
-      <td class="label"><code>claude-cerit-long</code></td>
-      <td><span class="pill pill-amber">llama-4-scout</span></td>
-      <td class="num">270 K</td>
-      <td>Very long context; no tool_use support (text only)</td>
+      <td style="font-family:var(--mono)">claude-cerit-long</td>
+      <td>llama-4-scout</td>
+      <td class="num">270K</td>
+      <td>Very long text (tools unverified)</td>
     </tr>
     <tr>
-      <td class="label"><code>claude-cerit</code></td>
-      <td><span class="pill pill-amber">gemma4</span></td>
-      <td class="num">110 K</td>
-      <td>Direct (no proxy) — fast text chat, no spinner</td>
-    </tr>
-    <tr>
-      <td class="label"><code>claude-cerit-ping</code></td>
-      <td colspan="3">Raw HTTP health check — verify token and latency</td>
+      <td class="dim" style="font-family:var(--mono)">claude-cerit-ping</td>
+      <td class="dim">&mdash;</td>
+      <td class="dim">&mdash;</td>
+      <td>Health check / connectivity test</td>
     </tr>
   </tbody>
 </table>
+</div>
 
-<h3>Proxy architecture in detail</h3>
+<!-- SECTION 8 -->
+<h2 id="next">8. What&rsquo;s next / open questions</h2>
 
-<p>
-The proxy is a single-file <code>ThreadingHTTPServer</code> with no dependencies
-beyond the Python standard library. It is intentionally simple: no async, no
-session state, no database. The turn-count guard works by counting
-<code>"role": "assistant"</code> entries in the <code>messages</code> array of each
-incoming request — entirely stateless.
-</p>
+<ul>
+  <li><strong>L01 test:</strong> llama-4-scout tool verification pending. Long-context scenarios need a proper structured benchmark, not just anecdotal testing.</li>
+  <li><strong>DeepSeek V4 Pro re-test:</strong> Admin is working on sglang migration for DeepSeek &mdash; vllm currently has compilation issues for some workloads. Once migrated, re-run the core 7-task suite to see if error rate and context inflation improve.</li>
+  <li><strong>LiteLLM fix:</strong> Broken for Claude Code since v1.81.14 (CERIT-side, not yet fixed). This may be the root cause of complex-session idle-stops. Worth a targeted test once resolved.</li>
+  <li><strong>Idle-stop in complex sessions:</strong> A more realistic reproducer &mdash; 20+ tools, multi-turn, full production context &mdash; would better characterise the remaining phenomenon versus the simplified 1-tool reproducer that shows 0% idle.</li>
+</ul>
 
-<pre><code><span class="cm"># Five intervention stages, applied per-request:</span>
-
-<span class="cm"># 1. Tool-definition sanitizer</span>
-body_obj = sanitize_tool_definitions(body_obj)   <span class="cm"># strips/converts proprietary types</span>
-body_obj = sanitize_tool_inputs(body_obj)         <span class="cm"># strips extra quotes (gemma4 bug)</span>
-
-<span class="cm"># 2. Agentic continuation + guards (tool-using requests only)</span>
-<span class="kw">if</span> request_has_tools:
-    n_asst = <span class="va">sum</span>(1 <span class="kw">for</span> m <span class="kw">in</span> messages <span class="kw">if</span> m.get(<span class="st">"role"</span>) == <span class="st">"assistant"</span>)
-    <span class="cm"># repetition detection …</span>
-    injection = CERIT_CONTINUATION + turn_warn + repeat_guard
-
-<span class="cm"># 3. Model routing</span>
-target = MODEL_OVERRIDES.get(model) <span class="kw">or</span> DEFAULT_TOOL_TARGET  <span class="cm"># → glm-5.2</span>
-
-<span class="cm"># 4. GLM thinking disable</span>
-<span class="kw">if</span> target == <span class="st">"glm-5.2"</span>:
-    send_obj[<span class="st">"chat_template_kwargs"</span>] = {<span class="st">"enable_thinking"</span>: <span class="kw">False</span>}
-
-<span class="cm"># 5. Context-overflow fallback chain on HTTP 400</span>
-<span class="cm"># glm-5.2 → kimi → qwen3.5-122b</span></code></pre>
-
-<!-- ── 6. AVAILABLE MODELS ────────────────────────────────────────────── -->
-<h2>CERIT model catalogue (June 2026)</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Model</th>
-      <th>API name</th>
-      <th style="text-align:right">Context</th>
-      <th>Tier</th>
-      <th>Tool calling</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="label">GLM-5.2</td>
-      <td><code>glm-5.2</code></td>
-      <td class="num">300 K</td>
-      <td><span class="pill pill-amber">experimental</span></td>
-      <td><span class="pill pill-green">yes</span> — thinking must be disabled</td>
-    </tr>
-    <tr>
-      <td class="label">Qwen3.5-122B</td>
-      <td><code>qwen3.5-122b</code> / <code>agentic</code></td>
-      <td class="num">256 K</td>
-      <td><span class="pill pill-green">guaranteed</span></td>
-      <td><span class="pill pill-green">yes</span> — sglang qwen3_coder parser</td>
-    </tr>
-    <tr>
-      <td class="label">DeepSeek V4 Pro</td>
-      <td><code>deepseek-v4-pro-thinking</code></td>
-      <td class="num">1 M</td>
-      <td><span class="pill pill-green">guaranteed</span></td>
-      <td><span class="pill pill-green">yes</span> — vLLM; thinking OFF by default</td>
-    </tr>
-    <tr>
-      <td class="label">Kimi K2.6</td>
-      <td><code>kimi</code> (admin alias)</td>
-      <td class="num">256 K</td>
-      <td><span class="pill pill-amber">experimental</span></td>
-      <td><span class="pill pill-green">yes</span> — sglang kimi_k2 parser</td>
-    </tr>
-    <tr>
-      <td class="label">GPT-OSS-120B</td>
-      <td><code>gpt-oss-120b</code> / <code>mini</code></td>
-      <td class="num">128 K</td>
-      <td><span class="pill pill-green">guaranteed</span></td>
-      <td><span class="pill pill-green">yes</span></td>
-    </tr>
-    <tr>
-      <td class="label">Llama-4-Scout</td>
-      <td><code>llama-4-scout-17b-16e-instruct</code></td>
-      <td class="num">270 K</td>
-      <td><span class="pill pill-amber">experimental</span></td>
-      <td><span class="pill pill-red">unverified</span> — use for long-context text only</td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- ── 7. WHAT'S NEXT ────────────────────────────────────────────────── -->
-<h2>What's next</h2>
-
-<p>
-The proxy now includes a <strong><code>TASK_COMPLETE</code> sentinel</strong>:
-the continuation rule instructs the model to end its final response with the
-line <code>TASK_COMPLETE</code>. The test runner detects this as a supplemental
-completion signal, disambiguating genuine completion from success-regex mismatch.
-</p>
-
-<p>
-<strong>Llama-4-scout tool support</strong> remains unverified. A dedicated L01 test
-exercises <code>claude-cerit-long</code> with a minimal file-read task to confirm
-whether the 270 K context model supports tool calling. Until confirmed, it remains
-in the text-only routing tier.
-</p>
-
-<p>
-<strong>DeepSeek V4 Pro</strong> (1 M token context) is worth re-testing as CERIT's
-vLLM infrastructure stabilises — the 68 upstream errors in run7 were likely transient
-load issues rather than a fundamental limitation.
-</p>
-
-<p>
-The benchmark suite (<code>run_tests.py</code>) now covers 117 tests with
-<code>--suite base|ext|all</code>, <code>--category A,B,...</code>,
-<code>--timeout-scale</code> for overnight runs, and a built-in LLM quality judge.
-An idle-stop reproducer (<code>cerit_idle_stop_reproducer.py</code>) quantifies
-baseline vs. mitigated idle-stop rates for comparison with future CERIT server-side fixes.
-</p>
+<div class="callout callout-photon">
+  <span class="callout-label">Bottom line</span>
+  <p>For routine agentic coding work on research projects, <strong>GLM-5.2 with thinking disabled is the recommendation</strong>. It is fast, clean, and requires no babysitting. For sessions that exceed 80K tokens, fall back to qwen3.5-122b. Both are free, both run on Czech national infrastructure, and both outperform expectations for open-weight models.</p>
+</div>
 
 <hr class="divider">
 
-<p style="font-size:.9rem;color:var(--ink-dim)">
+<p style="font-size:.88rem;color:var(--ink-dim)">
   <strong>Code:</strong>
-  <a href="https://github.com/mcer33/claude-code-cerit-llm" target="_blank" rel="noopener">
-    github.com/mcer33/claude-code-cerit-llm
-  </a>
+  <a href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a>
   &nbsp;&mdash;&nbsp;
   <strong>CERIT gateway:</strong>
-  <a href="https://llm.ai.e-infra.cz/" target="_blank" rel="noopener">llm.ai.e-infra.cz</a>
+  <a href="https://llm.ai.e-infra.cz/">llm.ai.e-infra.cz</a>
   &nbsp;&mdash;&nbsp;
   <strong>CERIT docs:</strong>
-  <a href="https://docs.cerit.io/en/docs/ai-as-a-service/ai-api" target="_blank" rel="noopener">docs.cerit.io</a>
+  <a href="https://docs.cerit.io/en/docs/ai-as-a-service/ai-api">docs.cerit.io</a>
 </p>
 
 </main>
 
+<!-- FOOTER -->
 <footer>
   <div>
     <p>Michal Cifra &mdash; Institute of Photonics and Electronics, Czech Academy of Sciences</p>
-    <p style="margin-top:.4rem"><a href="https://biophotoniq.net/">Biophotoniq</a> &middot; <a href="https://michalcifra.com/">michalcifra.com</a></p>
+    <p style="margin-top:.35rem">
+      <a href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a>
+    </p>
   </div>
   <div style="text-align:right">
-    <p>BL2605 &mdash; June 2026</p>
-    <p style="margin-top:.4rem"><a href="https://michalcifra.com/blogs/">All blogs</a></p>
+    <p>BL2605 &middot; June 2026</p>
+    <p style="margin-top:.35rem"><a href="https://michalcifra.com/blogs/">All blogs</a></p>
   </div>
 </footer>
 
+<!-- CHART.JS -->
 <script>
-Chart.defaults.color = '#9eafc6';
-Chart.defaults.borderColor = 'rgba(140,170,210,.1)';
-const ctx = document.getElementById('chartTime').getContext('2d');
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-    datasets: [
-      {
-        label: 'qwen3.5-122b',
-        data: [619, 37, 67, 23, 31, 39, 67],
-        backgroundColor: 'rgba(123,208,255,.55)',
-        borderColor: 'rgba(123,208,255,.8)',
-        borderWidth: 1,
-        borderRadius: 3,
-      },
-      {
-        label: 'DeepSeek V4 Pro',
-        data: [265, 54, 73, 202, 44, 43, 75],
-        backgroundColor: 'rgba(243,201,124,.45)',
-        borderColor: 'rgba(243,201,124,.7)',
-        borderWidth: 1,
-        borderRadius: 3,
-      },
-      {
-        label: 'GLM-5.2 thinking ON',
-        data: [900, 538, 159, 33, 132, 36, 66],
-        backgroundColor: 'rgba(248,113,113,.35)',
-        borderColor: 'rgba(248,113,113,.6)',
-        borderWidth: 1,
-        borderRadius: 3,
-      },
-      {
-        label: 'GLM-5.2 thinking OFF',
-        data: [48, 46, 228, 35, 46, 42, 49],
-        backgroundColor: 'rgba(74,222,128,.5)',
-        borderColor: 'rgba(74,222,128,.8)',
-        borderWidth: 1,
-        borderRadius: 3,
-      },
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: {
-        labels: { color: '#9eafc6', font: { family: 'IBM Plex Mono', size: 11 }, boxWidth: 12 }
-      },
-      tooltip: {
-        callbacks: {
-          label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} s`
+(function () {
+  const labels = [
+    'D · Bash/shell',
+    'C · Edit/refactor',
+    'A · Read/analyze',
+    'I · Verify/test',
+    'J · Web research',
+    'B · Code gen',
+    'G · Stress',
+    'E · Search/audit',
+    'K · Autonomous',
+    'F · Multi-tool',
+    'H · Vibe styles'
+  ];
+
+  const completion = [100, 100, 100, 100, 100, 88, 80, 80, 80, 72, 70];
+  const quality    = [9.0, 8.0, 6.2, 6.0, 5.3, 3.4, 3.5, 2.0, 2.0, 4.4, 4.3];
+
+  const photon = '#5ef2e6';
+  const amber  = '#f3c97c';
+
+  Chart.defaults.color = '#9eafc6';
+  Chart.defaults.borderColor = 'rgba(140,170,210,.08)';
+  Chart.defaults.font.family = '"Hanken Grotesk", system-ui, sans-serif';
+
+  const ctx = document.getElementById('run10Chart').getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Completion %',
+          data: completion,
+          backgroundColor: completion.map(v =>
+            v === 100 ? 'rgba(94,242,230,.55)'
+            : v >= 80  ? 'rgba(94,242,230,.35)'
+                       : 'rgba(94,242,230,.18)'
+          ),
+          borderColor: photon,
+          borderWidth: 1,
+          borderRadius: 3,
+          yAxisID: 'yLeft',
+          order: 2
+        },
+        {
+          label: 'Avg quality (1–10)',
+          data: quality,
+          type: 'line',
+          borderColor: amber,
+          backgroundColor: 'rgba(243,201,124,.12)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: amber,
+          pointBorderColor: amber,
+          tension: 0.35,
+          yAxisID: 'yRight',
+          order: 1
         }
-      }
+      ]
     },
-    scales: {
-      x: { grid: { color: 'rgba(140,170,210,.08)' }, ticks: { font: { family: 'IBM Plex Mono', size: 11 } } },
-      y: {
-        grid: { color: 'rgba(140,170,210,.08)' },
-        ticks: { font: { family: 'IBM Plex Mono', size: 11 }, callback: v => v + ' s' },
-        title: { display: true, text: 'seconds', color: '#5e6c84', font: { size: 11 } }
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: '#9eafc6',
+            font: { size: 12 },
+            usePointStyle: true,
+            padding: 20
+          }
+        },
+        tooltip: {
+          backgroundColor: '#0d1320',
+          borderColor: 'rgba(140,170,210,.22)',
+          borderWidth: 1,
+          titleColor: '#eef2f8',
+          bodyColor: '#9eafc6',
+          padding: 10,
+          callbacks: {
+            label: function (ctx) {
+              if (ctx.dataset.label === 'Completion %') return ' Completion: ' + ctx.parsed.x + '%';
+              return ' Quality: ' + ctx.parsed.x + '/10';
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            color: '#9eafc6',
+            font: { size: 12, family: '"Hanken Grotesk", system-ui, sans-serif' },
+            padding: 8
+          },
+          grid: { color: 'rgba(140,170,210,.07)' }
+        },
+        yLeft: {
+          position: 'left',
+          min: 0,
+          max: 118,
+          display: false,
+          grid: { color: 'rgba(140,170,210,.07)' }
+        },
+        yRight: {
+          position: 'right',
+          min: 0,
+          max: 13,
+          display: false,
+          grid: { drawOnChartArea: false }
+        },
+        x: { display: false }
       }
     }
-  }
-});
+  });
+})();
 </script>
+
 </body>
 </html>
