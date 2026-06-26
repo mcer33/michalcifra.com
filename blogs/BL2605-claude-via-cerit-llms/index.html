@@ -230,7 +230,7 @@ strong { color: var(--ink); font-weight: 600; }
   font-size: .95rem;
 }
 .callout ul li::before {
-  content: "&#x2192;";
+  content: "\2192";
   position: absolute;
   left: 0;
   color: var(--photon);
@@ -372,7 +372,7 @@ td strong { color: var(--photon); }
   letter-spacing: .02em;
 }
 .download-link:hover { color: var(--photon-2); text-decoration: underline; }
-.download-link::before { content: "&#x2192; "; }
+.download-link::before { content: "\2192\00a0"; }
 
 /* STAT ROW */
 .stat-row {
@@ -483,6 +483,14 @@ footer {
         <li>Download: <a href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a></li>
       </ul>
     </div>
+  </section>
+
+  <!-- MOTIVATION -->
+  <section>
+    <h2>Why bother?</h2>
+    <p><strong>Claude Code is not a chatbot.</strong> It is an agentic coding assistant that reads your actual codebase, runs shell commands, edits files, and iterates on tasks autonomously. You describe what you need &mdash; fix this analysis script, debug this Slurm job, refactor this module &mdash; and it works through the problem in a loop of tool calls until the task is done. For scientific computing, where the gap between "I know what I want" and "I know how to write it" is often wide, that loop is genuinely useful.</p>
+    <p>The cost barrier is real, though. A productive agentic session with Anthropic&rsquo;s API can burn through tokens fast &mdash; frontier models run at $3&ndash;15 per million tokens, and multi-file refactors or iterative debugging sessions with many tool calls add up quickly. For academic research, where every euro of API spend competes with lab consumables, that friction matters.</p>
+    <p>CERIT removes it. Czech academic users with a MetaCentrum or MUNI account can run frontier-class LLMs at <strong>llm.ai.e-infra.cz</strong> at no cost, on national infrastructure, with no data leaving Czech academic networks. GLM-5.2, the best tool-use model on the platform, benchmarks close to Anthropic Opus&nbsp;4.8. The catch: CERIT&rsquo;s endpoint is not plug-and-play with Claude Code. This project is the adapter.</p>
   </section>
 
   <!-- SECTION 1: CERIT -->
