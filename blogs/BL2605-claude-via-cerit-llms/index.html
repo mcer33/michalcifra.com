@@ -461,10 +461,9 @@ footer {
   <header class="hero">
     <span class="hero-tag">BL2605 &middot; June 2026 &middot; v2</span>
     <h1>Claude Code on Czech academic AI</h1>
-    <p class="hero-subtitle">A local rewrite proxy routes Claude Code to the free CERIT LLM gateway. Adds MCP delegation for codebase exploration, working WebSearch, and a dual-machine setup (NTB + MetaCentrum). Zero API cost for MetaCentrum / MUNI members.</p>
+    <p class="hero-subtitle">A local rewrite proxy routes Claude Code to the free CERIT LLM gateway. Adds MCP delegation for codebase exploration, working WebSearch, and confirmed setup on both Windows and MetaCentrum login nodes. Zero API cost for MetaCentrum / MUNI members.</p>
     <div class="hero-meta">
       <span>Author: <strong>Michal Cifra</strong></span>
-      <span>Institution: <strong>&Uacute;FE / Biophotoniq</strong></span>
       <span>Updated: <strong>June 2026</strong></span>
     </div>
   </header>
@@ -564,7 +563,7 @@ footer {
     <h2>Architecture overview</h2>
     <p>Three components work together: a local rewrite proxy, an MCP delegation server, and the CERIT endpoint. Claude Code sees only <code>localhost:9999</code> &mdash; everything else is transparent.</p>
 
-    <div class="arch-box"><span class="hl">Claude Code</span>  (Windows NTB or ufeclaude / MetaCentrum)
+    <div class="arch-box"><span class="hl">Claude Code</span>  (Windows or MetaCentrum login node)
   <span class="dim">ANTHROPIC_BASE_URL=http://localhost:9999</span>
   <span class="dim">--mcp-config cerit-mcp.json  --strict-mcp-config</span>
   <span class="dim">--settings cerit-claude-settings.json</span>
@@ -709,16 +708,16 @@ All other turns: CALL A TOOL. No exceptions.</code></pre>
     </ol>
 
     <div class="callout green">
-      <div class="callout-title">Confirmed working &mdash; ufeclaude interactive session test</div>
+      <div class="callout-title">Confirmed working &mdash; MetaCentrum interactive session test</div>
       <ul>
-        <li>11&thinsp;/&thinsp;11 tests pass on ufeclaude with real Claude Code 2.1.185 + proxy</li>
+        <li>11&thinsp;/&thinsp;11 tests pass on a MetaCentrum login node with real Claude Code 2.1.185 + proxy</li>
         <li>Query: <em>&ldquo;What is the latest release of GROMACS?&rdquo;</em></li>
         <li>Answer: <strong>GROMACS 2025.4</strong>, released November 23, 2025 &mdash; correct</li>
         <li>Latency: 51.4&thinsp;s &middot; 3 WebSearch calls &middot; model: qwen3.5-122b (<code>claude-cerit-medium</code>)</li>
       </ul>
     </div>
 
-    <p>Prerequisite: the <code>ddgs</code> Python package must be installed on the proxy machine (<code>pip install ddgs</code>). On NTB this is the Windows host; on ufeclaude it is the login node where the proxy runs.</p>
+    <p>Prerequisite: the <code>ddgs</code> Python package must be installed on the machine running the proxy (<code>pip install ddgs</code>) &mdash; your Windows workstation or the MetaCentrum login node, wherever <code>cerit-rewrite-proxy.py</code> runs.</p>
   </section>
 
   <!-- SECTION 6: BENCHMARKS -->
@@ -853,10 +852,10 @@ claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
     <h3>Dual-machine configuration</h3>
     <p>The canonical shell snippet lives at <code>ecosystem/infra/client-setup/cerit-llm/cerit-bashrc.snippet</code> and is synced to both machines:</p>
     <ul class="prose">
-      <li><strong>NTB (Windows)</strong> &mdash; PowerShell profile (<code>Microsoft.PowerShell_profile.ps1</code>) with all three functions; tracked in the ecosystem repo</li>
-      <li><strong>ufeclaude (MetaCentrum login node)</strong> &mdash; <code>~/.bashrc</code> sources <code>~/dev/cerit-bashrc.snippet</code>; CRLF-stripped on sync from Windows</li>
+      <li><strong>Windows</strong> &mdash; PowerShell profile (<code>Microsoft.PowerShell_profile.ps1</code>) with all three functions</li>
+      <li><strong>MetaCentrum login node (Linux)</strong> &mdash; <code>~/.bashrc</code> sources <code>~/dev/cerit-bashrc.snippet</code>; strip CRLF after copying from Windows (<code>sed -i "s/\r//" ~/dev/cerit-bashrc.snippet</code>)</li>
     </ul>
-    <p>Running <code>git pull &amp;&amp; bash install.sh</code> on either machine re-syncs proxy, prompts, and MCP files from the canonical ecosystem source.</p>
+    <p>Running <code>git pull &amp;&amp; bash install.sh</code> re-syncs proxy, prompts, and MCP files and regenerates <code>cerit-mcp.json</code> with the correct paths for the current machine.</p>
   </section>
 
   <!-- SECTION 8: DOWNLOAD -->
@@ -886,7 +885,7 @@ claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
 </div><!-- /.page -->
 
 <footer>
-  <span>&copy; 2026 Michal Cifra &middot; Institute of Photonics and Electronics, Czech Academy of Sciences</span>
+  <span>&copy; 2026 Michal Cifra</span>
   <span><a href="https://michalcifra.com/blogs/BL2605-claude-via-cerit-llms/">BL2605</a></span>
 </footer>
 
