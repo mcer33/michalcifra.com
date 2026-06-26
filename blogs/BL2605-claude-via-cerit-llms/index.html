@@ -4,12 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Claude Code on Czech academic AI — free agentic coding via CERIT LLMs</title>
-<meta name="description" content="Route Claude Code to the free CERIT LLM gateway using a local rewrite proxy. Setup guide, model overview, and benchmark results.">
+<meta name="description" content="Route Claude Code to the free CERIT LLM gateway with a rewrite proxy, MCP delegation, and WebSearch — all confirmed working. Setup guide, architecture, and benchmark results.">
 <meta name="author" content="Michal Cifra">
+<meta property="og:title" content="Claude Code on Czech academic AI — free agentic coding via CERIT LLMs">
+<meta property="og:description" content="Local proxy + MCP delegation layer makes Claude Code work against Czech academic LLMs for free. 88% task success, WebSearch confirmed, dual-machine setup.">
+<meta property="og:type" content="article">
 <link rel="canonical" href="https://michalcifra.com/blogs/BL2605-claude-via-cerit-llms/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #05070b; --bg-elev: #090d15; --panel: #0d1320; --panel-2: #111a2b;
@@ -17,23 +20,24 @@
   --line: rgba(140,170,210,.12); --line-s: rgba(140,170,210,.22);
   --photon: #5ef2e6; --photon-2: #7bd0ff; --amber: #f3c97c;
   --green: #4ade80; --red: #f87171;
+  --glow: 0 0 0 1px rgba(94,242,230,.25), 0 0 34px -6px rgba(94,242,230,.45);
   --serif: "Instrument Serif", Georgia, serif;
   --sans: "Hanken Grotesk", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
 body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.72;
   min-height: 100vh;
-  position: relative;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 body::after {
@@ -52,8 +56,8 @@ nav {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(5,7,11,.88);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(5,7,11,.88), rgba(5,7,11,.55));
+  backdrop-filter: blur(14px) saturate(1.3);
   border-bottom: 1px solid var(--line);
 }
 .nav-inner {
@@ -71,6 +75,21 @@ nav {
   color: var(--photon);
   text-decoration: none;
   letter-spacing: .04em;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.nav-brand::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--photon);
+  box-shadow: 0 0 8px var(--photon);
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: .4; }
 }
 .nav-brand:hover { color: var(--photon-2); }
 .nav-links {
@@ -125,6 +144,19 @@ nav {
   max-width: 620px;
   line-height: 1.65;
 }
+.hero-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+.hero-meta span {
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--ink-faint);
+  letter-spacing: .04em;
+}
+.hero-meta span strong { color: var(--ink-dim); font-weight: 500; }
 
 /* SECTIONS */
 section { padding: 2.5rem 0; border-bottom: 1px solid var(--line); }
@@ -137,6 +169,15 @@ h2 {
   color: var(--ink);
   margin-bottom: 1.1rem;
   line-height: 1.2;
+}
+
+h3 {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 1.6rem 0 .6rem;
+  letter-spacing: .01em;
 }
 
 p { color: var(--ink-dim); margin-bottom: 1rem; }
@@ -173,6 +214,8 @@ strong { color: var(--ink); font-weight: 600; }
 }
 .callout.amber .callout-title { color: var(--amber); }
 .callout.green .callout-title { color: var(--green); }
+.callout p { margin-bottom: .4rem; font-size: .95rem; }
+.callout p:last-child { margin-bottom: 0; }
 .callout ul {
   list-style: none;
   padding: 0;
@@ -187,7 +230,7 @@ strong { color: var(--ink); font-weight: 600; }
   font-size: .95rem;
 }
 .callout ul li::before {
-  content: "→";
+  content: "&#x2192;";
   position: absolute;
   left: 0;
   color: var(--photon);
@@ -248,6 +291,25 @@ pre code {
   margin-bottom: .3rem;
 }
 
+/* ARCH DIAGRAM */
+.arch-box {
+  background: var(--panel);
+  border: 1px solid var(--line-s);
+  border-radius: 8px;
+  padding: 1.4rem 1.6rem;
+  margin: 1.3rem 0;
+  font-family: var(--mono);
+  font-size: .78rem;
+  line-height: 1.85;
+  color: var(--ink-dim);
+  overflow-x: auto;
+  white-space: pre;
+}
+.arch-box .hl  { color: var(--photon); }
+.arch-box .hl2 { color: var(--photon-2); }
+.arch-box .hl3 { color: var(--amber); }
+.arch-box .dim { color: var(--ink-faint); }
+
 /* TABLES */
 .table-wrap { overflow-x: auto; margin: 1.2rem 0; }
 table {
@@ -275,6 +337,16 @@ tr:last-child td { border-bottom: none; }
 tr:hover td { background: rgba(140,170,210,.04); }
 td code { font-size: .78rem; }
 td strong { color: var(--photon); }
+.badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .65rem;
+  padding: .1em .45em;
+  border-radius: 3px;
+  letter-spacing: .04em;
+  font-weight: 500;
+}
+.badge-blue { background: rgba(123,208,255,.12); color: var(--photon-2); border: 1px solid rgba(123,208,255,.25); }
 
 /* DOWNLOAD BOX */
 .download-box {
@@ -300,9 +372,39 @@ td strong { color: var(--photon); }
   letter-spacing: .02em;
 }
 .download-link:hover { color: var(--photon-2); text-decoration: underline; }
-.download-link::before { content: "→ "; }
+.download-link::before { content: "&#x2192; "; }
 
-/* CATEGORY LABEL */
+/* STAT ROW */
+.stat-row {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1.4rem 0;
+  flex-wrap: wrap;
+}
+.stat {
+  background: var(--bg-elev);
+  border: 1px solid var(--line-s);
+  border-radius: 8px;
+  padding: 1rem 1.3rem;
+  flex: 1;
+  min-width: 130px;
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 2rem;
+  color: var(--photon);
+  line-height: 1;
+  margin-bottom: .3rem;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--ink-faint);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* CAT LABEL */
 .cat-label {
   font-family: var(--sans);
   font-size: .9rem;
@@ -322,15 +424,22 @@ footer {
   color: var(--ink-faint);
   font-size: .8rem;
   font-family: var(--mono);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
 }
 
 /* MOBILE */
 @media (max-width: 520px) {
   .page { padding: 0 1rem 3rem; }
   .nav-inner { padding: 0 1rem; }
-  footer { padding: 1.5rem 1rem; }
+  footer { padding: 1.5rem 1rem; flex-direction: column; align-items: flex-start; }
   .hero { padding: 2.5rem 0 2rem; }
   th, td { padding: .5rem .6rem; }
+  .stat-row { gap: .75rem; }
+  .arch-box { font-size: .7rem; }
 }
 </style>
 </head>
@@ -350,9 +459,14 @@ footer {
 
   <!-- HERO -->
   <header class="hero">
-    <span class="hero-tag">BL2605 · June 2026</span>
+    <span class="hero-tag">BL2605 &middot; June 2026 &middot; v2</span>
     <h1>Claude Code on Czech academic AI</h1>
-    <p class="hero-subtitle">Route Claude Code's agentic tool-calls to the free CERIT LLM gateway via a local rewrite proxy. Zero API cost for MetaCentrum / MUNI members.</p>
+    <p class="hero-subtitle">A local rewrite proxy routes Claude Code to the free CERIT LLM gateway. Adds MCP delegation for codebase exploration, working WebSearch, and a dual-machine setup (NTB + MetaCentrum). Zero API cost for MetaCentrum / MUNI members.</p>
+    <div class="hero-meta">
+      <span>Author: <strong>Michal Cifra</strong></span>
+      <span>Institution: <strong>&Uacute;FE / Biophotoniq</strong></span>
+      <span>Updated: <strong>June 2026</strong></span>
+    </div>
   </header>
 
   <!-- TL;DR -->
@@ -360,18 +474,21 @@ footer {
     <div class="callout">
       <div class="callout-title">TL;DR</div>
       <ul>
-        <li>Free LLM API at <strong>llm.ai.e-infra.cz</strong> — MetaCentrum or MUNI account required</li>
-        <li>A local proxy handles model routing, tool compatibility, and idle-stop prevention</li>
-        <li>Best model: <strong>GLM-5.2</strong> — 494 s · 7/7 tasks · 0 idle stops · 0 errors</li>
+        <li>Free LLM API at <strong>llm.ai.e-infra.cz</strong> &mdash; MetaCentrum or MUNI account required</li>
+        <li>Local proxy handles model routing, tool compatibility, thinking-mode control, and idle prevention</li>
+        <li>MCP delegation layer routes Read/Grep/Glob calls through a real Claude Code subagent</li>
+        <li>WebSearch confirmed working: DDG short-circuit, keyword injection, 11/11 interactive tests pass</li>
+        <li>Best model: <strong>GLM-5.2</strong> (thinking OFF) &mdash; 494&thinsp;s &middot; 7/7 tasks &middot; 0 idle stops</li>
+        <li>Extended: <strong>103&thinsp;/&thinsp;117 tasks (88%)</strong> across 11 categories &middot; 0 idle stops</li>
         <li>Download: <a href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a></li>
       </ul>
     </div>
   </section>
 
-  <!-- SECTION 1 -->
+  <!-- SECTION 1: CERIT -->
   <section>
     <h2>What CERIT provides</h2>
-    <p>CERIT-SC / e-INFRA CZ operates <strong>llm.ai.e-infra.cz</strong> — an Anthropic-compatible LLM API endpoint free of charge for Czech academic users holding a MetaCentrum or MUNI account. All inference runs on national infrastructure; no data leaves Czech academic networks.</p>
+    <p>CERIT-SC / e-INFRA CZ operates <strong>llm.ai.e-infra.cz</strong> &mdash; an Anthropic-compatible LLM API endpoint free of charge for Czech academic users holding a MetaCentrum or MUNI account. All inference runs on national infrastructure; no data leaves Czech academic networks.</p>
 
     <div class="table-wrap">
       <table>
@@ -379,16 +496,47 @@ footer {
           <tr>
             <th>Model</th>
             <th>Context</th>
+            <th>Backend</th>
             <th>Notes</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td><code>glm-5.2</code></td><td>~110 K</td><td><strong>Best for tool sessions</strong> — thinking disabled by proxy</td></tr>
-          <tr><td><code>qwen3.5-122b</code></td><td>256 K</td><td>Reliable, good for longer sessions</td></tr>
-          <tr><td><code>kimi</code></td><td>131 K prefill</td><td>Use alias <code>kimi</code> (tracks current version)</td></tr>
-          <tr><td><code>deepseek-v4</code></td><td>1 M</td><td>DeepSeek V4 Pro</td></tr>
-          <tr><td><code>llama-4-scout</code></td><td>270 K</td><td>Long text; tool support unverified</td></tr>
-          <tr><td><code>gemma4</code></td><td>110 K</td><td>Fast, text-only</td></tr>
+          <tr>
+            <td><code>glm-5.2</code></td>
+            <td>~110&thinsp;K</td>
+            <td><span class="badge badge-blue">vLLM</span></td>
+            <td><strong>Best for tool sessions</strong> &mdash; thinking disabled by proxy. ~Opus&nbsp;4.8 quality.</td>
+          </tr>
+          <tr>
+            <td><code>qwen3.5-122b</code></td>
+            <td>256&thinsp;K</td>
+            <td><span class="badge badge-blue">sglang</span></td>
+            <td>Reliable; 230&thinsp;K effective context. All-session routing for <code>claude-cerit-medium</code>.</td>
+          </tr>
+          <tr>
+            <td><code>kimi</code></td>
+            <td>131&thinsp;K prefill</td>
+            <td><span class="badge badge-blue">sglang</span></td>
+            <td>kimi-k2.7; alias tracks current version. Used as overflow fallback from glm-5.2.</td>
+          </tr>
+          <tr>
+            <td><code>deepseek-v4-pro-thinking</code></td>
+            <td>1&thinsp;M</td>
+            <td><span class="badge badge-blue">vLLM</span></td>
+            <td>DeepSeek V4 Pro; 1&thinsp;M context window.</td>
+          </tr>
+          <tr>
+            <td><code>llama-4-scout</code></td>
+            <td>270&thinsp;K</td>
+            <td>&mdash;</td>
+            <td>Long text ingestion; tool support unverified.</td>
+          </tr>
+          <tr>
+            <td><code>gemma4</code></td>
+            <td>110&thinsp;K</td>
+            <td>&mdash;</td>
+            <td>Fast, text-only; default proxy target when no tools present.</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -396,153 +544,342 @@ footer {
     <div class="callout amber">
       <div class="callout-title">Access</div>
       <ul>
-        <li>MetaCentrum or MUNI account required — apply at <a href="https://metavo.metacentrum.cz">metavo.metacentrum.cz</a></li>
-        <li>API token available at <a href="https://llm.ai.e-infra.cz">llm.ai.e-infra.cz</a> after login</li>
+        <li>MetaCentrum or MUNI account required &mdash; apply at <a href="https://metavo.metacentrum.cz">metavo.metacentrum.cz</a></li>
+        <li>API token available at <a href="https://llm.ai.e-infra.cz">llm.ai.e-infra.cz</a> after login with your MUNI/MetaCentrum identity</li>
+        <li>Store token: <code>echo 'YOUR_TOKEN' &gt; ~/.config/cerit/token &amp;&amp; chmod 600 ~/.config/cerit/token</code></li>
       </ul>
     </div>
   </section>
 
-  <!-- SECTION 2 -->
+  <!-- SECTION 2: ARCHITECTURE -->
   <section>
-    <h2>Why a proxy is needed</h2>
-    <ul class="prose">
-      <li><strong>Tool-type compatibility</strong> — Claude Code sends Anthropic-proprietary tool types the CERIT endpoint rejects (HTTP 400). The proxy strips and converts them before forwarding.</li>
-      <li><strong>GLM-5.2 thinking mode</strong> — GLM-5.2 ships with thinking enabled by default, which causes ~900 s timeouts on agentic sessions. The proxy disables it per-request.</li>
-      <li><strong>Model name / TUI</strong> — Claude Code's progress spinner requires <code>ANTHROPIC_MODEL</code> to start with <code>claude-</code>. The proxy handles the spoofed name while routing to the real CERIT model.</li>
-    </ul>
+    <h2>Architecture overview</h2>
+    <p>Three components work together: a local rewrite proxy, an MCP delegation server, and the CERIT endpoint. Claude Code sees only <code>localhost:9999</code> &mdash; everything else is transparent.</p>
+
+    <div class="arch-box"><span class="hl">Claude Code</span>  (Windows NTB or ufeclaude / MetaCentrum)
+  <span class="dim">ANTHROPIC_BASE_URL=http://localhost:9999</span>
+  <span class="dim">--mcp-config cerit-mcp.json  --strict-mcp-config</span>
+  <span class="dim">--settings cerit-claude-settings.json</span>
+          |
+          v
+<span class="hl2">cerit-rewrite-proxy.py</span>  (port 9999)
+  <span class="dim">8 interventions: tool sanitize  thinking disable  routing  WebSearch  ...</span>
+  <span class="dim">claude-cerit-rich   --&gt;  glm-5.2        (tool sessions,  ~110 K)</span>
+  <span class="dim">claude-cerit-medium --&gt;  qwen3.5-122b   (all sessions,   ~230 K)</span>
+  <span class="dim">claude-cerit-long   --&gt;  llama-4-scout  (long text,      ~270 K)</span>
+  <span class="dim">overflow fallback:       glm-5.2  --&gt;  kimi  --&gt;  qwen3.5-122b</span>
+          |
+          v
+<span class="hl2">llm.ai.e-infra.cz</span>  (CERIT LLM gateway, Anthropic-compatible)
+
+
+<span class="hl3">mcp_delegate_fast.py</span>  (stdlib MCP server  |  no extra deps)
+  tools: delegate_explorer  &middot;  delegate_summarizer  &middot;  delegate_bash_worker
+          |
+          v spawns subprocess
+<span class="hl3">cerit_subagents.py</span>  --&gt;  CC subprocess  --&gt;  proxy  --&gt;  CERIT
+  <span class="dim">(Read / Grep / Glob served by a capable model, not by the CERIT LLM directly)</span></div>
+
+    <p>The proxy is stateless &mdash; it rewrites each HTTP request, forwards it, and streams the response back. The MCP delegation server runs as a sidecar discovered through <code>cerit-mcp.json</code>. Claude Code never connects to the CERIT endpoint directly.</p>
   </section>
 
-  <!-- SECTION 3 -->
+  <!-- SECTION 3: PROXY INTERVENTIONS -->
   <section>
-    <h2>How the proxy works</h2>
-    <p>The proxy intercepts every request between Claude Code and the CERIT endpoint and applies six interventions:</p>
+    <h2>Eight proxy interventions</h2>
+    <p>The proxy applies eight transformations to every request/response cycle. The first three handle protocol compatibility; the rest handle model behaviour and reliability.</p>
 
     <ol class="prose">
-      <li><strong>Tool sanitizer</strong> — strips unsupported Anthropic tool types, patches missing <code>input_schema</code> fields</li>
-      <li><strong>Continuation injection</strong> — appends an agentic system-prompt block so the model calls tools instead of narrating; model signals task completion with <code>TASK_COMPLETE</code></li>
-      <li><strong>Turn + repetition guards</strong> — prevents runaway sessions (synthesis nudge at turn 12, hard stop at turn 20, loop-break on repeated tool calls)</li>
-      <li><strong>GLM thinking disable</strong> — injects <code>chat_template_kwargs: {"enable_thinking": false}</code> for GLM-5.2 targets</li>
-      <li><strong>Context-overflow fallback</strong> — on HTTP 400: <code>glm-5.2</code> → <code>kimi</code> → <code>qwen3.5-122b</code></li>
-      <li><strong>HTTP 429 retry</strong> — 3× retries with 5 s backoff; thread-safe request counter</li>
+      <li>
+        <strong>Tool-definition sanitizer</strong> &mdash; strips Anthropic-proprietary tool types (e.g. <code>computer_use_20250124</code>, <code>web_search_20250305</code> from definitions) that CERIT rejects with HTTP&nbsp;400, and patches missing <code>input_schema</code> fields. CC sends these automatically for every session.
+      </li>
+      <li>
+        <strong>Tool-argument sanitizer</strong> &mdash; normalises tool-call arguments in streaming SSE chunks; some CERIT models emit structured arguments in a format that differs from Anthropic&rsquo;s.
+      </li>
+      <li>
+        <strong>Model routing + name spoofing</strong> &mdash; <code>ANTHROPIC_MODEL</code> must start with <code>claude-</code> for CC&rsquo;s TUI spinner. The proxy maps the spoofed name to the real CERIT target. Tool sessions are routed to <code>glm-5.2</code>; <code>claude-cerit-medium</code> bypasses this and always routes to <code>qwen3.5-122b</code> via <code>MODEL_OVERRIDES</code>.
+      </li>
+      <li>
+        <strong>GLM-5.2 thinking disable</strong> &mdash; injects <code>chat_template_kwargs: {"enable_thinking": false}</code> for every GLM-5.2 request. Thinking-ON causes runaway tool-call loops (~900&thinsp;s, 143 calls per session). Thinking-OFF: 494&thinsp;s, 7/7 tasks, 0 errors.
+      </li>
+      <li>
+        <strong>Agentic continuation + turn-0 injection</strong> &mdash; appends a <code>CERIT_CONTINUATION</code> block to every system prompt and injects <code>tool_choice</code> on turn&nbsp;0:
+        <ul class="prose" style="margin-top:.6rem">
+          <li>Web-intent keyword detected &rarr; <code>tool_choice: {"type":"tool","name":"WebSearch"}</code></li>
+          <li><code>delegate_explorer</code> available (local file task) &rarr; <code>tool_choice: delegate_explorer</code></li>
+          <li>Otherwise &rarr; <code>tool_choice: any</code></li>
+        </ul>
+      </li>
+      <li>
+        <strong>Turn + repetition guards</strong> &mdash; synthesis nudge at turn&nbsp;12, hard stop at turn&nbsp;20, loop-break on identical consecutive tool calls. Prevents infinite planning loops.
+      </li>
+      <li>
+        <strong>Context-overflow fallback</strong> &mdash; HTTP&nbsp;400 on a forwarded request triggers automatic model escalation: <code>glm-5.2 &rarr; kimi &rarr; qwen3.5-122b</code>. Transparent to Claude Code.
+      </li>
+      <li>
+        <strong>HTTP&nbsp;429 retry</strong> &mdash; 3&times; retries with 5&thinsp;s backoff; thread-safe request counter guards against burst limits on the gateway.
+      </li>
     </ol>
 
-    <p>The continuation block injected into every system prompt:</p>
-    <div class="pre-label">CERIT_CONTINUATION snippet</div>
-    <pre><code>AGENTIC EXECUTION — NON-NEGOTIABLE
+    <p>The agentic continuation block injected on every call:</p>
+    <div class="pre-label">CERIT_CONTINUATION &mdash; appended to system prompt</div>
+    <pre><code>AGENTIC EXECUTION &mdash; NON-NEGOTIABLE
 When tools are available: call a tool immediately. Do not explain. Do not narrate.
-end_turn is ONLY valid: (a) task 100% done — write your FULL final answer now,
+end_turn is ONLY valid: (a) task 100% done &mdash; write your FULL final answer now,
   OR (b) you need information only the human can provide.
 All other turns: CALL A TOOL. No exceptions.</code></pre>
   </section>
 
-  <!-- SECTION 4 -->
+  <!-- SECTION 4: MCP DELEGATION -->
   <section>
-    <h2>Benchmark results</h2>
-    <p>Tested on 7 core tasks (run9) and 117 extended tasks (run10), all with GLM-5.2 thinking disabled.</p>
+    <h2>MCP delegation layer</h2>
+    <p>Claude Code&rsquo;s real power in agentic coding is its ability to read and explore codebases. The CERIT models can call tools &mdash; but tools like <code>Read</code>, <code>Grep</code>, and <code>Glob</code> run natively in CC, not via the LLM. To give the CERIT model a capable codebase-exploration path, a delegation layer wraps those calls through a real Claude Code subagent running against the <em>same</em> proxy.</p>
 
-    <p class="cat-label">Core benchmark — 7 tasks</p>
+    <h3>Delegation tools</h3>
+    <p>The MCP server (<code>mcp_delegate_fast.py</code>) exposes three tools to the CERIT model:</p>
+
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Model</th><th>Time</th><th>Result</th><th>Idle stops</th><th>Errors</th></tr>
+          <tr><th>Tool</th><th>Purpose</th><th>Replaces</th></tr>
         </thead>
         <tbody>
-          <tr><td>qwen3.5-122b</td><td>883 s</td><td>7/7</td><td>0</td><td>0</td></tr>
-          <tr><td>DeepSeek V4 Pro</td><td>755 s</td><td>7/7</td><td>0</td><td>68</td></tr>
-          <tr><td>GLM-5.2 thinking ON</td><td>1865 s</td><td>6/7</td><td>0</td><td>68</td></tr>
-          <tr><td><strong>GLM-5.2 thinking OFF</strong></td><td><strong>494 s</strong></td><td><strong>7/7</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+          <tr>
+            <td><code>delegate_explorer</code></td>
+            <td>Codebase search and exploration with natural-language queries</td>
+            <td>Read, Grep, Glob</td>
+          </tr>
+          <tr>
+            <td><code>delegate_summarizer</code></td>
+            <td>Summarise long files or search results to a key-point extract</td>
+            <td>cat + manual triage</td>
+          </tr>
+          <tr>
+            <td><code>delegate_bash_worker</code></td>
+            <td>Execute shell operations with a capable model in the loop</td>
+            <td>Bash (complex cases)</td>
+          </tr>
         </tbody>
       </table>
     </div>
 
-    <p class="cat-label">Extended benchmark — 117 tests, GLM-5.2</p>
+    <p>When the CERIT model calls <code>delegate_explorer</code>, the MCP server spawns <code>cerit_subagents.py</code>, which launches a real Claude Code subprocess (also pointed at the proxy). That subprocess uses Read/Grep/Glob natively and returns a structured result. The CERIT model receives a clean answer without touching file-system tools itself.</p>
+
+    <h3>Settings deny list</h3>
+    <p>To prevent the CERIT LLM from calling Read/Grep/Glob directly, <code>cerit-claude-settings.json</code> denies those tools at the Claude Code level:</p>
+
+    <div class="pre-label">cerit-claude-settings.json (excerpt)</div>
+    <pre><code>{
+  "permissions": {
+    "deny": ["Read", "Grep", "Glob", "Bash(grep:*)", "Bash(find:*)",
+             "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)"]
+  }
+}</code></pre>
+
+    <div class="callout green">
+      <div class="callout-title">Delegation test results</div>
+      <ul>
+        <li>14&thinsp;/&thinsp;14 delegation integration tests pass &mdash; explorer, summarizer, bash-worker chains all verified</li>
+        <li>Proxy injects <code>tool_choice: delegate_explorer</code> on turn&nbsp;0 for local file tasks (no preamble text turns wasted)</li>
+        <li>MCP server uses only Python stdlib &mdash; no extra dependencies on the server side</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SECTION 5: WEBSEARCH -->
+  <section>
+    <h2>WebSearch &mdash; confirmed working</h2>
+    <p>Claude Code&rsquo;s WebSearch tool works end-to-end in all three <code>claude-cerit-*</code> sessions. The full path has seven steps, all handled automatically by the proxy.</p>
+
+    <ol class="prose">
+      <li>User types a web-intent query (<em>&ldquo;latest version of X&rdquo;</em>, <em>&ldquo;search for Y online&rdquo;</em>, &hellip;)</li>
+      <li>Turn-0 keyword detection fires in the proxy. Trigger words include: <code>websearch</code>, <code>web search</code>, <code>search the web</code>, <code>search online</code>, <code>internet</code>, <code>latest release</code>, <code>latest version</code>, <code>current version</code>, <code>news about</code></li>
+      <li>Proxy injects <code>tool_choice: {"type":"tool","name":"WebSearch"}</code> &rarr; model calls WebSearch immediately on the first turn, no preamble</li>
+      <li>Claude Code sends a secondary <code>web_search_20250305</code> single-tool request to the proxy</li>
+      <li>Proxy detects this as a search-execution call and short-circuits to DuckDuckGo (<code>ddgs</code> Python library) &mdash; never forwarded to CERIT</li>
+      <li>DDG results are injected as a synthetic Anthropic SSE response (real search results, no latency on CERIT side)</li>
+      <li>Model receives real results, synthesises answer, and responds</li>
+    </ol>
+
+    <div class="callout green">
+      <div class="callout-title">Confirmed working &mdash; ufeclaude interactive session test</div>
+      <ul>
+        <li>11&thinsp;/&thinsp;11 tests pass on ufeclaude with real Claude Code 2.1.185 + proxy</li>
+        <li>Query: <em>&ldquo;What is the latest release of GROMACS?&rdquo;</em></li>
+        <li>Answer: <strong>GROMACS 2025.4</strong>, released November 23, 2025 &mdash; correct</li>
+        <li>Latency: 51.4&thinsp;s &middot; 3 WebSearch calls &middot; model: qwen3.5-122b (<code>claude-cerit-medium</code>)</li>
+      </ul>
+    </div>
+
+    <p>Prerequisite: the <code>ddgs</code> Python package must be installed on the proxy machine (<code>pip install ddgs</code>). On NTB this is the Windows host; on ufeclaude it is the login node where the proxy runs.</p>
+  </section>
+
+  <!-- SECTION 6: BENCHMARKS -->
+  <section>
+    <h2>Benchmark results</h2>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num">494&thinsp;s</div>
+        <div class="stat-label">7/7 tasks &middot; GLM-5.2</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">88%</div>
+        <div class="stat-label">103/117 extended tasks</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">0</div>
+        <div class="stat-label">idle stops (all runs)</div>
+      </div>
+    </div>
+
+    <p class="cat-label">Core benchmark &mdash; 7 tasks (run9)</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Model / config</th><th>Time</th><th>Result</th><th>Idle stops</th><th>Errors</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>qwen3.5-122b</td><td>883&thinsp;s</td><td>7/7</td><td>0</td><td>0</td></tr>
+          <tr><td>DeepSeek V4 Pro</td><td>755&thinsp;s</td><td>7/7</td><td>0</td><td>68</td></tr>
+          <tr><td>GLM-5.2 thinking <strong>ON</strong></td><td>1865&thinsp;s</td><td>6/7</td><td>0</td><td>68</td></tr>
+          <tr><td><strong>GLM-5.2 thinking OFF</strong></td><td><strong>494&thinsp;s</strong></td><td><strong>7/7</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="cat-label">Extended benchmark &mdash; 117 tests, GLM-5.2 thinking OFF (run10)</p>
     <div class="callout green">
       <div class="callout-title">Overall</div>
       <ul>
-        <li><strong>103 / 117 (88%)</strong> tasks completed · 0 idle stops · 947 tool calls · avg quality <strong>5.37 / 10</strong></li>
+        <li><strong>103&thinsp;/&thinsp;117 (88%)</strong> tasks completed &middot; 0 idle stops &middot; 947 tool calls &middot; avg quality <strong>5.37&thinsp;/&thinsp;10</strong></li>
       </ul>
     </div>
 
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Category</th><th>Tests</th><th>Done</th><th>Quality</th></tr>
+          <tr><th>Category</th><th>Tests</th><th>Done</th><th>Avg quality</th></tr>
         </thead>
         <tbody>
-          <tr><td>D — Bash / shell</td><td>15</td><td>100%</td><td>9.0</td></tr>
-          <tr><td>C — Edit / refactor</td><td>15</td><td>100%</td><td>8.0</td></tr>
-          <tr><td>A — Read / analyze</td><td>13</td><td>100%</td><td>6.2</td></tr>
-          <tr><td>I — Verify / test</td><td>5</td><td>100%</td><td>6.0</td></tr>
-          <tr><td>J — Web research</td><td>5</td><td>100%</td><td>5.3</td></tr>
-          <tr><td>B — Code gen</td><td>16</td><td>88%</td><td>3.4</td></tr>
-          <tr><td>G — Stress</td><td>5</td><td>80%</td><td>3.5</td></tr>
-          <tr><td>E — Search / audit</td><td>10</td><td>80%</td><td>2.0</td></tr>
-          <tr><td>K — Autonomous</td><td>5</td><td>80%</td><td>2.0</td></tr>
-          <tr><td>F — Multi-tool</td><td>18</td><td>72%</td><td>4.4</td></tr>
-          <tr><td>H — Vibe styles</td><td>10</td><td>70%</td><td>4.3</td></tr>
+          <tr><td>D &mdash; Bash / shell</td><td>15</td><td><strong>100%</strong></td><td>9.0</td></tr>
+          <tr><td>C &mdash; Edit / refactor</td><td>15</td><td><strong>100%</strong></td><td>8.0</td></tr>
+          <tr><td>A &mdash; Read / analyze</td><td>13</td><td><strong>100%</strong></td><td>6.2</td></tr>
+          <tr><td>I &mdash; Verify / test</td><td>5</td><td><strong>100%</strong></td><td>6.0</td></tr>
+          <tr><td>J &mdash; Web research</td><td>5</td><td><strong>100%</strong></td><td>5.3</td></tr>
+          <tr><td>B &mdash; Code gen</td><td>16</td><td>88%</td><td>3.4</td></tr>
+          <tr><td>G &mdash; Stress</td><td>5</td><td>80%</td><td>3.5</td></tr>
+          <tr><td>E &mdash; Search / audit</td><td>10</td><td>80%</td><td>2.0</td></tr>
+          <tr><td>K &mdash; Autonomous</td><td>5</td><td>80%</td><td>2.0</td></tr>
+          <tr><td>F &mdash; Multi-tool</td><td>18</td><td>72%</td><td>4.4</td></tr>
+          <tr><td>H &mdash; Vibe styles</td><td>10</td><td>70%</td><td>4.3</td></tr>
         </tbody>
       </table>
     </div>
+
+    <p>Web research (J) scores 100% completion &mdash; the WebSearch DDG path is robust. Read/analyze (A) and Bash (D) are near-perfect because they map cleanly to GLM-5.2&rsquo;s strengths. Multi-tool chains (F) and vibe-style tasks (H) are harder for open-weight models at this context size.</p>
   </section>
 
-  <!-- SECTION 5 -->
+  <!-- SECTION 7: SETUP -->
   <section>
-    <h2>Setup — step by step</h2>
+    <h2>Setup &mdash; step by step</h2>
 
-    <div class="pre-label">bash</div>
-    <pre><code># 1. Get a MetaCentrum or MUNI account → token at llm.ai.e-infra.cz
+    <div class="pre-label">bash / git-bash / wsl</div>
+    <pre><code># 1. Get a MetaCentrum / MUNI account &rarr; token at llm.ai.e-infra.cz
 mkdir -p ~/.config/cerit
-echo 'YOUR_TOKEN' > ~/.config/cerit/token &amp;&amp; chmod 600 ~/.config/cerit/token
+echo 'YOUR_TOKEN' &gt; ~/.config/cerit/token &amp;&amp; chmod 600 ~/.config/cerit/token
 
 # 2. Clone and install
 git clone https://github.com/mcer33/claude-code-cerit-llm ~/dev/claude-code-cerit-llm
 cd ~/dev/claude-code-cerit-llm &amp;&amp; bash install.sh
 
-# 3. Reload and verify
+# 3. Install WebSearch dependency (on the machine running the proxy)
+pip install ddgs
+
+# 4. Reload and verify
 source ~/.bashrc &amp;&amp; claude-cerit-ping
 
-# 4. Launch
-claude-cerit-rich</code></pre>
+# 5. Launch
+claude-cerit-rich          # default &mdash; GLM-5.2, 110 K
+claude-cerit-medium        # qwen3.5-122b, 230 K
+claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
 
-    <p class="cat-label">Shell commands</p>
+    <p>The <code>install.sh</code> script copies the proxy, MCP server, subagent files, and settings to <code>~/dev/</code> and <code>~/dev/cerit-subagents/</code>, creates a Python venv for the MCP delegation layer, and appends the shell functions to <code>~/.bashrc</code>. On Windows, the PowerShell profile is managed separately (see GitHub).</p>
+
+    <h3>Shell commands</h3>
     <div class="table-wrap">
       <table>
         <thead>
           <tr><th>Command</th><th>Routes to</th><th>Context</th><th>When to use</th></tr>
         </thead>
         <tbody>
-          <tr><td><code>claude-cerit-rich</code></td><td>glm-5.2</td><td>110 K</td><td>Recommended default</td></tr>
-          <tr><td><code>claude-cerit-medium</code></td><td>qwen3.5-122b</td><td>230 K</td><td>Sessions 80 K–220 K</td></tr>
-          <tr><td><code>claude-cerit-long</code></td><td>llama-4-scout</td><td>270 K</td><td>Very long text (tools unverified)</td></tr>
-          <tr><td><code>claude-cerit-ping</code></td><td>—</td><td>—</td><td>Health check</td></tr>
+          <tr>
+            <td><code>claude-cerit-rich</code></td>
+            <td>glm-5.2</td>
+            <td>110&thinsp;K</td>
+            <td>Recommended default &mdash; best task completion, fastest</td>
+          </tr>
+          <tr>
+            <td><code>claude-cerit-medium</code></td>
+            <td>qwen3.5-122b</td>
+            <td>230&thinsp;K</td>
+            <td>Sessions with 80&ndash;220&thinsp;K context; reliable tool use</td>
+          </tr>
+          <tr>
+            <td><code>claude-cerit-long</code></td>
+            <td>llama-4-scout</td>
+            <td>270&thinsp;K</td>
+            <td>Very long text ingestion (tool support unverified)</td>
+          </tr>
+          <tr>
+            <td><code>claude-cerit-ping</code></td>
+            <td>&mdash;</td>
+            <td>&mdash;</td>
+            <td>Proxy + CERIT health check</td>
+          </tr>
         </tbody>
       </table>
     </div>
+
+    <p>Each function automatically passes <code>--settings</code>, <code>--mcp-config</code>, <code>--strict-mcp-config</code>, and <code>--append-system-prompt</code>. No manual flags needed.</p>
+
+    <h3>Dual-machine configuration</h3>
+    <p>The canonical shell snippet lives at <code>ecosystem/infra/client-setup/cerit-llm/cerit-bashrc.snippet</code> and is synced to both machines:</p>
+    <ul class="prose">
+      <li><strong>NTB (Windows)</strong> &mdash; PowerShell profile (<code>Microsoft.PowerShell_profile.ps1</code>) with all three functions; tracked in the ecosystem repo</li>
+      <li><strong>ufeclaude (MetaCentrum login node)</strong> &mdash; <code>~/.bashrc</code> sources <code>~/dev/cerit-bashrc.snippet</code>; CRLF-stripped on sync from Windows</li>
+    </ul>
+    <p>Running <code>git pull &amp;&amp; bash install.sh</code> on either machine re-syncs proxy, prompts, and MCP files from the canonical ecosystem source.</p>
   </section>
 
-  <!-- SECTION 6 -->
+  <!-- SECTION 8: DOWNLOAD -->
   <section>
     <h2>Download</h2>
     <div class="download-box">
-      <p>All files — proxy, shell functions, benchmark suite, and idle-stop reproducer — are on GitHub:</p>
+      <p>All files &mdash; proxy, MCP delegation server, subagent runner, shell functions, benchmark suite &mdash; are on GitHub:</p>
       <a class="download-link" href="https://github.com/mcer33/claude-code-cerit-llm">github.com/mcer33/claude-code-cerit-llm</a>
     </div>
 
-    <p>What's included:</p>
+    <p class="cat-label">What&rsquo;s included</p>
     <ul class="prose">
-      <li><code>cerit-rewrite-proxy.py</code> — the proxy</li>
-      <li><code>cerit_prompts.py</code> — prompt constants</li>
-      <li><code>cerit-bashrc.snippet</code> — shell functions</li>
-      <li><code>install.sh</code> — one-shot installer</li>
-      <li><code>run_tests.py</code> — 117-test benchmark suite</li>
-      <li><code>cerit_idle_stop_reproducer.py</code> — idle-stop measurement tool</li>
+      <li><code>cerit-rewrite-proxy.py</code> &mdash; the proxy (8 interventions, model routing, WebSearch DDG short-circuit)</li>
+      <li><code>cerit_prompts.py</code> &mdash; prompt constants (CERIT_CONTINUATION, system-prompt append text)</li>
+      <li><code>cerit-bashrc.snippet</code> &mdash; shell functions for Linux / macOS</li>
+      <li><code>Microsoft.PowerShell_profile.ps1</code> &mdash; PowerShell functions for Windows</li>
+      <li><code>subagents/mcp_delegate_fast.py</code> &mdash; stdlib MCP server, no extra deps</li>
+      <li><code>subagents/cerit_subagents.py</code> &mdash; subagent runner (Claude Agent SDK)</li>
+      <li><code>subagents/cerit-claude-settings.json</code> &mdash; CC settings with tool deny list</li>
+      <li><code>subagents/cerit-mcp.json</code> &mdash; MCP config (paths auto-patched by install.sh)</li>
+      <li><code>subagents/cerit-system-prompt-append.txt</code> &mdash; WebSearch + delegation priority rules</li>
+      <li><code>install.sh</code> &mdash; one-shot installer (copies files, creates venv, appends bashrc)</li>
+      <li><code>run_tests.py</code> &mdash; 117-test benchmark suite</li>
     </ul>
   </section>
 
 </div><!-- /.page -->
 
 <footer>
-  &copy; 2026 Michal Cifra &middot; Institute of Photonics and Electronics, Czech Academy of Sciences
+  <span>&copy; 2026 Michal Cifra &middot; Institute of Photonics and Electronics, Czech Academy of Sciences</span>
+  <span><a href="https://michalcifra.com/blogs/BL2605-claude-via-cerit-llms/">BL2605</a></span>
 </footer>
 
 </body>
