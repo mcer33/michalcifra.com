@@ -610,7 +610,7 @@ footer {
         </ul>
       </li>
       <li>
-        <strong>Turn + repetition guards</strong> &mdash; synthesis nudge at turn&nbsp;12, hard stop at turn&nbsp;20, loop-break on identical consecutive tool calls. Prevents infinite planning loops.
+        <strong>Turn + repetition guards</strong> &mdash; synthesis nudge at turn&nbsp;12, hard stop at turn&nbsp;20, loop-break when the same tool is called 3&thinsp;+ times within the last 30 messages. Prevents infinite planning loops.
       </li>
       <li>
         <strong>Context-overflow fallback</strong> &mdash; HTTP&nbsp;400 on a forwarded request triggers automatic model escalation: <code>glm-5.2 &rarr; kimi &rarr; qwen3.5-122b</code>. Transparent to Claude Code.
@@ -692,11 +692,11 @@ All other turns: CALL A TOOL. No exceptions.</code></pre>
 
     <ol class="prose">
       <li>User types a web-intent query (<em>&ldquo;latest version of X&rdquo;</em>, <em>&ldquo;search for Y online&rdquo;</em>, &hellip;)</li>
-      <li>Turn-0 keyword detection fires in the proxy. Trigger words include: <code>websearch</code>, <code>web search</code>, <code>search the web</code>, <code>search online</code>, <code>internet</code>, <code>latest release</code>, <code>latest version</code>, <code>current version</code>, <code>news about</code></li>
+      <li>Turn-0 keyword detection fires in the proxy. Trigger words include: <code>websearch</code>, <code>web search</code>, <code>search the web</code>, <code>search online</code>, <code>internet</code>, <code>latest</code>&nbsp;(prefix), <code>latest release</code>, <code>latest version</code>, <code>current version</code>, <code>look up online</code>, <code>find online</code>, <code>news about</code></li>
       <li>Proxy injects <code>tool_choice: {"type":"tool","name":"WebSearch"}</code> &rarr; model calls WebSearch immediately on the first turn, no preamble</li>
       <li>Claude Code sends a secondary <code>web_search_20250305</code> single-tool request to the proxy</li>
       <li>Proxy detects this as a search-execution call and short-circuits to DuckDuckGo (<code>ddgs</code> Python library) &mdash; never forwarded to CERIT</li>
-      <li>DDG results are injected as a synthetic Anthropic SSE response (real search results, no latency on CERIT side)</li>
+      <li>DDG results are returned as a synthetic JSON response (real search results, no latency on CERIT side)</li>
       <li>Model receives real results, synthesises answer, and responds</li>
     </ol>
 
@@ -865,12 +865,12 @@ claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
       <li><code>cerit_prompts.py</code> &mdash; prompt constants (CERIT_CONTINUATION, system-prompt append text)</li>
       <li><code>cerit-bashrc.snippet</code> &mdash; shell functions for Linux / macOS</li>
       <li><code>Microsoft.PowerShell_profile.ps1</code> &mdash; PowerShell functions for Windows</li>
-      <li><code>subagents/mcp_delegate_fast.py</code> &mdash; stdlib MCP server, no extra deps</li>
-      <li><code>subagents/cerit_subagents.py</code> &mdash; subagent runner (Claude Agent SDK)</li>
+      <li><code>subagents/mcp_delegate_fast.py</code> &mdash; stdlib MCP server, zero external deps (json, os, subprocess, sys only)</li>
+      <li><code>subagents/cerit_subagents.py</code> &mdash; subagent runner (Claude Agent SDK; venv provides <code>anthropic</code> + <code>mcp</code>)</li>
       <li><code>subagents/cerit-claude-settings.json</code> &mdash; CC settings with tool deny list</li>
-      <li><code>subagents/cerit-mcp.json</code> &mdash; MCP config (paths auto-patched by install.sh)</li>
+      <li><code>cerit-mcp.json</code> &mdash; template; <code>install.sh</code> generates the real file at <code>~/dev/cerit-subagents/cerit-mcp.json</code> with correct per-machine paths</li>
       <li><code>subagents/cerit-system-prompt-append.txt</code> &mdash; WebSearch + delegation priority rules</li>
-      <li><code>install.sh</code> &mdash; one-shot installer (copies files, creates venv, appends bashrc)</li>
+      <li><code>install.sh</code> &mdash; one-shot installer (copies files, generates cerit-mcp.json, creates venv, appends bashrc)</li>
       <li><code>run_tests.py</code> &mdash; 117-test benchmark suite</li>
     </ul>
   </section>
