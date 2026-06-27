@@ -461,7 +461,7 @@ footer {
   <header class="hero">
     <span class="hero-tag">BL2605 &middot; June 2026 &middot; v2</span>
     <h1>Claude Code on Czech academic AI</h1>
-    <p class="hero-subtitle">A local rewrite proxy routes Claude Code to the free CERIT LLM gateway. Adds MCP delegation for codebase exploration, working WebSearch, and confirmed setup on both Windows and MetaCentrum login nodes. Zero API cost for MetaCentrum / MUNI members.</p>
+    <p class="hero-subtitle">A local rewrite proxy routes Claude Code to the free CERIT LLM gateway. Adds MCP delegation for codebase exploration, working WebSearch, and confirmed setup on both Windows and Linux servers. Zero API cost for MetaCentrum / MUNI members.</p>
     <div class="hero-meta">
       <span>Author: <strong>Michal Cifra</strong></span>
       <span>Updated: <strong>June 2026</strong></span>
@@ -563,7 +563,7 @@ footer {
     <h2>Architecture overview</h2>
     <p>Three components work together: a local rewrite proxy, an MCP delegation server, and the CERIT endpoint. Claude Code sees only <code>localhost:9999</code> &mdash; everything else is transparent.</p>
 
-    <div class="arch-box"><span class="hl">Claude Code</span>  (Windows or MetaCentrum login node)
+    <div class="arch-box"><span class="hl">Claude Code</span>  (Windows or Linux server)
   <span class="dim">ANTHROPIC_BASE_URL=http://localhost:9999</span>
   <span class="dim">--mcp-config cerit-mcp.json  --strict-mcp-config</span>
   <span class="dim">--settings cerit-claude-settings.json</span>
@@ -710,14 +710,14 @@ All other turns: CALL A TOOL. No exceptions.</code></pre>
     <div class="callout green">
       <div class="callout-title">Confirmed working &mdash; remote server interactive session test</div>
       <ul>
-        <li>11&thinsp;/&thinsp;11 tests pass on a MetaCentrum login node with real Claude Code 2.1.185 + proxy</li>
+        <li>11&thinsp;/&thinsp;11 tests pass on a Linux server with real Claude Code 2.1.185 + proxy</li>
         <li>Query: <em>&ldquo;What is the latest release of GROMACS?&rdquo;</em></li>
         <li>Answer: <strong>GROMACS 2025.4</strong>, released November 23, 2025 &mdash; correct</li>
         <li>Latency: 51.4&thinsp;s &middot; 3 WebSearch calls &middot; model: qwen3.5-122b (<code>claude-cerit-medium</code>)</li>
       </ul>
     </div>
 
-    <p>Prerequisite: the <code>ddgs</code> Python package must be installed on the machine running the proxy (<code>pip install ddgs</code>) &mdash; your Windows workstation or the MetaCentrum login node, wherever <code>cerit-rewrite-proxy.py</code> runs.</p>
+    <p>Prerequisite: the <code>ddgs</code> Python package must be installed on the machine running the proxy (<code>pip install ddgs</code>) &mdash; your Windows workstation or Linux server, wherever <code>cerit-rewrite-proxy.py</code> runs.</p>
   </section>
 
   <!-- SECTION 6: BENCHMARKS -->
@@ -853,7 +853,7 @@ claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
     <p>The canonical shell snippet lives at <code>ecosystem/infra/client-setup/cerit-llm/cerit-bashrc.snippet</code> and is synced to both machines:</p>
     <ul class="prose">
       <li><strong>Windows</strong> &mdash; PowerShell profile (<code>Microsoft.PowerShell_profile.ps1</code>) with all three functions</li>
-      <li><strong>MetaCentrum login node (Linux)</strong> &mdash; <code>~/.bashrc</code> sources <code>~/dev/cerit-bashrc.snippet</code>; strip CRLF after copying from Windows (<code>sed -i "s/\r//" ~/dev/cerit-bashrc.snippet</code>)</li>
+      <li><strong>Linux server</strong> &mdash; <code>~/.bashrc</code> sources <code>~/dev/cerit-bashrc.snippet</code>; strip CRLF after copying from Windows (<code>sed -i "s/\r//" ~/dev/cerit-bashrc.snippet</code>)</li>
     </ul>
     <p>Running <code>git pull &amp;&amp; bash install.sh</code> re-syncs proxy, prompts, and MCP files and regenerates <code>cerit-mcp.json</code> with the correct paths for the current machine.</p>
   </section>
