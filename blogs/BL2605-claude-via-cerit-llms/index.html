@@ -849,10 +849,18 @@ claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
 
     <p>Each function automatically passes <code>--settings</code>, <code>--mcp-config</code>, <code>--strict-mcp-config</code>, and <code>--append-system-prompt</code>. No manual flags needed.</p>
 
+    <div class="callout amber">
+      <div class="callout-title">Tested environment</div>
+      <ul>
+        <li>All settings tested with Claude Code launched from a <strong>Git Bash terminal</strong> (Windows) and a standard bash shell (Linux server)</li>
+        <li>Native Windows PowerShell and cmd.exe are not tested &mdash; use Git Bash on Windows</li>
+      </ul>
+    </div>
+
     <h3>Dual-machine configuration</h3>
     <p>The canonical shell snippet lives at <code>ecosystem/infra/client-setup/cerit-llm/cerit-bashrc.snippet</code> and is synced to both machines:</p>
     <ul class="prose">
-      <li><strong>Windows</strong> &mdash; PowerShell profile (<code>Microsoft.PowerShell_profile.ps1</code>) with all three functions</li>
+      <li><strong>Windows</strong> &mdash; PowerShell profile (<code>Microsoft.PowerShell_profile.ps1</code>) with all three functions; run Claude Code from <strong>Git Bash</strong></li>
       <li><strong>Linux server</strong> &mdash; <code>~/.bashrc</code> sources <code>~/dev/cerit-bashrc.snippet</code>; strip CRLF after copying from Windows (<code>sed -i "s/\r//" ~/dev/cerit-bashrc.snippet</code>)</li>
     </ul>
     <p>Running <code>git pull &amp;&amp; bash install.sh</code> re-syncs proxy, prompts, and MCP files and regenerates <code>cerit-mcp.json</code> with the correct paths for the current machine.</p>
