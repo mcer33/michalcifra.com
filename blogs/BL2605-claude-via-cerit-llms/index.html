@@ -490,6 +490,7 @@ footer {
     <p><strong>Claude Code is not a chatbot.</strong> It is an agentic coding assistant that reads your actual codebase, runs shell commands, edits files, and iterates on tasks autonomously. You describe what you need &mdash; fix this analysis script, debug this Slurm job, refactor this module &mdash; and it works through the problem in a loop of tool calls until the task is done. For scientific computing, where the gap between "I know what I want" and "I know how to write it" is often wide, that loop is genuinely useful.</p>
     <p>The cost barrier is real, though. A productive agentic session with Anthropic&rsquo;s API can burn through tokens fast &mdash; frontier models run at $3&ndash;15 per million tokens, and multi-file refactors or iterative debugging sessions with many tool calls add up quickly. For academic research, where every euro of API spend competes with lab consumables, that friction matters.</p>
     <p>CERIT removes it. Czech academic users with a MetaCentrum or MUNI account can run frontier-class LLMs at <strong>llm.ai.e-infra.cz</strong> at no cost, on national infrastructure, with no data leaving Czech academic networks. GLM-5.2, the best tool-use model on the platform, benchmarks close to Anthropic Opus&nbsp;4.8. The catch: CERIT&rsquo;s endpoint is not plug-and-play with Claude Code. This project is the adapter.</p>
+    <p><em>Scope note: everything below is written for and tested against the <strong>Claude Code CLI</strong> (the terminal tool, invoked as <code>claude</code>). It does not apply to the Claude desktop/web app. The core trick &mdash; pointing <code>ANTHROPIC_BASE_URL</code> at a local rewrite proxy &mdash; works with any Claude Code front-end that reads that variable (e.g. the VS Code/JetBrains extensions), but the settings file, MCP delegation layer, and system-prompt append are CLI-shaped and would need adapting for a plain/base Claude Code setup that skips CERIT&rsquo;s tool-compatibility quirks entirely.</em></p>
   </section>
 
   <!-- SECTION 1: CERIT -->
@@ -666,19 +667,19 @@ All other turns: CALL A TOOL. No exceptions.</code></pre>
     <p>When the CERIT model calls <code>delegate_explorer</code>, the MCP server spawns <code>cerit_subagents.py</code>, which launches a real Claude Code subprocess (also pointed at the proxy). That subprocess uses Read/Grep/Glob natively and returns a structured result. The CERIT model receives a clean answer without touching file-system tools itself.</p>
 
     <h3>Settings deny list</h3>
-    <p>To prevent the CERIT LLM from calling Read/Grep/Glob (or their Bash lookalikes) directly, <code>cerit-claude-settings.json</code> denies those tools at the Claude Code level. It also denies <code>Agent</code>/<code>Task</code> &mdash; CERIT sessions cannot spawn Claude Code&rsquo;s own subagents, only the three MCP delegation tools above &mdash; and carries a matching allow-list for the handful of Bash commands that stay safe and cheap enough to run directly (<code>ls</code>, <code>pwd</code>, <code>echo</code>, <code>git status/log/diff</code>, <code>wc</code>, <code>stat</code>).</p>
+    <p>To prevent the CERIT LLM from calling Read/Grep/Glob (or their Bash lookalikes) directly, <code>cerit-claude-settings.json</code> denies those tools at the Claude Code level. It also denies <code>Agent</code> &mdash; CERIT sessions cannot spawn Claude Code&rsquo;s own subagents, only the three MCP delegation tools above &mdash; and carries a matching allow-list for the handful of Bash commands that stay safe and cheap enough to run directly (<code>ls</code>, <code>pwd</code>, <code>echo</code>, <code>git status/log/diff</code>, <code>wc</code>, <code>stat</code>).</p>
 
     <div class="pre-label">cerit-claude-settings.json (excerpt)</div>
     <pre><code>{
   "permissions": {
-    "deny":  ["Read", "Grep", "Glob", "Agent", "Task",
+    "deny":  ["Read", "Grep", "Glob", "Agent",
               "Bash(grep:*)", "Bash(rg:*)", "Bash(ag:*)", "Bash(find:*)",
               "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)",
               "Bash(less:*)", "Bash(more:*)", "Bash(awk:*)", "Bash(sed:*)"],
     "allow": ["mcp__cerit-delegate__delegate_explorer", "&hellip;",
-              "Bash(pwd)", "Bash(ls)", "Bash(echo *)",
-              "Bash(git status)", "Bash(git log:*)", "Bash(git diff:*)",
-              "Bash(wc *)", "Bash(stat *)"]
+              "Bash(pwd)", "Bash(ls:*)", "Bash(echo:*)",
+              "Bash(git status:*)", "Bash(git log:*)", "Bash(git diff:*)",
+              "Bash(wc:*)", "Bash(stat:*)"]
   }
 }</code></pre>
 
