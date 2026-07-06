@@ -524,7 +524,7 @@ footer {
             <td><code>kimi</code></td>
             <td>131&thinsp;K prefill</td>
             <td><span class="badge badge-blue">sglang</span></td>
-            <td>kimi-k2.7; alias tracks current version. Used as overflow fallback from glm-5.2.</td>
+            <td>kimi-k2.7; alias tracks current version. Overflow fallback from glm-5.2, and the target for <code>claude-cerit-long</code> since <code>llama-4-scout</code> was retired from CERIT on 2026-06-30. Note: 131&thinsp;K is <em>smaller</em> than <code>claude-cerit-medium</code>&rsquo;s 230&thinsp;K &mdash; use <code>-long</code> only if <code>-medium</code> is unavailable, not for extra context headroom.</td>
           </tr>
           <tr>
             <td><code>deepseek-v4-pro-thinking</code></td>
@@ -533,16 +533,10 @@ footer {
             <td>DeepSeek V4 Pro; 1&thinsp;M context window.</td>
           </tr>
           <tr>
-            <td><code>llama-4-scout</code></td>
-            <td>270&thinsp;K</td>
-            <td>&mdash;</td>
-            <td>Long text ingestion; tool support unverified.</td>
-          </tr>
-          <tr>
             <td><code>gemma4</code></td>
             <td>110&thinsp;K</td>
             <td>&mdash;</td>
-            <td>Fast, text-only; default proxy target when no tools present.</td>
+            <td>Fast, text-only; default proxy target when no tools present. Excluded from tool-using sessions (unreliable tool output).</td>
           </tr>
         </tbody>
       </table>
@@ -573,7 +567,7 @@ footer {
   <span class="dim">8 interventions: tool sanitize  thinking disable  routing  WebSearch  ...</span>
   <span class="dim">claude-cerit-rich   --&gt;  glm-5.2        (tool sessions,  ~110 K)</span>
   <span class="dim">claude-cerit-medium --&gt;  qwen3.5-122b   (all sessions,   ~230 K)</span>
-  <span class="dim">claude-cerit-long   --&gt;  llama-4-scout  (long text,      ~270 K)</span>
+  <span class="dim">claude-cerit-long   --&gt;  kimi           (overflow only,  131 K &lt; medium)</span>
   <span class="dim">overflow fallback:       glm-5.2  --&gt;  kimi  --&gt;  qwen3.5-122b</span>
           |
           v
@@ -672,22 +666,28 @@ All other turns: CALL A TOOL. No exceptions.</code></pre>
     <p>When the CERIT model calls <code>delegate_explorer</code>, the MCP server spawns <code>cerit_subagents.py</code>, which launches a real Claude Code subprocess (also pointed at the proxy). That subprocess uses Read/Grep/Glob natively and returns a structured result. The CERIT model receives a clean answer without touching file-system tools itself.</p>
 
     <h3>Settings deny list</h3>
-    <p>To prevent the CERIT LLM from calling Read/Grep/Glob directly, <code>cerit-claude-settings.json</code> denies those tools at the Claude Code level:</p>
+    <p>To prevent the CERIT LLM from calling Read/Grep/Glob (or their Bash lookalikes) directly, <code>cerit-claude-settings.json</code> denies those tools at the Claude Code level. It also denies <code>Agent</code>/<code>Task</code> &mdash; CERIT sessions cannot spawn Claude Code&rsquo;s own subagents, only the three MCP delegation tools above &mdash; and carries a matching allow-list for the handful of Bash commands that stay safe and cheap enough to run directly (<code>ls</code>, <code>pwd</code>, <code>echo</code>, <code>git status/log/diff</code>, <code>wc</code>, <code>stat</code>).</p>
 
     <div class="pre-label">cerit-claude-settings.json (excerpt)</div>
     <pre><code>{
   "permissions": {
-    "deny": ["Read", "Grep", "Glob", "Bash(grep:*)", "Bash(find:*)",
-             "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)"]
+    "deny":  ["Read", "Grep", "Glob", "Agent", "Task",
+              "Bash(grep:*)", "Bash(rg:*)", "Bash(ag:*)", "Bash(find:*)",
+              "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)",
+              "Bash(less:*)", "Bash(more:*)", "Bash(awk:*)", "Bash(sed:*)"],
+    "allow": ["mcp__cerit-delegate__delegate_explorer", "&hellip;",
+              "Bash(pwd)", "Bash(ls)", "Bash(echo *)",
+              "Bash(git status)", "Bash(git log:*)", "Bash(git diff:*)",
+              "Bash(wc *)", "Bash(stat *)"]
   }
 }</code></pre>
 
-    <div class="callout green">
-      <div class="callout-title">Delegation test results</div>
+    <div class="callout amber">
+      <div class="callout-title">Known limitation</div>
       <ul>
-        <li>14&thinsp;/&thinsp;14 delegation integration tests pass &mdash; explorer, summarizer, bash-worker chains all verified</li>
-        <li>Proxy injects <code>tool_choice: delegate_explorer</code> on turn&nbsp;0 for local file tasks (no preamble text turns wasted)</li>
-        <li>MCP server uses only Python stdlib &mdash; no extra dependencies on the server side</li>
+        <li>The MCP delegation server can crash mid-session. When it does, every subsequent call to <code>delegate_explorer</code>/<code>delegate_summarizer</code>/<code>delegate_bash_worker</code> fails with <code>No such tool available</code>, and it does <strong>not</strong> self-heal &mdash; there is no automatic MCP-server restart mid-session</li>
+        <li>Observed failure mode: with Read/Grep/Glob denied and the delegation layer dead, a model can get stuck between &ldquo;no working tool&rdquo; and an agentic system prompt that discourages ending the turn &mdash; and escape by declaring the task complete with no actual output</li>
+        <li>Mitigation (prompt-level, not a real fix): the system prompt now instructs the model to treat one <code>No such tool available</code> as session-wide breakage, tell the user immediately, and fall back to <code>Bash</code> + <code>python -c &hellip;</code> for file reads/search/glob instead of retrying the dead tool. The underlying cause of the MCP crash itself is still unresolved</li>
       </ul>
     </div>
   </section>
@@ -808,7 +808,7 @@ source ~/.bashrc &amp;&amp; claude-cerit-ping
 # 5. Launch
 claude-cerit-rich          # default &mdash; GLM-5.2, 110 K
 claude-cerit-medium        # qwen3.5-122b, 230 K
-claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
+claude-cerit-long          # kimi, 131 K (overflow only &mdash; use -medium first)</code></pre>
 
     <p>The <code>install.sh</code> script copies the proxy, MCP server, subagent files, and settings to <code>~/dev/</code> and <code>~/dev/cerit-subagents/</code>, creates a Python venv for the MCP delegation layer, and appends the shell functions to <code>~/.bashrc</code>. On Windows, the PowerShell profile is managed separately (see GitHub).</p>
 
@@ -833,9 +833,9 @@ claude-cerit-long          # llama-4-scout, 270 K (text-heavy)</code></pre>
           </tr>
           <tr>
             <td><code>claude-cerit-long</code></td>
-            <td>llama-4-scout</td>
-            <td>270&thinsp;K</td>
-            <td>Very long text ingestion (tool support unverified)</td>
+            <td>kimi</td>
+            <td>131&thinsp;K</td>
+            <td>Overflow only when <code>-medium</code> is unavailable &mdash; smaller context than <code>-medium</code>, not larger</td>
           </tr>
           <tr>
             <td><code>claude-cerit-ping</code></td>
