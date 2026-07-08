@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Test detekce manipulace + návrhů replik na vědeckých kanálech (Debiasify)</title>
+<style>
+  :root { --bg:#0f1216; --card:#171c23; --mut:#8b95a3; --fg:#e8edf2;
+           --rhet:#e0a458; --fact:#5fa8d3; --none:#3a6b4a; --line:#232a33;
+           --reply:#6ea36e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+          font:16px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:880px; margin:0 auto; padding:32px 20px 80px; }
+  h1 { font-size:26px; margin:0 0 6px; }
+  .lead { color:var(--mut); margin:0 0 24px; }
+  .note { background:#1c2530; border:1px solid var(--line); border-left:3px solid var(--fact);
+           border-radius:8px; padding:14px 16px; margin:0 0 16px; font-size:14.5px; color:#cdd6e0; }
+  .note.warn { border-left-color:var(--rhet); background:#20201a; }
+  .legend { background:#141a21; border:1px solid var(--line); border-left:3px solid var(--rhet);
+             border-radius:8px; padding:12px 16px; margin:0 0 28px; font-size:14px; color:#cdd6e0; }
+  .legend ul { margin:8px 0 0; padding-left:18px; } .legend li { margin:4px 0; }
+  .kpis { display:flex; flex-wrap:wrap; gap:14px; margin:0 0 28px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:10px;
+          padding:14px 18px; flex:1; min-width:150px; }
+  .kpi b { display:block; font-size:24px; } .kpi span { color:var(--mut); font-size:13px; }
+  h2 { font-size:16px; color:var(--mut); text-transform:uppercase; letter-spacing:.06em;
+        margin:32px 0 12px; }
+  ul.top { margin:0 0 8px; padding-left:18px; } ul.top .ct { color:var(--mut); }
+  .hostgroup { margin:0 0 30px; }
+  h3.host { font-size:16.5px; margin:26px 0 4px; padding-bottom:6px;
+             border-bottom:1px solid var(--line); }
+  .ctx { color:var(--mut); font-size:13px; margin:0 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+           padding:16px 18px; margin:0 0 16px; }
+  .card .meta { display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;
+                 font-size:13px; color:var(--mut); margin-bottom:8px; }
+  .card .who b { color:#c7d0da; }
+  .excerpt { margin:6px 0 12px; color:#f0d9a8; font-style:italic; }
+  .chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px; }
+  .chip { font-size:12.5px; padding:3px 9px; border-radius:20px; background:#202833;
+           border:1px solid var(--line); }
+  .chip.rhetorical { border-color:var(--rhet); } .chip.factual { border-color:var(--fact); }
+  .chip.none { border-color:var(--none); color:#9fd4af; }
+  .chip.holistic { border-color:var(--mut); color:var(--mut); font-style:italic; }
+  .summary { font-size:14.5px; color:#cdd6e0; margin:4px 0 12px; }
+  .replies { background:#12211a; border:1px solid #1f3b2c; border-radius:10px;
+              padding:12px 14px; margin:10px 0 12px; }
+  .rhead { font-size:13.5px; font-weight:600; color:#9fd4af; margin-bottom:8px; }
+  .rtag { font-weight:500; font-size:11.5px; color:#0f1216; background:var(--reply);
+           border-radius:20px; padding:1px 8px; margin-left:6px; }
+  .variant { border-top:1px solid #1f3b2c; padding:8px 0 2px; }
+  .variant:first-of-type { border-top:none; }
+  .vname { font-size:12.5px; color:var(--reply); font-weight:600; margin-bottom:2px; }
+  .vbody { margin:0 0 4px; font-size:14px; color:#dbe6de; }
+  .src { font-size:13px; color:var(--fact); text-decoration:none; }
+  footer { color:var(--mut); font-size:13px; margin-top:36px; border-top:1px solid var(--line);
+            padding-top:16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Detekce manipulace a nenávisti + automatické návrhy odpovědí</h1>
+  <p class="lead">Test nástroje <b>Debiasify</b> na populárních (mezinárodních)
+    vědeckých kanálech · vygenerováno 8. 7. 2026</p>
+
+  <div class="note">
+    <b>Proč tento test.</b> Oficiální účet Akademie věd na Bluesky je malý a
+    věcný — manipulace ani nenávist se tam prakticky neobjevují. Abychom otestovali
+    detekci <b>na reálné manipulaci a nenávisti</b>, zaměřili jsme se na
+    <b>vysoce sledované mezinárodní vědecké účty</b> (vakcinologové, viroložky,
+    velké vědecké časopisy) na síti Bluesky, v jejichž diskuzích se
+    <b>protivědecká manipulace i útoky soustřeďují</b>. Automaticky jsme načetli
+    <b>reakce čtenářů</b> pod jejich příspěvky, vybrali ty se znaky manipulace
+    či nenávisti (a delší než 100&nbsp;znaků, což je minimum nástroje) a poslali
+    je Debiasify k rozboru.
+  </div>
+
+  <div class="note warn">
+    <b>Novinka — návrhy odpovědí.</b> U každého manipulativního komentáře jsme
+    navíc využili <b>novou funkci Debiasify</b>: nástroj sám vygeneruje několik
+    variant <b>slušné, věcné odpovědi</b>, které reagují na konkrétní zjištěné
+    manipulace. Ty jsou zobrazené v zeleném rámečku u každého komentáře. Jde
+    přesně o funkci, na kterou se kolegové ptali — a je nyní dostupná přes API.
+  </div>
+
+  <div class="note">
+    <b>Jazyk.</b> Analyzované komentáře i navržené odpovědi jsou <b>v angličtině</b>,
+    protože právě tam je objem manipulace největší a angličtina je zároveň
+    <b>rodným výstupním jazykem</b> Debiasify (u českých textů se souhrn i odpovědi
+    dodatečně překládají). Tentýž postup lze spustit i na českých kanálech, jakmile
+    k nim budeme mít strojový přístup.
+  </div>
+
+  <div class="legend">
+    <b>Jak číst procenta.</b>
+    <p style="margin:8px 0 4px">U všech tří metrik: <b>0&nbsp;% = nejlepší</b>
+      (věcný text bez manipulace), <b>100&nbsp;% = nejproblematičtější</b>.
+      Čím vyšší číslo, tím hůř.</p>
+    <ul>
+      <li><b>Rétorika</b> — <i>jak</i> je text napsán (emoce, útoky na osobu,
+        nálepkování, konspirační rámování). Číslo = míra jistoty u nejsilnějšího nálezu.</li>
+      <li><b>Fakta</b> — <i>co a jak</i> je doloženo (nepodložená tvrzení, argumentace
+        historkou, záměna korelace a příčiny).</li>
+      <li><b>Míra ovlivňování</b> — souhrnně, nakolik techniky snižují informační
+        hodnotu textu (zanedbatelná → nízká → střední → vyšší → vysoká).</li>
+    </ul>
+    <p style="margin:8px 0 0; color:var(--mut); font-size:13px">Pozn.: u některých
+      útočných komentářů nástroj neuvede jednotlivé techniky (rétorika i fakta 0&nbsp;%),
+      ale přesto jim přiřadí <b>vysokou míru ovlivňování</b> a popíše ji ve slovním
+      shrnutí — jde o celkové (holistické) hodnocení textu.</p>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><b>15</b><span>analyzovaných komentářů</span></div>
+    <div class="kpi"><b>82%</b>
+      <span>průměrná míra ovlivňování (vysoká)</span></div>
+    <div class="kpi"><b>15</b><span>komentářů s návrhy odpovědí</span></div>
+    <div class="kpi"><b>45</b><span>vygenerovaných variant odpovědí</span></div>
+  </div>
+
+  <h2>Nejčastější nálezy</h2>
+  <ul class="top"><li>Vynechání klíčových informací <span class='ct'>(6×)</span></li><li>Efekt rámování (způsob podání) <span class='ct'>(6×)</span></li><li>Vágní zdrojování <span class='ct'>(5×)</span></li><li>Nepodložená / vyvrácená tvrzení <span class='ct'>(4×)</span></li><li>Ukvapené zobecnění <span class='ct'>(2×)</span></li><li>Útok na osobu (ad hominem) <span class='ct'>(2×)</span></li><li>Apel na emoce <span class='ct'>(2×)</span></li><li>Účelový výběr faktů (cherry-picking) <span class='ct'>(1×)</span></li></ul>
+
+  <h2>Jednotlivé komentáře (dle kanálu)</h2>
+  <div class="hostgroup"><h3 class="host">🦋 Dr. Angela Rasmussen (viroložka, ~46 tis. sledujících)</h3><p class="ctx">Vlákno pod příspěvkem účtu: <i>„So this lady was just charged with 1st-degree murder for killing her two 18-month-old twins. Days after her kids died she was on RFK Jr’s media network saying vaccines did it. When…"</i></p>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>tdayne.bsky.social</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>95%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„Ppl like this are not only scum bags for harming her own family she’s harming numerous families by making them fear vaccines what’s piece of shit"</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text is heavily dominated by rhetorical manipulation, relying on extreme ad hominem attacks, emotional appeals, and loaded framing to provoke outrage and demonize the target. Factually, the post suffers from a complete lack of evidence, omitting all necessary context and relying on vague, unsupported assertions that prevent any objective verification. Consequently, the communication functions as an emotional outlet rather than an informative or reasoned argument.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Focus on constructive dialogue</div><p class="vbody">I completely understand how deeply concerning it is when discussions about family safety and public health feel so tense, but looking closely at this post, we find it focuses on personal accusations rather than providing the clear evidence we need to understand the situation. Online platforms often encourage highly emotional and personal attacks to capture our attention, which unfortunately makes it harder for everyone to find reliable, factual information.</p></div><div class="variant"><div class="vname">Focus on objective evidence</div><p class="vbody">I share your desire to protect families and promote accurate health information, yet when we look at the details here, we see that the claims rely on strong language rather than sharing verifiable facts or sources. Articles and posts online sometimes use intense outrage to drive engagement, which sadly distracts us from the calm, evidence-based conversations that actually help keep us safe.</p></div><div class="variant"><div class="vname">Focus on calm communication</div><p class="vbody">I understand how frustrating it is to see conflicting messages about vaccines and family well-being, but if we examine this message together, we find it uses severe insults instead of presenting the objective data that would help us make informed decisions. The internet often rewards sensationalism and personal conflict because it grabs attention quickly, but this approach usually loses the important context and facts we need.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/tdayne.bsky.social/post/3mpzhpvhj2k22" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Grandma </b></span>
+        <span class="scores">rétorika <b>100%</b>
+          · fakta <b>50%</b>
+          · ovlivňování <b>95%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„I hope every unnecessary death caused by JFKjr‘s crazy conspiracy theories haunts him until he dies. 
+
+If there‘s an afterlife, may he be subjected to the screams of agony and to slave away by cleaning the poop, vomit, and blood of the innocent lives lost for eternity."</p>
+      <div class="chips"><span class="chip rhetorical">Apel na emoce <b>100%</b></span><span class="chip rhetorical">Útok na osobu (ad hominem) <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>75%</b></span><span class="chip rhetorical">Senzacechtivost <b>75%</b></span><span class="chip factual">Nepodložená / vyvrácená tvrzení <b>50%</b></span></div>
+      <p class="summary">The text exhibits significant rhetorical manipulation, primarily driven by intense emotional appeals, sensationalism, and ad hominem attacks designed to provoke outrage rather than foster rational debate. Objectivity is severely compromised by the use of highly graphic, visceral imagery and personal vilification. From a factual perspective, the text relies entirely on an unsupported causal claim linking the subject&#x27;s theories directly to specific deaths, presenting this complex assertion as an absolute truth without any empirical evidence or sourcing.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Context</div><p class="vbody">I completely understand how deeply frustrating and painful it is to think about the real-world impact of public health misinformation, but looking closely at these complex issues, we find that attributing specific outcomes directly to one person&#x27;s statements requires careful, objective evidence that this post leaves out. Social media posts often rely on highly emotional language and personal attacks to capture our attention, which unfortunately oversimplifies difficult public health challenges and distracts us from constructive solutions.</p></div><div class="variant"><div class="vname">Focus on Constructive Dialogue</div><p class="vbody">It is completely natural to feel a strong sense of urgency and anger when discussing public health and safety, yet when we examine the facts, we see that addressing controversial public figures is most effective when we focus on verified data rather than wishing harm or making unsupported claims about direct causality. The nature of online platforms often encourages extreme, sensationalized reactions that attack individuals personally, which makes it harder for all of us to have a calm, evidence-based conversation about the actual facts.</p></div><div class="variant"><div class="vname">Balanced and Fact-Centered</div><p class="vbody">I share your concern for protecting innocent lives and promoting accurate science, but if we look at the situation objectively, proving a direct causal link between public statements and specific deaths is highly complex and requires solid evidence rather than intense personal grievances. Articles and posts online frequently use vivid, shocking imagery to spark outrage, but these emotional shortcuts tend to cloud our judgment and prevent us from focusing on the actual scientific consensus.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/keepitsane3.bsky.social/post/3mpyzxt7an22d" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Mr. Rochester 📎🇨🇦</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>90%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„And, thanks to the “innovations” since 2010 (first iPhone), these knuckle-dragging mouth breathers are known to us. They have a worldwide platform now, from which to spew their idiocy. Pre-2010, and these filth and their “ideas” would be unknown, with all of their ilk. It’s a moronic inferno now."</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text is heavily dominated by rhetorical manipulation, relying on extreme ad hominem attacks, dehumanizing framing, and ingroup-outgroup polarization to disparage online commentators. Factually, the piece suffers from a lack of evidence and contains a clear historical error regarding the release date of the first iPhone. Together, these elements prioritize emotional outrage and tribal division over objective analysis or factual accuracy.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathetic and Fact-Focused</div><p class="vbody">I understand your concern about how digital spaces have changed, but looking more closely at the history, the first iPhone actually launched in 2007 rather than 2010, and the rise of online communication is a complex shift that goes far beyond dividing people into rigid intellectual categories. Similar articles online unfortunately often use highly emotional language and personal attacks to grab attention, which can distract us from having a constructive conversation about how technology truly impacts our society.</p></div><div class="variant"><div class="vname">Collaborative and Analytical</div><p class="vbody">I completely share your desire for more thoughtful online discussions, though when we examine the timeline, we find that the smartphone revolution began earlier in 2007, and modern research suggests that digital platforms amplify a wide variety of human experiences rather than just spreading ignorance. It is very common for online commentary to rely on sharp divisions and provocative framing to drive engagement, which unfortunately oversimplifies the real challenges of our digital age.</p></div><div class="variant"><div class="vname">Constructive and Balanced</div><p class="vbody">I can see why the current state of social media feels overwhelming, but if we look at the factual details, the technological shift started before 2010, and labeling large groups of people as intellectually inferior overlooks the diverse and positive ways communities connect online. Unfortunately, the nature of the internet often rewards sensationalism and us-versus-them narratives, which tends to cloud objective analysis with emotional outrage.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/mrrochester.bsky.social/post/3mpywsawlc22g" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>godknowsimgood.bsky.social</b></span>
+        <span class="scores">rétorika <b>75%</b>
+          · fakta <b>75%</b>
+          · ovlivňování <b>90%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„All I know is that I didn’t get any Covid vaccines and I’m in fine health whereas friends of mine were damaged by the Covid vaccines, and deeply regret getting vaccinated. Yet we were told the vaccines were &quot;safe and effective”. So I know not to trust what the medical establishment assert."</p>
+      <div class="chips"><span class="chip factual">Ukvapené zobecnění <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>75%</b></span><span class="chip factual">Účelový výběr faktů (cherry-picking) <b>75%</b></span><span class="chip rhetorical">Efekt dostupnosti (nápadné případy) <b>75%</b></span></div>
+      <p class="summary">The text exhibits significant cognitive and rhetorical biases, primarily operating through the Factual Bucket via Hasty Generalization, Omission of Key Information, and Selective Evidence, as it relies entirely on localized anecdotes while ignoring global epidemiological data. Rhetorically, it utilizes the Availability &amp; Salience heuristic to elevate vivid personal experiences over scientific consensus, thereby fostering systemic distrust in institutional authority. Together, these mechanisms distort objective risk assessment by presenting non-representative personal observations as definitive proof of systemic failure.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Shared Perspective</div><p class="vbody">I completely understand wanting to protect your health and feeling concerned when hearing about friends who have struggled, but looking more closely at the broader picture, individual experiences can vary widely and don&#x27;t always reflect the overall safety data gathered from millions of people worldwide. It is very common for social media posts to focus on dramatic personal stories to get views, which unfortunately leaves out the essential scientific statistics and comparative health studies we need to see the whole truth.</p></div><div class="variant"><div class="vname">Collaborative and Informative</div><p class="vbody">It is natural to worry when people close to us have health issues, but when we look at global health data alongside personal stories, we find that the vast majority of vaccinated individuals remain safe and protected, which isn&#x27;t always visible in our immediate circles. Online discussions often highlight vivid, emotional anecdotes because they grab our attention quickly, but this tends to hide the larger, reassuring medical facts and comprehensive research.</p></div><div class="variant"><div class="vname">Reassuring and Balanced</div><p class="vbody">I hear your concern for your friends&#x27; well-being, but if we look at the wider medical evidence, we see that individual anecdotes don&#x27;t capture the full reality of how vaccines protect the public on a larger scale. The internet naturally amplifies striking personal stories over complex scientific data, which can easily make rare events seem like the general rule and create unnecessary worry.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/godknowsimgood.bsky.social/post/3mpypkk5c6c2f" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Dogs10Gods0</b></span>
+        <span class="scores">rétorika <b>100%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>90%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„Now the anti-vaxers will say her arrest was to cover-up &quot;vax deaths,&quot; because they&#x27;re brainwashed, and stupid like that. 🤪"</p>
+      <div class="chips"><span class="chip rhetorical">Útok na osobu (ad hominem) <b>100%</b></span><span class="chip rhetorical">Ty taky (obvinění z pokrytectví) <b>75%</b></span><span class="chip rhetorical">Podsouvání (slaměný panák) <b>75%</b></span><span class="chip rhetorical">Apel na emoce <b>75%</b></span></div>
+      <p class="summary">The text exhibits significant rhetorical bias, primarily driven by aggressive Ad Hominem attacks and Stereotyping that label opponents as intellectually deficient. Additionally, the author utilizes a Straw Man mechanism to pre-emptively caricature the opposing side&#x27;s arguments, while factually degrading the discourse through the complete Omission of Key Information regarding the identity and context of the arrest. Together, these tactics shift the focus from empirical debate to emotional outgroup denigration.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Context-Focused</div><p class="vbody">I understand how frustrating it is to see polarized debates online, but looking closely at this post, it doesn&#x27;t provide any names, dates, or facts about who was arrested or why, while pre-emptively labeling an entire group with harsh insults. Social media posts often rely on emotional name-calling and oversimplified caricatures of the other side to get quick reactions, which unfortunately leaves us without the real facts needed for a constructive conversation.</p></div><div class="variant"><div class="vname">Objective and Analytical</div><p class="vbody">I completely share your desire for clear and honest discussions on sensitive topics, but when we examine this post, we find it dismisses others with personal attacks and invents an extreme argument for them without sharing any actual context about the arrest. It is very common for online content to use exaggerated stereotypes and personal insults to stir up anger, which sadly distracts us from looking at verifiable evidence and understanding the real situation.</p></div><div class="variant"><div class="vname">Collaborative and Fact-Oriented</div><p class="vbody">I can see why these intense online disagreements catch our attention, but if we look at the details here, the post focuses on calling people names and predicting their reactions rather than giving us the basic facts of the event itself. Unfortunately, the fast-paced nature of the internet encourages posts that attack people&#x27;s intelligence and create easy targets to criticize, rather than sharing the complete, unbiased story.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/johnjado.bsky.social/post/3mpz2mrcxu22f" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>That Anonymous Coward</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>90%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„They are spinning a sad tale of woe how it was the vaccines that did it &amp; now the evil evil leftists are trying her for murder b/c she told the truth about the vaccines blah blah blah blah.... blech.
+
+These folks do not care about kids 1 bit."</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text exhibits significant bias, primarily driven by rhetorical manipulation and factual deficiencies. In the Rhetorical bucket, the author relies heavily on ad hominem attacks, straw man caricatures, and emotional appeals to vilify and mock the opposing group. In the Factual bucket, the post suffers from a severe omission of key information and vague sourcing, leaving the reader without any verifiable context or evidence to evaluate the underlying claims.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Context-Focused</div><p class="vbody">I completely understand how frustrating it is to see complex, sensitive issues simplified, but looking closely at the situation, we find that dismissing the entire discussion with personal attacks leaves out the verifiable facts and context we need to understand what actually happened. Social media posts often rely on emotional shortcuts and caricature opposing views to spark outrage, which unfortunately makes it harder for all of us to have a constructive, fact-based conversation.</p></div><div class="variant"><div class="vname">Collaborative and Informative</div><p class="vbody">I share your desire for truth and protecting others, but when we examine the details, we see that relying on vague sources and mocking the other side prevents us from getting a clear, objective picture of the legal case and the actual arguments involved. It is very common for online commentary to use highly charged language and omit key details to grab attention, which often obscures the real facts we need to make an informed judgment.</p></div><div class="variant"><div class="vname">Calm and Analytical</div><p class="vbody">I understand the concern over misleading narratives, but looking more closely at the original post, we find that using strong emotional appeals and personal labels instead of sharing verifiable evidence makes it difficult to verify what is actually true. The fast-paced nature of the internet often encourages authors to use provocative framing and leave out crucial context, which can unintentionally mislead readers who are looking for genuine answers.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/thatac.bsky.social/post/3mpzdjrygb22l" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Dizzygirl</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>85%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„It&#x27;s smart of her.
+
+She&#x27;s in Idaho, full of maga antivax nutters so nonzero chance she gets some on her jury.
+
+They&#x27;re already framing this as the government trying to cover up the &quot;vaccine deaths.&quot;
+
+She knows what she&#x27;s doing. 
+
+She probably isn&#x27;t even a devout antivaxxer. Just sees an opportunity."</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text exhibits significant rhetorical bias through the use of highly derogatory ad hominem labeling (&#x27;maga antivax nutters&#x27;) and regional stereotyping to characterize the population of Idaho. From a factual perspective, the text suffers from severe informational degradation due to the complete omission of key contextual details—such as the identity of the subject and the nature of the case—alongside vague sourcing (&#x27;they&#x27;) and unsupported, speculative claims about the subject&#x27;s internal motivations. Together, these elements shift the text from an objective commentary to an insular, politically charged narrative designed to reinforce ingroup assumptions.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Focus on Missing Context</div><p class="vbody">I understand how frustrating it is to see what looks like strategic manipulation of public opinion, but looking closely at this post, we find that it doesn&#x27;t actually name the person or the specific legal case being discussed. Online discussions often leave out these crucial details and rely on broad stereotypes to quickly grab attention, which unfortunately makes it harder for us to find the objective truth.</p></div><div class="variant"><div class="vname">Emphasizing Verifiability</div><p class="vbody">I completely share your desire to understand the real motives behind high-profile legal strategies, yet without concrete names, sources, or case facts, we cannot verify if these speculations are accurate. It is very common for internet posts to use emotionally charged labels and vague references to drive engagement, which often obscures the actual facts of the situation.</p></div><div class="variant"><div class="vname">Promoting Fair Discussion</div><p class="vbody">I can see why this situation raises concerns about how public sentiment is influenced, but when we look at the post, it relies heavily on assumptions about people&#x27;s inner motives and uses broad regional generalizations instead of verifiable facts. The fast-paced nature of social media often encourages posts that use polarizing language and skip over key details to generate clicks, leaving us without the context we need for a fair assessment.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/dizzygirl.myatproto.social/post/3mpyia6oe3227" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Dizzygirl</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>85%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„I also think that if she strangled them (not confirmed) that would be obvious to any competent ME.
+
+But the antivax nutters are primed to believe anything so even with both babies dying at the same time with obvious signs of strangulation, they&#x27;re ready to gobble up any narrative."</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text exhibits significant rhetorical manipulation, primarily concentrated in the Rhetorical bucket under the parent groups of Ad Hominem, Framing and Bias, and Appeal to Emotion. The author relies heavily on loaded language, derogatory labeling (&#x27;antivax nutters&#x27;), and ingroup-outgroup polarization to dismiss opposing views without engaging with actual arguments. Factual evidence is largely absent, as the premise itself is noted as &#x27;not confirmed,&#x27; resulting in a text driven almost entirely by subjective framing and emotional provocation rather than objective analysis.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Shared Understanding</div><p class="vbody">I completely understand how frustrating it is when sensitive topics like child safety are discussed, but looking closely at this post, it relies on unconfirmed cases and harsh labels rather than verified medical facts. Social media posts often use highly emotional language and personal attacks to get more views, which unfortunately distracts us from having a constructive and evidence-based conversation.</p></div><div class="variant"><div class="vname">Focus on Constructive Dialogue</div><p class="vbody">I share your desire for clear and honest discussions on public health, but we have to be careful with posts that use hypothetical scenarios and name-calling to make a point instead of presenting solid evidence. It is very common online for authors to use polarizing language to provoke a reaction, but this usually divides people instead of helping us find the truth together.</p></div><div class="variant"><div class="vname">Objective and Calm Analysis</div><p class="vbody">I can see why this topic catches people&#x27;s attention, but when we examine the post objectively, it bases its argument on unverified events and uses derogatory terms rather than objective scientific analysis. The nature of the internet often encourages sensationalism and taking sides, which makes it harder to focus on the actual facts and expert medical consensus.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/dizzygirl.myatproto.social/post/3mpyprk4yf22p" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>💖 Birdhism Jen ➡️ SDCC</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>85%</b> (vysoká)</span>
+      </div>
+      <p class="excerpt">„I hope I’m wrong, but I feel like there’s anti-vax parents who hate their kids and want them to get sick and die. 
+To ignore kids getting sick without vaccines and still stay anti-vax? That’s extremely sus imo."</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text relies heavily on rhetorical manipulation to demonize an opposing group rather than engaging with factual evidence. Within the Rhetorical bucket, the author employs severe ad hominem attacks, straw man arguments, and emotional appeals by attributing malicious, homicidal intent to anti-vaccine parents. These tactics polarize the issue and replace logical, evidence-based public health discussion with sensationalized moral outrage.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Shared Understanding</div><p class="vbody">I completely understand the deep frustration and worry that comes with wanting to protect children from preventable diseases, but looking more closely at the research, most parents who hesitate about vaccines are actually motivated by fear and a desire to protect their kids, rather than any malice or wish to harm them. It is very common for social media posts to use extreme, polarizing language to channel our shared anxieties, but framing this complex public health issue as a matter of personal hatred unfortunately oversimplifies the problem and makes constructive dialogue much harder.</p></div><div class="variant"><div class="vname">Focus on Constructive Dialogue</div><p class="vbody">It is incredibly stressful to see children put at risk of illness, and I share your passion for keeping them safe, yet studies on vaccine hesitancy show that these decisions usually stem from misinformation and fear rather than a deliberate desire to cause harm. Online discussions often rely on highly emotional accusations to capture our attention, which can lead us to assume the worst intentions in others instead of addressing the root causes of misinformation.</p></div><div class="variant"><div class="vname">Compassionate and Fact-Based</div><p class="vbody">I hear your deep concern for children&#x27;s health and safety, which is something we all want to safeguard, but public health experts find that parents who oppose vaccines are typically misguided by fear rather than acting out of hatred or ill intent toward their families. The internet frequently amplifies sensationalized and angry viewpoints to drive engagement, which unfortunately distracts us from the real challenge of building trust and sharing accurate scientific facts.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/birdhism.com/post/3mpzcmr5pck2x" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>hippyengineer.bsky.social</b></span>
+        <span class="scores">rétorika <b>50%</b>
+          · fakta <b>75%</b>
+          · ovlivňování <b>80%</b> (vyšší)</span>
+      </div>
+      <p class="excerpt">„She fucked up by killing both of them at the exact same time. The odds of them both dying of the exact same, incredibly rare vaccine response, at the exact same time is unimaginably unlikely. Her claims would be much more credible (while still being wildly uncredible) if they died w/in a couple days"</p>
+      <div class="chips"><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip factual">Nepodložená / vyvrácená tvrzení <b>50%</b></span></div>
+      <p class="summary">The text exhibits significant rhetorical and factual biases, primarily driven by loaded framing and a complete absence of empirical support. Rhetorically, the author employs the Framing Effect by using aggressive, presumptive language (&#x27;killing both of them&#x27;) to establish guilt before presenting evidence. Factually, the post suffers from Omission of Key Information and Vague Sourcing, as it references a highly specific medical and legal scenario without providing names, dates, or verifiable sources, ultimately presenting highly speculative probabilistic assertions as Unsupported Claims.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathetic and Fact-Focused</div><p class="vbody">I understand your concern and desire for clarity when hearing about such tragic claims, but looking more closely at the original post, we find that it lacks any verifiable sources, names, or medical context to support these strong assertions. Social media posts often use highly emotional language and dramatic framing to grab attention, which unfortunately leaves out the essential facts and evidence needed to understand what actually happened.</p></div><div class="variant"><div class="vname">Analytical and Supportive</div><p class="vbody">It is completely natural to want to make sense of intense situations like this, but if we examine the details, the post makes very serious claims about causation and probability without providing any official reports or background information. Online discussions frequently rely on vague references and loaded phrasing to drive engagement, which can easily obscure the truth and make it difficult to find reliable information.</p></div><div class="variant"><div class="vname">Collaborative and Objective</div><p class="vbody">I completely share your interest in getting to the bottom of these claims, but when we look at the post objectively, it presents a highly specific medical scenario as fact without citing any credible sources or offering key context. The fast-paced nature of the internet often encourages people to share strong, unverified opinions that jump to conclusions before all the actual evidence is even available.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/hippyengineer.bsky.social/post/3mpyojoz2sc2o" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>seamiracles</b></span>
+        <span class="scores">rétorika <b>50%</b>
+          · fakta <b>75%</b>
+          · ovlivňování <b>70%</b> (vyšší)</span>
+      </div>
+      <p class="excerpt">„Funny this didn&#x27;t happen in ANY other country. Brazil and India were competing for number 2 in covid rates and deaths, but didn&#x27;t have these reported (fake) issues. The conspiracy just doesn&#x27;t hold up in a global context. Brazil has the world&#x27;s largest free vaxx program with high adherence rates."</p>
+      <div class="chips"><span class="chip factual">Vynechání klíčových informací <b>75%</b></span><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip factual">Nepodložená / vyvrácená tvrzení <b>75%</b></span><span class="chip factual">Ukvapené zobecnění <b>50%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip rhetorical">Konfirmační zkreslení <b>50%</b></span></div>
+      <p class="summary">The text exhibits significant rhetorical and factual biases that undermine its analytical objectivity. Rhetorically, the author employs the Framing Effect and Confirmation Bias by using dismissive language (&#x27;fake issues&#x27;, &#x27;conspiracy&#x27;) and selectively highlighting positive vaccination metrics in Brazil to pre-emptively invalidate opposing views. Factually, the argument suffers from Hasty Generalization, Vague Sourcing, and the Omission of Key Information, as it fails to define the core subject of the debate, relies on unreferenced epidemiological claims, and draws sweeping global conclusions from an isolated, two-country comparison.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathetic and Context-Focused</div><p class="vbody">I understand your desire to look at the bigger picture and find clarity amidst so much conflicting information, but looking more closely at the original post, we find that it leaves out crucial context by not specifying what the actual &#x27;conspiracy&#x27; or &#x27;issues&#x27; are, while relying on broad claims about Brazil and India without citing any official health data. It is very common for social media posts to use strong, dismissive language and oversimplify complex global health situations to make a point quickly, which unfortunately makes it harder for us to have an open, well-informed discussion based on complete facts.</p></div><div class="variant"><div class="vname">Collaborative and Fact-Oriented</div><p class="vbody">I completely share your interest in understanding how different countries handled the pandemic, but if we analyze this post carefully, we can see it makes a very broad generalization about the entire world based on just two countries, without providing any sources or explaining what specific issues are being dismissed. Online discussions often rely on emotionally charged framing and selective examples to grab our attention, which can easily lead us to overlook the detailed, verified data needed to understand public health on a global scale.</p></div><div class="variant"><div class="vname">Constructive and Analytical</div><p class="vbody">I appreciate your focus on global trends and vaccination efforts, but looking at the details of this argument, it presents absolute claims about what did or didn&#x27;t happen worldwide without offering any clear definitions, references, or balanced evidence to support them. The fast-paced nature of the internet often encourages authors to use labels like &#x27;conspiracy&#x27; or &#x27;fake&#x27; to quickly invalidate other perspectives, which unfortunately skips over the careful sourcing and nuance we need to find the truth.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/seamiracles.bsky.social/post/3mpyq6asouc24" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Kathy Byrne</b></span>
+        <span class="scores">rétorika <b>75%</b>
+          · fakta <b>75%</b>
+          · ovlivňování <b>65%</b> (vyšší)</span>
+      </div>
+      <p class="excerpt">„her lawyer admitting he’s not a medical expert fully believes vaccines kill, in this itvw Shaw said she’s a suspect “I had supposedly had a postpartum overwhelming blackout &amp; done it to my children” says the kids died at same time, she’s suing the Amer Academy of Pediatrics, has a gofundme-ish acct"</p>
+      <div class="chips"><span class="chip rhetorical">Efekt rámování (způsob podání) <b>75%</b></span><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span></div>
+      <p class="summary">The text exhibits significant rhetorical and factual distortions, primarily driven by the Framing Effect, which uses loaded and fragmented phrasing to cast doubt on the subject&#x27;s credibility. Factually, the post suffers from Vague Sourcing by referencing an unspecified interview (&#x27;this itvw&#x27;) and Omission of Key Information, as it completely excludes the broader legal, medical, and contextual background of the deaths and the subsequent lawsuit against the American Academy of Pediatrics. Together, these tactics steer the reader toward a highly skeptical and dismissive interpretation of the case without providing the necessary objective data.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Context-First</div><p class="vbody">I understand how deeply concerning and heartbreaking any case involving the loss of children is, but looking more closely at this post, it leaves out crucial context about the lawsuit, the official medical findings, and even where this interview actually comes from. It is very common for social media posts to use highly selective, dramatic phrasing and omit key background details to grab attention, which unfortunately makes it difficult to see the full, objective picture of such a complex legal and medical situation.</p></div><div class="variant"><div class="vname">Constructive and Informative</div><p class="vbody">It is completely natural to feel overwhelmed by such tragic news, yet when we look for the actual sources and the complete legal details behind these claims, we find that the post relies on unverified quotes and leaves out the official facts of the case. Online discussions often rely on fragmented, emotionally charged snippets to drive engagement, which can easily distort the reality of sensitive legal proceedings and medical debates.</p></div><div class="variant"><div class="vname">Collaborative and Fact-Focused</div><p class="vbody">I share your desire to understand the truth behind such a serious story, but a closer look reveals that this account doesn&#x27;t provide a verifiable source for the interview or the necessary context regarding the lawsuit and the medical evidence. Unfortunately, the fast-paced nature of the internet often encourages posts that use loaded language and skip important background information, making a deeply sensitive situation seem much more chaotic than it is.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/kab-fair.bsky.social/post/3mpyxeysfvc2i" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Dave Fecak</b></span>
+        <span class="scores">rétorika <b>50%</b>
+          · fakta <b>75%</b>
+          · ovlivňování <b>60%</b> (vyšší)</span>
+      </div>
+      <p class="excerpt">„Studies suggest that narcissists are more prone to belief in conspiracy theories. There are lots of good mental health resources for narcissists and conspiracy theorists, but most are not wiling to admit they need help."</p>
+      <div class="chips"><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip rhetorical">Stereotypizace <b>50%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span></div>
+      <p class="summary">The text exhibits rhetorical bias primarily through the pathologizing framing of ideological beliefs and personality traits, alongside stereotyping generalizations about the willingness of these groups to seek help. Factually, the argument suffers from vague sourcing and the omission of key context, relying on the generic phrase &#x27;studies suggest&#x27; to establish scientific authority without providing verifiable citations. Together, these tactics shift the discourse from an objective analysis of cognitive patterns to a dismissive characterization of specific populations.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathetic and Context-Focused</div><p class="vbody">I understand how concerning it is to think about how personality traits affect our beliefs, but looking more closely at the actual research, we find that scientific studies on this topic are highly nuanced and do not clinically pathologize these groups or suggest they all need mental health treatment. Articles online unfortunately often oversimplify complex psychological studies and use broad generalizations to grab attention, which ends up leaving out crucial context and making things seem far more extreme than they are.</p></div><div class="variant"><div class="vname">Collaborative and Fact-Oriented</div><p class="vbody">It is completely natural to want to understand the psychology behind different worldviews, yet when we examine the scientific consensus, we see that researchers avoid labeling belief systems as mental illnesses and do not make sweeping claims about people&#x27;s willingness to seek help. The nature of social media often encourages writers to use vague phrases like &#x27;studies suggest&#x27; without providing real sources, creating dramatic headlines that overlook the careful, balanced details of real scientific work.</p></div><div class="variant"><div class="vname">Supportive and Analytical</div><p class="vbody">I appreciate your interest in the connection between personality and beliefs, but a closer look at the data shows that researchers study these cognitive patterns as general human tendencies rather than medical conditions requiring psychological intervention. Unfortunately, many popular articles tend to rely on stereotypes and dramatic framing to drive engagement, which often distorts scientific findings and leaves readers without the specific sources needed to verify the claims.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/fecak.bsky.social/post/3mq3qux7mnk2n" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article></div><div class="hostgroup"><h3 class="host">🦋 Nature (~92 tis.)</h3><p class="ctx">Vlákno pod příspěvkem účtu: <i>„Public trust in science can’t be sustained by the support of narrow constituencies at one end of an ideological spectrum, says Mark Henderson
+
+go.nature.com/4wjjguQ…"</i></p>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Jim</b></span>
+        <span class="scores">rétorika <b>0%</b>
+          · fakta <b>0%</b>
+          · ovlivňování <b>75%</b> (vyšší)</span>
+      </div>
+      <p class="excerpt">„Ignoring the forces of misinformation sowing disbelief?  That&#x27;s a bias right there.
+
+One side runs a giant study that shows a vaccine is safe and effective.  The other side just makes shit up.  We need to be unbiased and present both sides?
+
+Surrendering to misinformation does not build trust."</p>
+      <div class="chips"><span class="chip holistic">souhrnné hodnocení (viz míra ovlivňování a shrnutí)</span></div>
+      <p class="summary">The text relies heavily on rhetorical framing and false binaries to discredit the concept of journalistic balance in scientific reporting. By employing a False Dilemma and a Straw Man argument, the author presents the debate as a choice between absolute scientific truth and complete fabrication, ignoring more nuanced approaches to reporting. Factually, the argument suffers from Hasty Generalization and Vague Sourcing, as it groups all skeptical viewpoints into a single category of bad-faith actors without citing specific studies or actors to substantiate the claim.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathy and Nuance</div><p class="vbody">I completely understand the desire to protect scientific integrity, but looking more closely at how media works, presenting different viewpoints doesn&#x27;t always mean giving equal weight to falsehoods. Healthy scientific debate often involves a wide range of genuine, nuanced perspectives rather than just a simple choice between absolute truth and complete fabrication. It is very common for online discussions to simplify complex journalistic practices into rigid, either-or choices to make a point more dramatic, which unfortunately leaves out the careful balance reporters must maintain.</p></div><div class="variant"><div class="vname">Constructive Dialogue</div><p class="vbody">I share your concern about the spread of misinformation, but when we examine the issue deeply, grouping all skeptical viewpoints together as bad-faith actors can overlook valuable scientific scrutiny. True journalistic balance aims to explore these diverse, evidence-based angles rather than promoting unsubstantiated claims. Social media posts often use broad generalizations and paint issues in black-and-white terms to capture our attention quickly, which can obscure the thoughtful, middle-ground approaches that exist in professional reporting.</p></div><div class="variant"><div class="vname">Collaborative Fact-Finding</div><p class="vbody">It makes total sense to want clear, reliable information, but if we look at the broader picture, framing the media&#x27;s role as a strict choice between scientific consensus and fabricated claims creates an artificial divide. Real-world reporting often navigates a spectrum of legitimate scientific debates that don&#x27;t fit into a simple binary. The fast-paced nature of the internet tends to reward highly polarized arguments that skip over specific evidence, making complex media ethics seem much more one-sided than they actually are.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/jimc5.bsky.social/post/3mpoagatink2l" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article></div><div class="hostgroup"><h3 class="host">🦋 Dr. Tara C. Smith (epidemioložka, ~34 tis.)</h3><p class="ctx">Vlákno pod příspěvkem účtu: <i>„Andrea Shaw, the woman who was just indicted on 2 accounts of murder for the deaths of her toddlers, claims vaccines killed them. She&#x27;s the key plaintiff for Children&#x27;s H…"</i></p>
+    <article class="card">
+      <div class="meta">
+        <span class="who">↳ komentář uživatele <b>Loren Petrich</b></span>
+        <span class="scores">rétorika <b>50%</b>
+          · fakta <b>75%</b>
+          · ovlivňování <b>80%</b> (vyšší)</span>
+      </div>
+      <p class="excerpt">„Did the investigators of those toddlers’ deaths find out their cause of death?
+
+Was it mechanical? Being strangled, stabbed, crushed, …
+
+Was it thermal? Too cold, too hot, fire, …
+
+Those are obviously different from possible vaccine side effects."</p>
+      <div class="chips"><span class="chip factual">Vágní zdrojování <b>75%</b></span><span class="chip rhetorical">Efekt rámování (způsob podání) <b>50%</b></span><span class="chip factual">Vynechání klíčových informací <b>50%</b></span><span class="chip factual">Nepodložená / vyvrácená tvrzení <b>50%</b></span></div>
+      <p class="summary">The text exhibits significant rhetorical framing by presenting a false juxtaposition between physical trauma and vaccine side effects, thereby steering the reader toward vaccine-related speculation. Factually, the post suffers from severe omission of key information by ignoring common natural causes of pediatric mortality, and relies on vague sourcing by referencing unspecified &#x27;toddlers&#x27; deaths&#x27; and &#x27;investigators&#x27; without verifiable details. Together, these tactics manipulate the reader&#x27;s perception by introducing highly speculative vaccine associations under the guise of analytical questioning.</p>
+      <div class="replies"><div class="rhead">💬 Návrhy věcné odpovědi <span class="rtag">nová funkce Debiasify</span></div><div class="variant"><div class="vname">Empathetic and Informative</div><p class="vbody">I understand how deeply concerning any news about toddler deaths is, but looking more closely at the facts, this post leaves out crucial context by not specifying which case is being discussed and omitting common natural causes of pediatric mortality like infections or genetic conditions to suggest an unproven link to vaccines. It is unfortunate that online posts often use vague details and dramatic contrasts to capture our attention, which can easily lead to unnecessary worry instead of sharing clear, verified medical facts.</p></div><div class="variant"><div class="vname">Analytical and Reassuring</div><p class="vbody">It is completely natural to want answers when hearing about such tragic events, yet a closer look reveals that this post lacks any verifiable sources or specific details, while presenting a misleading choice between physical trauma and vaccine side effects that ignores standard medical realities. Social media content frequently relies on open-ended, alarming questions to drive engagement, which unfortunately glosses over the actual scientific and investigative facts we need to understand the situation.</p></div><div class="variant"><div class="vname">Collaborative and Fact-Focused</div><p class="vbody">I share your desire to protect children and get to the truth, but examining the post carefully shows it doesn&#x27;t name the actual investigation and leaves out the most common natural causes of sudden infant deaths, creating an unsupported connection to vaccines. The fast-paced nature of the internet often encourages posts that simplify complex medical investigations into emotional debates, making it harder to find the reliable, evidence-based information we all look for.</p></div></div>
+      <a class="src" href="https://bsky.app/profile/lpetrich.bsky.social/post/3mpr3g5nd522l" rel="nofollow noopener" target="_blank">🦋 Zobrazit na Bluesky ↗</a>
+    </article></div>
+
+  <footer>
+    Stránka je záměrně <b>neindexovaná</b> (neobjeví se ve vyhledávačích).
+    Nástroj: Debiasify (debiasify.com), včetně nové funkce návrhu replik.
+    Data: veřejné reakce z Bluesky pod účty mezinárodních vědců a časopisů.
+    Pilotní spolupráce v rámci programu AV ČR „Umělá inteligence pro vědu
+    a společnost". Generováno agentem <code>debiasify-agent</code>.
+  </footer>
+</div>
+</body>
+</html>
