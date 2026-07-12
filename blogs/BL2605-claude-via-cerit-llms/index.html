@@ -592,7 +592,7 @@ footer {
 
     <ol class="prose">
       <li>
-        <strong>Tool-definition sanitizer</strong> &mdash; strips Anthropic-proprietary tool types (e.g. <code>computer_use_20250124</code>, <code>web_search_20250305</code> from definitions) that CERIT rejects with HTTP&nbsp;400, and patches missing <code>input_schema</code> fields. CC sends these automatically for every session.
+        <strong>Tool-definition sanitizer</strong> &mdash; converts or strips Anthropic-proprietary tool types that CERIT rejects with HTTP&nbsp;400, and patches missing <code>input_schema</code> fields. <code>web_search_20250305</code> is converted on every session (CC sends it automatically &mdash; 5,000+ conversions logged in production). <code>computer_20250124</code>/<code>text_editor_20250124</code>/<code>bash_20250124</code> are stripped defensively but have never actually appeared in a real session in this proxy&rsquo;s logs &mdash; they only matter if a computer-use MCP server or similar is connected.
       </li>
       <li>
         <strong>Tool-argument sanitizer</strong> &mdash; normalises tool-call arguments in streaming SSE chunks; some CERIT models emit structured arguments in a format that differs from Anthropic&rsquo;s.
