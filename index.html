@@ -1053,9 +1053,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 
 /* reveal on scroll — covers both .reveal and .tmil (timeline entries) */
 const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12});
-document.querySelectorAll(".reveal,.tmil").forEach(el=>io.observe(el));
-/* fire hero reveals immediately */
-window.addEventListener("load",()=>document.querySelectorAll(".hero .reveal,.chiprow.reveal").forEach(el=>el.classList.add("in")));
+document.querySelectorAll(".reveal,.tmil").forEach(el=>{if(!el.closest('.hero'))io.observe(el);});
+/* hero reveals: double-RAF ensures browser paints opacity:0 before transition starts */
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  document.querySelectorAll(".hero .reveal,.chiprow.reveal").forEach(el=>el.classList.add("in"));
+}));
 </script>
 
 <script>
