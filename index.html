@@ -446,6 +446,7 @@
   .kit .kithead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
   .kit h3{font-family:var(--serif);font-weight:400;font-size:1.25rem;margin:0}
   .kit p{margin:0;color:var(--ink-dim);font-size:.92rem;line-height:1.62}
+  .bio-count{font-family:var(--mono);font-size:.62rem;color:var(--ink-faint);letter-spacing:.05em;white-space:nowrap}
   .copybtn{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--photon);background:none;border:1px solid var(--line-strong);border-radius:8px;padding:6px 11px;cursor:pointer;transition:.15s;white-space:nowrap}
   .copybtn:hover{border-color:var(--photon)}
   .presskit{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;align-items:center}
@@ -545,7 +546,7 @@
   <div class="hero-bg">
     <img class="poster" src="https://img.youtube.com/vi/gezEio1mdjs/maxresdefault.jpg" alt="" aria-hidden="true" />
     <div id="hero-yt" aria-hidden="true">
-      <video id="hero-vid" autoplay muted playsinline preload="auto">
+      <video id="hero-vid" autoplay loop muted playsinline preload="auto">
         <source src="assets/hero-bg.mp4" type="video/mp4">
       </video>
     </div>
@@ -1039,6 +1040,16 @@ document.querySelectorAll(".copybtn").forEach(b=>b.addEventListener("click",asyn
   const el=document.querySelector(b.dataset.copy); if(!el) return;
   try{ await navigator.clipboard.writeText(el.textContent.trim()); const t=b.textContent; b.textContent="Copied ✓"; setTimeout(()=>{b.textContent=t;},1500);}catch(e){}
 }));
+/* word + char counts for press-kit bios */
+["bio-short","bio-long"].forEach(id=>{
+  const el=document.getElementById(id); if(!el) return;
+  const txt=el.textContent.trim();
+  const words=txt.split(/\s+/).length, chars=txt.length;
+  const btn=document.querySelector('[data-copy="#'+id+'"]'); if(!btn) return;
+  const s=document.createElement("span"); s.className="bio-count";
+  s.textContent=words+" words · "+chars+" chars";
+  btn.parentNode.insertBefore(s,btn);
+});
 document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
@@ -1051,7 +1062,10 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
   var START=20; // skip first 20s TEDx animation; talking section starts at t=20
   v.addEventListener('canplay',function(){v.style.opacity='.72';},{once:true});
   v.addEventListener('loadedmetadata',function(){v.currentTime=START;},{once:true});
-  v.addEventListener('ended',function(){v.currentTime=START;v.play();});
+  // pre-empt loop: jump back to START before video hits t=0 again
+  v.addEventListener('timeupdate',function(){
+    if(v.duration && v.currentTime > v.duration-0.5) v.currentTime=START;
+  });
   v.load();
 })();
 
