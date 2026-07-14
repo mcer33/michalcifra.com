@@ -545,7 +545,7 @@
   <div class="hero-bg">
     <img class="poster" src="https://img.youtube.com/vi/gezEio1mdjs/maxresdefault.jpg" alt="" aria-hidden="true" />
     <div id="hero-yt" aria-hidden="true">
-      <video id="hero-vid" autoplay loop muted playsinline preload="auto">
+      <video id="hero-vid" autoplay muted playsinline preload="auto">
         <source src="assets/hero-bg.mp4" type="video/mp4">
       </video>
     </div>
@@ -1043,12 +1043,15 @@ document.getElementById("modalX").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 
-/* ambient hero video — self-hosted MP4, fade in when ready */
+/* ambient hero video — self-hosted MP4, fade in when ready, skip TEDx intro */
 (function(){
   if(window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   var v=document.getElementById('hero-vid');
   if(!v) return;
+  var START=20; // skip first 20s TEDx animation; talking section starts at t=20
   v.addEventListener('canplay',function(){v.style.opacity='.72';},{once:true});
+  v.addEventListener('loadedmetadata',function(){v.currentTime=START;},{once:true});
+  v.addEventListener('ended',function(){v.currentTime=START;v.play();});
   v.load();
 })();
 
