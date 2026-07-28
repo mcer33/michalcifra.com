@@ -435,10 +435,12 @@ const world = Globe()(globeEl)
 
 // Companies layer toggle: rebuild pointsData without companies when unchecked
 const companiesToggle = document.getElementById('companies-toggle');
-companiesToggle.addEventListener('change', ev=>{
-  globePoints = ev.target.checked ? geoLabs.concat(geoCompanies) : geoLabs.slice();
-  world.pointsData(globePoints);
-});
+if (companiesToggle) {
+  companiesToggle.addEventListener('change', ev=>{
+    globePoints = ev.target.checked ? geoLabs.concat(geoCompanies) : geoLabs.slice();
+    world.pointsData(globePoints);
+  });
+} else { console.warn('companies-toggle element not found at init; companies layer stays on'); }
 
 // Clean sphere: no NASA texture. Subtle dark globe with cyan country outlines.
 const mat = world.globeMaterial();
